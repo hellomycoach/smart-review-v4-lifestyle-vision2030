@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { 
   Sparkles, Wifi, Utensils, Camera, Flame, Activity, ShieldCheck, 
-  Globe, Award, Check, X, RefreshCw, Trophy, HeartPulse, Gift, Mic, AlertCircle
+  Globe, Award, Check, X, RefreshCw, Trophy, HeartPulse, Gift, Mic
 } from 'lucide-react';
 
 const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants-v3";
@@ -20,13 +20,25 @@ const normalizeKey = (str: any): string => {
   return String(str).toLowerCase().replace(/[^a-z0-9]/g, "").trim();
 };
 
+const parseInstanceName = (raw: any): string => {
+  if (!raw) return "";
+  if (typeof raw === 'string') return raw.trim();
+  if (Array.isArray(raw) && raw.length > 0) {
+    const first = raw[0];
+    if (typeof first === 'string') return first.trim();
+    if (typeof first === 'object' && first !== null) {
+      return (first.instance_name || first.restaurant_name || "").trim();
+    }
+  }
+  return "";
+};
+
 export default function LuxuryRestaurantPortalV4() {
   const params = useParams();
   const searchParams = useSearchParams();
 
   const [lang, setLang] = useState<'ar' | 'fr' | 'en'>('ar');
   const [loadingRest, setLoadingRest] = useState(true);
-  const [notFound, setNotFound] = useState(false);
 
   // Auto-détection de la langue du téléphone
   useEffect(() => {
@@ -38,24 +50,7 @@ export default function LuxuryRestaurantPortalV4() {
     }
   }, []);
 
-  // Extraction dynamique ultra-fiable de l'instance
-  let rawInstance = "";
-  if (typeof window !== 'undefined') {
-    const parts = window.location.pathname.split('/spin/');
-    if (parts.length > 1) {
-      rawInstance = parts[1].split('/')[0].split('?')[0].trim();
-    }
-  }
-  if (!rawInstance && params?.instance) {
-    rawInstance = (typeof params.instance === 'string' ? params.instance : '').trim();
-  }
-  if (!rawInstance && searchParams.get('instance')) {
-    rawInstance = (searchParams.get('instance') || '').trim();
-  }
-
-  const targetKey = normalizeKey(rawInstance);
-
-  // STATE INITIAL NEUTRE
+  // STATE INITIAL NEUTRE (ZÉRO DONNÉE HARDCODÉE)
   const [restaurantData, setRestaurantData] = useState<any>({
     restaurant_name: "",
     city: "",
@@ -64,6 +59,8 @@ export default function LuxuryRestaurantPortalV4() {
     menu_url: "#",
     linked_evolution: ""
   });
+
+  const [currentInstanceName, setCurrentInstanceName] = useState("");
 
   // Modals States
   const [activeModal, setActiveModal] = useState<'wifi' | 'food_ai' | null>(null);
@@ -84,17 +81,28 @@ export default function LuxuryRestaurantPortalV4() {
   const [aiAnalysisLoading, setAiAnalysisLoading] = useState(false);
   const [aiResult, setAiResult] = useState<any>(null);
 
-  // CHARGEMENT SÉCURISÉ NOCODB AVEC NORMALISATION
+  // CHARGEMENT RESTAURANT SÉCURISÉ (EXÉCUTÉ APRÈS LE MONTAGE NAVIGATEUR)
   useEffect(() => {
     const loadRestaurant = async () => {
-      if (!targetKey) {
-        setLoadingRest(false);
-        setNotFound(true);
-        return;
+      setLoadingRest(true);
+
+      // Extraction ultra-fiable de l'instance après montage
+      let targetRaw = "";
+      if (typeof window !== 'undefined') {
+        const parts = window.location.pathname.split('/spin/');
+        if (parts.length > 1) {
+          targetRaw = parts[1].split('/')[0].split('?')[0].trim();
+        }
+      }
+      if (!targetRaw && params?.instance) {
+        targetRaw = (typeof params.instance === 'string' ? params.instance : '').trim();
+      }
+      if (!targetRaw && searchParams.get('instance')) {
+        targetRaw = (searchParams.get('instance') || '').trim();
       }
 
-      setLoadingRest(true);
-      setNotFound(false);
+      setCurrentInstanceName(targetRaw);
+      const targetKey = normalizeKey(targetRaw);
 
       try {
         const res = await fetch(`${N8N_RESTAURANTS_API}?t=${Date.now()}`, { cache: 'no-store' });
@@ -102,18 +110,22 @@ export default function LuxuryRestaurantPortalV4() {
           const data = await res.json();
           const list = Array.isArray(data) ? data : (data.list || data.data || []);
 
-          // RECHERCHE NORMALISÉE
-          let matched = list.find((r: any) => {
-            const dbKey = normalizeKey(r.instance_name || r.restaurant_name);
-            return dbKey === targetKey;
-          });
+          let matched = null;
 
-          // Si pas de match exact, recherche par inclusion partielle
-          if (!matched && targetKey.length >= 3) {
+          if (targetKey) {
+            // 1. Recherche par clé normalisée
             matched = list.find((r: any) => {
-              const dbKey = normalizeKey(r.instance_name || r.restaurant_name);
-              return dbKey.length > 0 && (dbKey.includes(targetKey) || targetKey.includes(dbKey));
+              const dbKey = normalizeKey(parseInstanceName(r.instance_name) || r.instance_name || r.restaurant_name);
+              return dbKey === targetKey;
             });
+
+            // 2. Recherche partielle si pas de correspondance exacte
+            if (!matched && targetKey.length >= 3) {
+              matched = list.find((r: any) => {
+                const dbKey = normalizeKey(parseInstanceName(r.instance_name) || r.instance_name || r.restaurant_name);
+                return dbKey.length > 0 && (dbKey.includes(targetKey) || targetKey.includes(dbKey));
+              });
+            }
           }
 
           if (matched) {
@@ -127,22 +139,17 @@ export default function LuxuryRestaurantPortalV4() {
               menu_url: matched.menu_url || "#",
               linked_evolution: botPhone
             });
-          } else {
-            setNotFound(true);
           }
-        } else {
-          setNotFound(true);
         }
       } catch (e) {
         console.error("Erreur chargement restaurant:", e);
-        setNotFound(true);
       } finally {
         setLoadingRest(false);
       }
     };
 
     loadRestaurant();
-  }, [targetKey]);
+  }, [params]);
 
   // ANIMATION ROTATION ROUE V3 (4.5s FLUIDE)
   const handleSpinWheel = () => {
@@ -174,7 +181,7 @@ export default function LuxuryRestaurantPortalV4() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           client_phone: wifiPhone.trim(),
-          instance_name: rawInstance,
+          instance_name: currentInstanceName,
           source: 'WiFi Portal V4'
         })
       });
@@ -215,7 +222,7 @@ export default function LuxuryRestaurantPortalV4() {
           data: cleanBase64,
           client_email: clientEmail.trim(),
           language: lang,
-          instance: rawInstance
+          instance: currentInstanceName
         })
       });
 
@@ -262,8 +269,6 @@ export default function LuxuryRestaurantPortalV4() {
       step1: "1. انقر للفتح",
       step2: "2. سجل فويس 5s 🎙️",
       step3: "3. استلم هديتك 🎁",
-      notFoundTitle: "المطعم غير موجود",
-      notFoundDesc: "يرجى التأكد من مسح الرمز الضوئي (QR Code) الخاص بالمطعم الصحيح.",
       loadingText: "جاري تحميل بوابة المطعم...",
       poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
     },
@@ -295,8 +300,6 @@ export default function LuxuryRestaurantPortalV4() {
       step1: "1. Ouvrir WhatsApp",
       step2: "2. Vocal de 5s 🎙️",
       step3: "3. Votre Cadeau 🎁",
-      notFoundTitle: "Établissement Non Trouvé",
-      notFoundDesc: "Veuillez vérifier l'URL ou scanner le QR Code officiel de l'établissement.",
       loadingText: "Chargement du Portail VIP...",
       poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
     },
@@ -329,8 +332,6 @@ export default function LuxuryRestaurantPortalV4() {
       step1: "1. Tap to open",
       step2: "2. Record 5s voice 🎙️",
       step3: "3. Claim reward 🎁",
-      notFoundTitle: "Restaurant Not Found",
-      notFoundDesc: "Please check the URL or scan the official restaurant QR Code.",
       loadingText: "Loading VIP Portal...",
       poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
     }
@@ -342,7 +343,7 @@ export default function LuxuryRestaurantPortalV4() {
     else setLang('ar');
   };
 
-  // 1. ÉCRAN DE CHARGEMENT SOMBRE NEUTRE
+  // ÉCRAN DE CHARGEMENT SOMBRE NEUTRE
   if (loadingRest) {
     return (
       <div className="min-h-screen bg-[#090A0F] text-zinc-100 font-['Cairo',sans-serif] flex flex-col items-center justify-center p-6 space-y-4">
@@ -352,20 +353,6 @@ export default function LuxuryRestaurantPortalV4() {
     );
   }
 
-  // 2. ÉCRAN NEUTRE NOT FOUND
-  if (notFound || !restaurantData.restaurant_name) {
-    return (
-      <div className="min-h-screen bg-[#090A0F] text-zinc-100 font-['Cairo',sans-serif] flex flex-col items-center justify-center p-6 text-center space-y-4">
-        <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-full">
-          <AlertCircle className="w-10 h-10" />
-        </div>
-        <h2 className="text-xl font-black text-white">{t.notFoundTitle}</h2>
-        <p className="text-xs text-zinc-400 max-w-sm leading-relaxed">{t.notFoundDesc}</p>
-      </div>
-    );
-  }
-
-  // 3. ÉCRAN OFFICIEL MATCHÉ
   return (
     <div 
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
@@ -395,14 +382,16 @@ export default function LuxuryRestaurantPortalV4() {
         </header>
 
         {/* HERO BANNER RESTAURANT DYNAMIQUE */}
-        <div className="relative group">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 via-amber-300 to-emerald-500 rounded-[28px] blur-sm opacity-70"></div>
-          <div className="relative bg-[#14161F] border-2 border-amber-400/40 rounded-[26px] p-6 text-center space-y-2 shadow-2xl">
-            <p className="text-xs font-bold text-amber-400 uppercase tracking-widest">{t.subTitle}</p>
-            <h1 className="text-3xl font-black text-white">{restaurantData.restaurant_name}</h1>
-            {restaurantData.city && <p className="text-xs text-zinc-400 font-bold">{restaurantData.city}</p>}
+        {restaurantData.restaurant_name && (
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 via-amber-300 to-emerald-500 rounded-[28px] blur-sm opacity-70"></div>
+            <div className="relative bg-[#14161F] border-2 border-amber-400/40 rounded-[26px] p-6 text-center space-y-2 shadow-2xl">
+              <p className="text-xs font-bold text-amber-400 uppercase tracking-widest">{t.subTitle}</p>
+              <h1 className="text-3xl font-black text-white">{restaurantData.restaurant_name}</h1>
+              {restaurantData.city && <p className="text-xs text-zinc-400 font-bold">{restaurantData.city}</p>}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* ROUE DE LA FORTUNE 3D */}
         <div className="bg-[#14161F] border-2 border-amber-500/40 p-6 rounded-[26px] text-center space-y-5 shadow-2xl relative overflow-hidden">
