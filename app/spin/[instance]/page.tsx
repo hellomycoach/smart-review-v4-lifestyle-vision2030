@@ -50,7 +50,7 @@ export default function LuxuryRestaurantPortalV4() {
     }
   }, []);
 
-  // State Initial
+  // State Initial Neutre
   const [restaurantData, setRestaurantData] = useState<any>({
     restaurant_name: "Halim Cafe",
     city: "المدينة المنورة",
@@ -234,9 +234,9 @@ export default function LuxuryRestaurantPortalV4() {
     }
   };
 
-  // URL WHATSAPP DYNAMIQUE DU BOT RESTAURANT
+  // 🎯 URL WHATSAPP DYNAMIQUE SANS TEXTE PRÉ-REMPLI (OPTION B - 100% NETTE)
   const botPhoneClean = (restaurantData.linked_evolution || "41779874995").replace(/[^0-9]/g, '');
-  const whatsappUrl = `https://wa.me/${botPhoneClean}?text=${encodeURIComponent('مرحباً، أود إرسال تقييمي للحصول على الهديّة!')}`;
+  const whatsappUrl = botPhoneClean ? `https://wa.me/${botPhoneClean}` : "#";
 
   const t = {
     ar: {
@@ -434,7 +434,7 @@ export default function LuxuryRestaurantPortalV4() {
           </button>
         </div>
 
-        {/* MODULES V4 EN TAILES LISIBLES */}
+        {/* MODULES V4 */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           
           <button 
@@ -477,11 +477,9 @@ export default function LuxuryRestaurantPortalV4() {
 
         </div>
 
-        {/* ======================================================= */}
-        {/* POP-UP VICTOIRE (BOULE ET TEXTES TRÈS LISIBLES) */}
-        {/* ======================================================= */}
+        {/* POP-UP VICTOIRE */}
         {showWinnerModal && (
-          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
             <div className="bg-[#14161F] border-2 border-amber-400 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-6 relative shadow-[0_0_50px_rgba(245,158,11,0.5)]">
               <button 
                 onClick={() => setShowWinnerModal(false)}
@@ -504,7 +502,7 @@ export default function LuxuryRestaurantPortalV4() {
                   {t.spinCongratsDesc}
                 </p>
 
-                {/* BOUTON WHATSAPP VERT PERMANENT & DYNAMIQUE */}
+                {/* BOUTON WHATSAPP VERT PERMANENT SANS TEXTE PRÉ-REMPLI */}
                 <a 
                   href={whatsappUrl}
                   target="_blank"
@@ -515,7 +513,7 @@ export default function LuxuryRestaurantPortalV4() {
                   <span>{t.sendReviewWhatsapp}</span>
                 </a>
 
-                {/* 3 ÉTAPES TRÈS LISIBLES */}
+                {/* 3 ÉTAPES LISIBLES */}
                 <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/10 text-xs font-black text-zinc-200">
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">{t.step1}</div>
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-amber-500/30 text-amber-400">{t.step2}</div>
