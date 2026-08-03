@@ -50,7 +50,7 @@ export default function LuxuryRestaurantPortalV4() {
     }
   }, []);
 
-  // State Initial Neutre
+  // State Initial
   const [restaurantData, setRestaurantData] = useState<any>({
     restaurant_name: "Halim Cafe",
     city: "المدينة المنورة",
@@ -148,7 +148,7 @@ export default function LuxuryRestaurantPortalV4() {
     loadRestaurant();
   }, [params]);
 
-  // ANIMATION ROTATION ROUE V3 (4.5s FLUIDE)
+  // ANIMATION ROTATION ROUE V3 (4.5s FLUIDE ET PARFAITEMENT RONDE)
   const handleSpinWheel = () => {
     if (mustSpin) return;
     setMustSpin(true);
@@ -234,7 +234,7 @@ export default function LuxuryRestaurantPortalV4() {
     }
   };
 
-  // 🎯 URL WHATSAPP DYNAMIQUE SANS TEXTE PRÉ-REMPLI (OPTION B - 100% NETTE)
+  // 🎯 URL WHATSAPP DYNAMIQUE DU BOT (SANS TEXTE PRÉ-REMPLI - NETTE ET PURE)
   const botPhoneClean = (restaurantData.linked_evolution || "41779874995").replace(/[^0-9]/g, '');
   const whatsappUrl = botPhoneClean ? `https://wa.me/${botPhoneClean}` : "#";
 
@@ -389,7 +389,7 @@ export default function LuxuryRestaurantPortalV4() {
           </div>
         </div>
 
-        {/* ROUE DE LA FORTUNE 3D */}
+        {/* ROUE DE LA FORTUNE 3D (CARRÉE PARFAITE 1:1 POUR ROTATION CIRCULAIRE SANS BALOURD) */}
         <div className="bg-[#14161F] border-2 border-amber-500/40 p-6 sm:p-8 rounded-[26px] text-center space-y-5 shadow-2xl relative overflow-hidden">
           
           <div className="space-y-2">
@@ -400,13 +400,14 @@ export default function LuxuryRestaurantPortalV4() {
             <p className="text-sm text-zinc-300 font-bold leading-relaxed">{t.spinCardDesc}</p>
           </div>
 
-          <div className="relative w-64 h-60 sm:w-64 sm:h-64 mx-auto my-3">
+          {/* CONTENEUR CARRÉ 1:1 INTÉGRAL (w-64 h-64 aspect-square origin-center) */}
+          <div className="relative w-64 h-64 aspect-square mx-auto my-3 shrink-0">
             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20 text-amber-400 text-2xl drop-shadow-md">
               ▼
             </div>
             
             <div 
-              className="w-full h-full rounded-full border-4 border-amber-400 shadow-[0_0_35px_rgba(245,158,11,0.5)] overflow-hidden"
+              className="w-full h-full rounded-full border-4 border-amber-400 shadow-[0_0_35px_rgba(245,158,11,0.5)] overflow-hidden origin-center"
               style={{ 
                 transform: `rotate(${rotationDegree}deg)`,
                 transition: mustSpin ? 'transform 4.5s cubic-bezier(0.15, 0.9, 0.2, 1)' : 'none'
@@ -477,7 +478,7 @@ export default function LuxuryRestaurantPortalV4() {
 
         </div>
 
-        {/* POP-UP VICTOIRE */}
+        {/* POP-UP VICTOIRE (AVEC NOM CADEAU ET BOUTON WHATSAPP VERT LISIBLE) */}
         {showWinnerModal && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
             <div className="bg-[#14161F] border-2 border-amber-400 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-6 relative shadow-[0_0_50px_rgba(245,158,11,0.5)]">
@@ -502,7 +503,7 @@ export default function LuxuryRestaurantPortalV4() {
                   {t.spinCongratsDesc}
                 </p>
 
-                {/* BOUTON WHATSAPP VERT PERMANENT SANS TEXTE PRÉ-REMPLI */}
+                {/* BOUTON WHATSAPP VERT PERMANENT & DYNAMIQUE SANS TEXTE PRÉ-REMPLI */}
                 <a 
                   href={whatsappUrl}
                   target="_blank"
@@ -513,7 +514,7 @@ export default function LuxuryRestaurantPortalV4() {
                   <span>{t.sendReviewWhatsapp}</span>
                 </a>
 
-                {/* 3 ÉTAPES LISIBLES */}
+                {/* 3 ÉTAPES TRÈS LISIBLES */}
                 <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/10 text-xs font-black text-zinc-200">
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">{t.step1}</div>
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-amber-500/30 text-amber-400">{t.step2}</div>
