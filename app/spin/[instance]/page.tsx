@@ -11,17 +11,13 @@ const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-resta
 const N8N_WIFI_LEADS_API = "https://n8n.srv821341.hstgr.cloud/webhook/save-wifi-lead-v2";
 const N8N_AI_FOOD_VISION_API = "https://n8n.srv821341.hstgr.cloud/webhook/ai-food-vision-v4";
 
-const parseInstanceName = (raw: any): string => {
-  if (!raw) return "";
-  if (typeof raw === 'string') return raw.trim();
-  if (Array.isArray(raw) && raw.length > 0) {
-    const first = raw[0];
-    if (typeof first === 'string') return first.trim();
-    if (typeof first === 'object' && first !== null) {
-      return (first.instance_name || first.restaurant_name || "").trim();
-    }
+// NETTOYEUR UNIVERSEL DE CLEF D'INSTANCE (Anti-erreur de tirets/espaces/majuscules)
+const normalizeKey = (str: any): string => {
+  if (!str) return "";
+  if (typeof str === 'object' && str !== null) {
+    str = str.instance_name || str.restaurant_name || "";
   }
-  return "";
+  return String(str).toLowerCase().replace(/[^a-z0-9]/g, "").trim();
 };
 
 export default function LuxuryRestaurantPortalV4() {
@@ -42,22 +38,24 @@ export default function LuxuryRestaurantPortalV4() {
     }
   }, []);
 
-  // Extraction STRICTEMENT dynamique de l'instance
-  let currentInstance = "";
+  // Extraction dynamique ultra-fiable de l'instance
+  let rawInstance = "";
   if (typeof window !== 'undefined') {
     const parts = window.location.pathname.split('/spin/');
     if (parts.length > 1) {
-      currentInstance = parts[1].split('/')[0].split('?')[0].trim().toLowerCase();
+      rawInstance = parts[1].split('/')[0].split('?')[0].trim();
     }
   }
-  if (!currentInstance && params?.instance) {
-    currentInstance = (typeof params.instance === 'string' ? params.instance : '').trim().toLowerCase();
+  if (!rawInstance && params?.instance) {
+    rawInstance = (typeof params.instance === 'string' ? params.instance : '').trim();
   }
-  if (!currentInstance && searchParams.get('instance')) {
-    currentInstance = (searchParams.get('instance') || '').trim().toLowerCase();
+  if (!rawInstance && searchParams.get('instance')) {
+    rawInstance = (searchParams.get('instance') || '').trim();
   }
 
-  // STATE INITIAL NEUTRE (ZÉRO DONNÉE HARDCODÉE)
+  const targetKey = normalizeKey(rawInstance);
+
+  // STATE INITIAL NEUTRE
   const [restaurantData, setRestaurantData] = useState<any>({
     restaurant_name: "",
     city: "",
@@ -86,11 +84,10 @@ export default function LuxuryRestaurantPortalV4() {
   const [aiAnalysisLoading, setAiAnalysisLoading] = useState(false);
   const [aiResult, setAiResult] = useState<any>(null);
 
-  // CHARGEMENT SÉCURISÉ MULTI-TENANT
+  // CHARGEMENT SÉCURISÉ NOCODB AVEC NORMALISATION
   useEffect(() => {
     const loadRestaurant = async () => {
-      // SÉCURITÉ 1 : Si aucune instance dans l'URL, afficher Erreur Neutre (Pas de fallback concurrent)
-      if (!currentInstance) {
+      if (!targetKey) {
         setLoadingRest(false);
         setNotFound(true);
         return;
@@ -103,22 +100,22 @@ export default function LuxuryRestaurantPortalV4() {
         const res = await fetch(`${N8N_RESTAURANTS_API}?t=${Date.now()}`, { cache: 'no-store' });
         if (res.ok) {
           const data = await res.json();
-          const list = Array.isArray(data) ? data : (data.list || []);
-          const target = currentInstance.toLowerCase().trim();
+          const list = Array.isArray(data) ? data : (data.list || data.data || []);
 
-          // SÉCURITÉ 2 : Recherche stricte en 2 passes
-          // Passe A : Correspondance exacte
-          let matched = list.find((r: any) => parseInstanceName(r.instance_name).toLowerCase().trim() === target);
+          // RECHERCHE NORMALISÉE
+          let matched = list.find((r: any) => {
+            const dbKey = normalizeKey(r.instance_name || r.restaurant_name);
+            return dbKey === targetKey;
+          });
 
-          // Passe B : Correspondance partielle seulement si au moins 3 caractères
-          if (!matched && target.length >= 3) {
+          // Si pas de match exact, recherche par inclusion partielle
+          if (!matched && targetKey.length >= 3) {
             matched = list.find((r: any) => {
-              const inst = parseInstanceName(r.instance_name).toLowerCase().trim();
-              return inst.length > 0 && (inst.includes(target) || target.includes(inst));
+              const dbKey = normalizeKey(r.instance_name || r.restaurant_name);
+              return dbKey.length > 0 && (dbKey.includes(targetKey) || targetKey.includes(dbKey));
             });
           }
 
-          // SÉCURITÉ 3 : Si trouvé, affectation dynamique. Sinon, écran Neutre Not Found.
           if (matched) {
             const botPhone = (matched.linked_evolution || matched.manager_whatsapp || "").toString().replace(/[^0-9]/g, '');
 
@@ -145,7 +142,7 @@ export default function LuxuryRestaurantPortalV4() {
     };
 
     loadRestaurant();
-  }, [currentInstance]);
+  }, [targetKey]);
 
   // ANIMATION ROTATION ROUE V3 (4.5s FLUIDE)
   const handleSpinWheel = () => {
@@ -177,7 +174,7 @@ export default function LuxuryRestaurantPortalV4() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           client_phone: wifiPhone.trim(),
-          instance_name: currentInstance,
+          instance_name: rawInstance,
           source: 'WiFi Portal V4'
         })
       });
@@ -218,7 +215,7 @@ export default function LuxuryRestaurantPortalV4() {
           data: cleanBase64,
           client_email: clientEmail.trim(),
           language: lang,
-          instance: currentInstance
+          instance: rawInstance
         })
       });
 
@@ -355,7 +352,7 @@ export default function LuxuryRestaurantPortalV4() {
     );
   }
 
-  // 2. ÉCRAN NEUTRE NOT FOUND (SI L'INSTANCE N'EXISTE PAS)
+  // 2. ÉCRAN NEUTRE NOT FOUND
   if (notFound || !restaurantData.restaurant_name) {
     return (
       <div className="min-h-screen bg-[#090A0F] text-zinc-100 font-['Cairo',sans-serif] flex flex-col items-center justify-center p-6 text-center space-y-4">
@@ -368,7 +365,7 @@ export default function LuxuryRestaurantPortalV4() {
     );
   }
 
-  // 3. ÉCRAN OFFICIEL DU RESTAURANT MATCHÉ DYNAMIQUEMENT
+  // 3. ÉCRAN OFFICIEL MATCHÉ
   return (
     <div 
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
@@ -407,7 +404,7 @@ export default function LuxuryRestaurantPortalV4() {
           </div>
         </div>
 
-        {/* ROUE DE LA FORTUNE 3D (AVEC ANIMATION 4.5S) */}
+        {/* ROUE DE LA FORTUNE 3D */}
         <div className="bg-[#14161F] border-2 border-amber-500/40 p-6 rounded-[26px] text-center space-y-5 shadow-2xl relative overflow-hidden">
           
           <div className="space-y-1">
@@ -452,7 +449,7 @@ export default function LuxuryRestaurantPortalV4() {
           </button>
         </div>
 
-        {/* MODULES V4 : IA FITNESS, WIFI, MENU */}
+        {/* MODULES V4 */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           
           <button 
