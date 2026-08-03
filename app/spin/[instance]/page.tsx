@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { 
   Sparkles, Wifi, Utensils, Camera, Flame, Activity, ShieldCheck, 
-  Globe, Award, Check, X, RefreshCw, Dices, Trophy, HeartPulse
+  Globe, Award, Check, X, RefreshCw, Dices, Trophy, HeartPulse, Gift, Play
 } from 'lucide-react';
 
 const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants-v3";
@@ -58,11 +58,18 @@ export default function LuxuryRestaurantPortalV4() {
     city: "المدينة المنورة",
     reward_offer: "1 hot drink",
     wifi_password: "halim2030",
-    menu_url: "#"
+    menu_url: "#",
+    google_review_link: "https://search.google.com/local/writereview?placeid=12345",
+    linked_evolution: "966530629832"
   });
 
   // Modals States
   const [activeModal, setActiveModal] = useState<'wifi' | 'food_ai' | 'spin' | null>(null);
+
+  // Spin Wheel State
+  const [mustSpin, setMustSpin] = useState(false);
+  const [rotationDegree, setRotationDegree] = useState(0);
+  const [wonPrize, setWonPrize] = useState<string | null>(null);
 
   // WiFi Lead Form
   const [wifiPhone, setWifiPhone] = useState('');
@@ -94,7 +101,9 @@ export default function LuxuryRestaurantPortalV4() {
               city: matched.city || "المدينة المنورة",
               reward_offer: matched.reward_offer || matched.loyalty_reward || "1 hot drink",
               wifi_password: matched.wifi_password || "halim2030",
-              menu_url: matched.menu_url || "#"
+              menu_url: matched.menu_url || "#",
+              google_review_link: matched.google_review_link || "#",
+              linked_evolution: matched.linked_evolution || "966530629832"
             });
           }
         }
@@ -109,6 +118,25 @@ export default function LuxuryRestaurantPortalV4() {
       loadRestaurant();
     }
   }, [currentInstance]);
+
+  // ANIMATION DE LA ROUE DE LA FORTUNE
+  const handleSpinWheel = () => {
+    if (mustSpin) return;
+    setMustSpin(true);
+    setWonPrize(null);
+
+    // Animation 3D de 5 tours + arrêt sur le segment gagnant
+    const fullRotations = 360 * 6;
+    const randomAngle = 30 + Math.floor(Math.random() * 300);
+    const finalDegree = rotationDegree + fullRotations + randomAngle;
+
+    setRotationDegree(finalDegree);
+
+    setTimeout(() => {
+      setMustSpin(false);
+      setWonPrize(restaurantData.reward_offer || "1 hot drink");
+    }, 4500);
+  };
 
   // Soumission Formulaire WiFi
   const handleWifiSubmit = async (e: React.FormEvent) => {
@@ -171,33 +199,32 @@ export default function LuxuryRestaurantPortalV4() {
         setAiResult(data);
       } else {
         setAiResult({
-          dish_name_fr: "Tiramisu Italien VIP",
-          dish_name_ar: "تيراميسو إيطالي فاخر",
-          estimated_calories: 420,
-          health_status: "Gourmand 🍰",
-          macronutrients: { carbs: "48g", protein: "7g", fat: "22g" },
+          dish_name_fr: "Boisson Chaude Halim VIP",
+          dish_name_ar: "مشروب حليم دافئ فاخر",
+          estimated_calories: 220,
+          health_status: "Délicieux ☕",
+          macronutrients: { carbs: "28g", protein: "4g", fat: "8g" },
           workout: {
-            duration_minutes: 12,
-            title_fr: "Séance Brûle-Calories Express",
+            duration_minutes: 10,
+            title_fr: "Séance Brûle-Calories Halim Express",
             title_ar: "حصة حرق سعرات سريعة",
             exercises: [
               { name_fr: "Jumping Jacks", name_ar: "قفز مع فتح الرجلين", duration: "45 sec" },
-              { name_fr: "Squats au poids du corps", name_ar: "تمارين السكوات", duration: "45 sec" },
-              { name_fr: "Mountain Climbers", name_ar: "تمرين تسلق الجبل", duration: "45 sec" }
+              { name_fr: "Squats au poids du corps", name_ar: "تمارين السكوات", duration: "45 sec" }
             ]
           }
         });
       }
     } catch (err) {
       setAiResult({
-        dish_name_fr: "Tiramisu Italien VIP",
-        dish_name_ar: "تيراميسو إيطالي فاخر",
-        estimated_calories: 420,
-        health_status: "Gourmand 🍰",
-        macronutrients: { carbs: "48g", protein: "7g", fat: "22g" },
+        dish_name_fr: "Boisson Chaude Halim VIP",
+        dish_name_ar: "مشروب حليم دافئ فاخر",
+        estimated_calories: 220,
+        health_status: "Délicieux ☕",
+        macronutrients: { carbs: "28g", protein: "4g", fat: "8g" },
         workout: {
-          duration_minutes: 12,
-          title_fr: "Séance Brûle-Calories Express",
+          duration_minutes: 10,
+          title_fr: "Séance Brûle-Calories Halim Express",
           title_ar: "حصة حرق سعرات سريعة",
           exercises: [
             { name_fr: "Jumping Jacks", name_ar: "قفز مع فتح الرجلين", duration: "45 sec" },
@@ -209,6 +236,8 @@ export default function LuxuryRestaurantPortalV4() {
       setAiAnalysisLoading(false);
     }
   };
+
+  const whatsappUrl = `https://wa.me/${restaurantData.linked_evolution}?text=${encodeURIComponent('مرحباً، أود إرسال تقييمي للحصول على الهديّة!')}`;
 
   const t = {
     ar: {
@@ -233,6 +262,9 @@ export default function LuxuryRestaurantPortalV4() {
       aiAnalyzing: "جاري تحليل الطبق بالذكاء الاصطناعي...",
       calories: "السعرات الحرارية المقدرة :",
       workoutTitle: "حصة اللياقة المقترحة (بدون معدات) :",
+      spinBtnAction: "أدر العجلة الآن 🎲",
+      spinCongrats: "🎉 مبروك! لقد كسبت :",
+      sendReviewWhatsapp: "إرسال التقييم الصوتي عبر واتساب 💬",
       poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
     },
     fr: {
@@ -257,6 +289,9 @@ export default function LuxuryRestaurantPortalV4() {
       aiAnalyzing: "Analyse nutritionnelle IA en cours...",
       calories: "Calories estimées :",
       workoutTitle: "Séance Fitness 12 min (Sans matériel) :",
+      spinBtnAction: "Tourner la Roue Maintenant 🎲",
+      spinCongrats: "🎉 FÉLICITATIONS ! Vous avez gagné :",
+      sendReviewWhatsapp: "Envoyer mon avis vocal sur WhatsApp 💬",
       poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
     },
     en: {
@@ -281,6 +316,9 @@ export default function LuxuryRestaurantPortalV4() {
       aiAnalyzing: "AI Nutritional Analysis in progress...",
       calories: "Estimated Calories:",
       workoutTitle: "Recommended 12-min Bodyweight Workout:",
+      spinBtnAction: "Spin the Wheel Now 🎲",
+      spinCongrats: "🎉 CONGRATULATIONS! You won:",
+      sendReviewWhatsapp: "Send Voice Review on WhatsApp 💬",
       poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
     }
   }[lang];
@@ -355,7 +393,7 @@ export default function LuxuryRestaurantPortalV4() {
             </button>
           </div>
 
-          {/* PILIER 2 : IA NUTRITION & FITNESS (NOUVEAUTÉ V4) */}
+          {/* PILIER 2 : IA NUTRITION & FITNESS */}
           <div className="bg-[#14161F] border border-emerald-500/40 p-5 rounded-2xl space-y-3 hover:border-emerald-400 transition-all relative overflow-hidden">
             <div className="absolute top-0 right-0 bg-emerald-500 text-zinc-950 font-black text-[9px] px-2 py-0.5 rounded-bl">
               v4.0 NEW
@@ -576,27 +614,73 @@ export default function LuxuryRestaurantPortalV4() {
           </div>
         )}
 
-        {/* MODAL 3 : ROUE DE LA FORTUNE */}
+        {/* MODAL 3 : ROUE DE LA FORTUNE 3D INTERACTIVE */}
         {activeModal === 'spin' && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-            <div className="bg-[#14161F] border-2 border-amber-500/40 rounded-3xl p-6 max-w-md w-full text-center space-y-4 relative shadow-2xl">
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div className="bg-[#14161F] border-2 border-amber-500/40 rounded-3xl p-6 max-w-md w-full text-center space-y-5 relative shadow-2xl">
               <button 
-                onClick={() => setActiveModal(null)}
+                onClick={() => { setActiveModal(null); setWonPrize(null); }}
                 className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <Dices className="w-12 h-12 text-amber-400 mx-auto animate-bounce" />
-              <h3 className="text-xl font-black text-white">{t.spinCardTitle}</h3>
-              <p className="text-xs text-zinc-300 font-bold leading-relaxed">{t.spinCardDesc}</p>
+              <div className="space-y-1">
+                <Trophy className="w-9 h-9 text-amber-400 mx-auto" />
+                <h3 className="text-xl font-black text-white">{t.spinCardTitle}</h3>
+              </div>
 
-              <a 
-                href={`/r/${currentInstance}`}
-                className="block w-full bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-xs py-3.5 rounded-xl transition shadow-lg"
-              >
-                {t.btnSpin}
-              </a>
+              {!wonPrize ? (
+                <div className="space-y-5">
+                  {/* ROUE ANIMÉE SVG 3D */}
+                  <div className="relative w-56 h-56 mx-auto my-2">
+                    {/* FLÈCHE POINTEUR */}
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20 text-amber-400 drop-shadow-md">
+                      ▼
+                    </div>
+                    
+                    <div 
+                      className="w-full h-full rounded-full border-4 border-amber-400 shadow-[0_0_30px_rgba(245,158,11,0.5)] overflow-hidden transition-all duration-[4500ms] cubic-bezier(0.15,0.9,0.2,1)"
+                      style={{ transform: `rotate(${rotationDegree}deg)` }}
+                    >
+                      <svg viewBox="0 0 100 100" className="w-full h-full">
+                        <g transform="translate(50,50)">
+                          <path d="M0,0 L50,0 A50,50 0 0,1 25,43.3 Z" fill="#D4AF37" />
+                          <path d="M0,0 L25,43.3 A50,50 0 0,1 -25,43.3 Z" fill="#14161F" />
+                          <path d="M0,0 L-25,43.3 A50,50 0 0,1 -50,0 Z" fill="#10B981" />
+                          <path d="M0,0 L-50,0 A50,50 0 0,1 -25,-43.3 Z" fill="#D4AF37" />
+                          <path d="M0,0 L-25,-43.3 A50,50 0 0,1 25,-43.3 Z" fill="#14161F" />
+                          <path d="M0,0 L25,-43.3 A50,50 0 0,1 50,0 Z" fill="#10B981" />
+                        </g>
+                      </svg>
+                    </div>
+                  </div>
+
+                  <button 
+                    onClick={handleSpinWheel}
+                    disabled={mustSpin}
+                    className="w-full bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-black text-sm py-3.5 rounded-xl transition shadow-lg flex items-center justify-center gap-2"
+                  >
+                    {mustSpin ? <RefreshCw className="w-5 h-5 animate-spin" /> : t.spinBtnAction}
+                  </button>
+                </div>
+              ) : (
+                /* POPUP DE VICTOIRE AVEC BOUTON WHATSAPP */
+                <div className="bg-amber-500/10 border-2 border-amber-400 p-5 rounded-2xl space-y-3 animate-pulse">
+                  <Gift className="w-10 h-10 text-amber-400 mx-auto" />
+                  <p className="text-xs font-bold text-amber-300">{t.spinCongrats}</p>
+                  <h4 className="text-2xl font-black text-white">{wonPrize}</h4>
+                  
+                  <a 
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full bg-emerald-500 hover:bg-emerald-600 text-zinc-950 font-black text-xs py-3.5 rounded-xl transition shadow-lg mt-2"
+                  >
+                    {t.sendReviewWhatsapp}
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         )}
