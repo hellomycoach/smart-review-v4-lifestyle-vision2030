@@ -41,14 +41,23 @@ export default function LuxuryRestaurantPortalV4() {
     }
   }, []);
 
-  // Instance & Restaurant
-  const instanceParam = (params?.instance as string || searchParams.get('instance') || "bella_italia_riyadh").trim().toLowerCase();
+  // Extraction garantie de l'instance depuis l'URL
+  let currentInstance = "";
+  if (typeof window !== 'undefined') {
+    const parts = window.location.pathname.split('/spin/');
+    if (parts.length > 1) {
+      currentInstance = parts[1].split('/')[0].split('?')[0].trim().toLowerCase();
+    }
+  }
+  if (!currentInstance) {
+    currentInstance = (typeof params?.instance === 'string' ? params.instance : searchParams.get('instance') || "halim_cafe_madinah").trim().toLowerCase();
+  }
 
   const [restaurantData, setRestaurantData] = useState<any>({
-    restaurant_name: "Bella Italia",
-    city: "الرياض",
-    reward_offer: "1 Tiramisu offert 🍨",
-    wifi_password: "BellaWiFi2026",
+    restaurant_name: "Halim Cafe",
+    city: "المدينة المنورة",
+    reward_offer: "1 hot drink",
+    wifi_password: "halim2030",
     menu_url: "#"
   });
 
@@ -76,15 +85,15 @@ export default function LuxuryRestaurantPortalV4() {
           const list = Array.isArray(data) ? data : (data.list || []);
           const matched = list.find((r: any) => {
             const inst = parseInstanceName(r.instance_name).toLowerCase();
-            return inst.includes(instanceParam) || instanceParam.includes(inst);
+            return inst === currentInstance || inst.includes(currentInstance) || currentInstance.includes(inst);
           });
 
           if (matched) {
             setRestaurantData({
-              restaurant_name: matched.restaurant_name || "Bella Italia",
-              city: matched.city || "الرياض",
-              reward_offer: matched.reward_offer || matched.loyalty_reward || "1 Tiramisu offert 🍨",
-              wifi_password: matched.wifi_password || "BellaWiFi2026",
+              restaurant_name: matched.restaurant_name || "Halim Cafe",
+              city: matched.city || "المدينة المنورة",
+              reward_offer: matched.reward_offer || matched.loyalty_reward || "1 hot drink",
+              wifi_password: matched.wifi_password || "halim2030",
               menu_url: matched.menu_url || "#"
             });
           }
@@ -96,8 +105,10 @@ export default function LuxuryRestaurantPortalV4() {
       }
     };
 
-    loadRestaurant();
-  }, [instanceParam]);
+    if (currentInstance) {
+      loadRestaurant();
+    }
+  }, [currentInstance]);
 
   // Soumission Formulaire WiFi
   const handleWifiSubmit = async (e: React.FormEvent) => {
@@ -111,13 +122,13 @@ export default function LuxuryRestaurantPortalV4() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           client_phone: wifiPhone.trim(),
-          instance_name: instanceParam,
+          instance_name: currentInstance,
           source: 'WiFi Portal V4'
         })
       });
       setWifiSuccess(true);
     } catch (e) {
-      setWifiSuccess(true); // Fallback pour afficher le MDP WiFi
+      setWifiSuccess(true);
     } finally {
       setWifiLoading(false);
     }
@@ -141,7 +152,6 @@ export default function LuxuryRestaurantPortalV4() {
     setAiAnalysisLoading(true);
     setAiResult(null);
 
-    // Extraction du contenu brut base64 sans le header
     const cleanBase64 = base64Image.replace(/^data:image\/\w+;base64,/, '');
 
     try {
@@ -152,7 +162,7 @@ export default function LuxuryRestaurantPortalV4() {
           image_base64: cleanBase64,
           data: cleanBase64,
           language: lang,
-          instance: instanceParam
+          instance: currentInstance
         })
       });
 
@@ -160,7 +170,6 @@ export default function LuxuryRestaurantPortalV4() {
         const data = await res.json();
         setAiResult(data);
       } else {
-        // Mock de démonstration si le webhook n'a pas encore de réponse binaire
         setAiResult({
           dish_name_fr: "Tiramisu Italien VIP",
           dish_name_ar: "تيراميسو إيطالي فاخر",
@@ -169,8 +178,8 @@ export default function LuxuryRestaurantPortalV4() {
           macronutrients: { carbs: "48g", protein: "7g", fat: "22g" },
           workout: {
             duration_minutes: 12,
-            title_fr: "Séance Brûle-Calories Tiramisu Express",
-            title_ar: "حصة حرق سعرات التيراميسو السريعة",
+            title_fr: "Séance Brûle-Calories Express",
+            title_ar: "حصة حرق سعرات سريعة",
             exercises: [
               { name_fr: "Jumping Jacks", name_ar: "قفز مع فتح الرجلين", duration: "45 sec" },
               { name_fr: "Squats au poids du corps", name_ar: "تمارين السكوات", duration: "45 sec" },
@@ -180,7 +189,6 @@ export default function LuxuryRestaurantPortalV4() {
         });
       }
     } catch (err) {
-      // Fallback Demo
       setAiResult({
         dish_name_fr: "Tiramisu Italien VIP",
         dish_name_ar: "تيراميسو إيطالي فاخر",
@@ -288,7 +296,6 @@ export default function LuxuryRestaurantPortalV4() {
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
       className="min-h-screen bg-[#090A0F] text-zinc-100 font-['Cairo',sans-serif] relative flex flex-col justify-between p-4 sm:p-6 overflow-x-hidden selection:bg-amber-500 selection:text-black"
     >
-      {/* EFFETS LUMINEUX LUXE */}
       <div className="fixed top-[-10%] right-[-10%] w-96 h-96 bg-amber-500/10 rounded-full blur-[160px] pointer-events-none" />
       <div className="fixed bottom-[-10%] left-[-10%] w-96 h-96 bg-emerald-500/10 rounded-full blur-[160px] pointer-events-none" />
 
@@ -318,7 +325,7 @@ export default function LuxuryRestaurantPortalV4() {
           <div className="relative bg-[#14161F] border-2 border-amber-400/40 rounded-[26px] p-6 text-center space-y-2 shadow-2xl">
             <p className="text-xs font-bold text-amber-400 uppercase tracking-widest">{t.subTitle}</p>
             <h1 className="text-3xl font-black text-white">{restaurantData.restaurant_name}</h1>
-            <p className="text-xs text-zinc-400 font-bold">فرع {restaurantData.city}</p>
+            <p className="text-xs text-zinc-400 font-bold">{restaurantData.city}</p>
           </div>
         </div>
 
@@ -465,7 +472,7 @@ export default function LuxuryRestaurantPortalV4() {
           </div>
         )}
 
-        {/* MODAL 2 : IA NUTRITION & FITNESS COACH (NOUVEAUTÉ V4) */}
+        {/* MODAL 2 : IA NUTRITION & FITNESS COACH */}
         {activeModal === 'food_ai' && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
             <div className="bg-[#14161F] border-2 border-emerald-500/40 rounded-3xl p-6 max-w-md w-full space-y-5 relative shadow-2xl my-auto">
@@ -508,7 +515,6 @@ export default function LuxuryRestaurantPortalV4() {
                 </div>
               ) : (
                 <div className="space-y-4 text-start">
-                  {/* FICHE ANNALYSE NUTRITIONNELLES */}
                   <div className="bg-zinc-950 p-4 rounded-2xl border border-emerald-500/30 space-y-2">
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-black text-white">
@@ -536,7 +542,6 @@ export default function LuxuryRestaurantPortalV4() {
                     )}
                   </div>
 
-                  {/* PROGRAMME FITNESS RECOMMANDÉ */}
                   {aiResult.workout && (
                     <div className="bg-gradient-to-br from-emerald-950/60 to-zinc-950 p-4 rounded-2xl border border-emerald-500/40 space-y-3">
                       <div className="flex items-center gap-2 text-xs font-black text-emerald-400">
@@ -571,7 +576,7 @@ export default function LuxuryRestaurantPortalV4() {
           </div>
         )}
 
-        {/* MODAL 3 : ROUE DE LA FORTUNE (REDIRECTION / SPIN) */}
+        {/* MODAL 3 : ROUE DE LA FORTUNE */}
         {activeModal === 'spin' && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
             <div className="bg-[#14161F] border-2 border-amber-500/40 rounded-3xl p-6 max-w-md w-full text-center space-y-4 relative shadow-2xl">
@@ -587,7 +592,7 @@ export default function LuxuryRestaurantPortalV4() {
               <p className="text-xs text-zinc-300 font-bold leading-relaxed">{t.spinCardDesc}</p>
 
               <a 
-                href={`/r/${instanceParam}`}
+                href={`/r/${currentInstance}`}
                 className="block w-full bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-xs py-3.5 rounded-xl transition shadow-lg"
               >
                 {t.btnSpin}
@@ -596,7 +601,7 @@ export default function LuxuryRestaurantPortalV4() {
           </div>
         )}
 
-        {/* FOOTER SMART REVIEW AI V4 */}
+        {/* FOOTER */}
         <footer className="pt-2 text-center">
           <p className="text-[11px] text-zinc-500 font-bold tracking-wider flex items-center justify-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
