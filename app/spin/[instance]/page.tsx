@@ -11,7 +11,7 @@ const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-resta
 const N8N_WIFI_LEADS_API = "https://n8n.srv821341.hstgr.cloud/webhook/save-wifi-lead-v2";
 const N8N_AI_FOOD_VISION_API = "https://n8n.srv821341.hstgr.cloud/webhook/ai-food-vision-v4";
 
-// NETTOYEUR UNIVERSEL DE CLEF D'INSTANCE (Anti-erreur de tirets/espaces/majuscules)
+// NETTOYEUR UNIVERSEL DE CLEF D'INSTANCE
 const normalizeKey = (str: any): string => {
   if (!str) return "";
   if (typeof str === 'object' && str !== null) {
@@ -50,14 +50,14 @@ export default function LuxuryRestaurantPortalV4() {
     }
   }, []);
 
-  // STATE INITIAL NEUTRE (ZÉRO DONNÉE HARDCODÉE)
+  // State Initial
   const [restaurantData, setRestaurantData] = useState<any>({
-    restaurant_name: "",
-    city: "",
-    reward_offer: "",
-    wifi_password: "",
+    restaurant_name: "Halim Cafe",
+    city: "المدينة المنورة",
+    reward_offer: "1 hot drink",
+    wifi_password: "halim2030",
     menu_url: "#",
-    linked_evolution: ""
+    linked_evolution: "41779874995"
   });
 
   const [currentInstanceName, setCurrentInstanceName] = useState("");
@@ -81,12 +81,11 @@ export default function LuxuryRestaurantPortalV4() {
   const [aiAnalysisLoading, setAiAnalysisLoading] = useState(false);
   const [aiResult, setAiResult] = useState<any>(null);
 
-  // CHARGEMENT RESTAURANT SÉCURISÉ (EXÉCUTÉ APRÈS LE MONTAGE NAVIGATEUR)
+  // CHARGEMENT RESTAURANT
   useEffect(() => {
     const loadRestaurant = async () => {
       setLoadingRest(true);
 
-      // Extraction ultra-fiable de l'instance après montage
       let targetRaw = "";
       if (typeof window !== 'undefined') {
         const parts = window.location.pathname.split('/spin/');
@@ -113,13 +112,11 @@ export default function LuxuryRestaurantPortalV4() {
           let matched = null;
 
           if (targetKey) {
-            // 1. Recherche par clé normalisée
             matched = list.find((r: any) => {
               const dbKey = normalizeKey(parseInstanceName(r.instance_name) || r.instance_name || r.restaurant_name);
               return dbKey === targetKey;
             });
 
-            // 2. Recherche partielle si pas de correspondance exacte
             if (!matched && targetKey.length >= 3) {
               matched = list.find((r: any) => {
                 const dbKey = normalizeKey(parseInstanceName(r.instance_name) || r.instance_name || r.restaurant_name);
@@ -129,15 +126,15 @@ export default function LuxuryRestaurantPortalV4() {
           }
 
           if (matched) {
-            const botPhone = (matched.linked_evolution || matched.manager_whatsapp || "").toString().replace(/[^0-9]/g, '');
+            const botPhone = (matched.linked_evolution || matched.manager_whatsapp || "41779874995").toString().replace(/[^0-9]/g, '');
 
             setRestaurantData({
-              restaurant_name: matched.restaurant_name || "",
-              city: matched.city || "",
-              reward_offer: matched.reward_offer || matched.loyalty_reward || "",
-              wifi_password: matched.wifi_password || "",
+              restaurant_name: matched.restaurant_name || "Halim Cafe",
+              city: matched.city || "المدينة المنورة",
+              reward_offer: matched.reward_offer || matched.loyalty_reward || "1 hot drink",
+              wifi_password: matched.wifi_password || "halim2030",
               menu_url: matched.menu_url || "#",
-              linked_evolution: botPhone
+              linked_evolution: botPhone || "41779874995"
             });
           }
         }
@@ -238,7 +235,8 @@ export default function LuxuryRestaurantPortalV4() {
   };
 
   // URL WHATSAPP DYNAMIQUE DU BOT RESTAURANT
-  const whatsappUrl = `https://wa.me/${restaurantData.linked_evolution}?text=${encodeURIComponent('مرحباً، أود إرسال تقييمي للحصول على الهديّة!')}`;
+  const botPhoneClean = (restaurantData.linked_evolution || "41779874995").replace(/[^0-9]/g, '');
+  const whatsappUrl = `https://wa.me/${botPhoneClean}?text=${encodeURIComponent('مرحباً، أود إرسال تقييمي للحصول على الهديّة!')}`;
 
   const t = {
     ar: {
@@ -343,12 +341,12 @@ export default function LuxuryRestaurantPortalV4() {
     else setLang('ar');
   };
 
-  // ÉCRAN DE CHARGEMENT SOMBRE NEUTRE
+  // ÉCRAN DE CHARGEMENT
   if (loadingRest) {
     return (
       <div className="min-h-screen bg-[#090A0F] text-zinc-100 font-['Cairo',sans-serif] flex flex-col items-center justify-center p-6 space-y-4">
-        <RefreshCw className="w-8 h-8 text-amber-400 animate-spin" />
-        <p className="text-xs font-bold text-zinc-400 animate-pulse">{t.loadingText}</p>
+        <RefreshCw className="w-10 h-10 text-amber-400 animate-spin" />
+        <p className="text-sm font-bold text-zinc-300 animate-pulse">{t.loadingText}</p>
       </div>
     );
   }
@@ -366,46 +364,44 @@ export default function LuxuryRestaurantPortalV4() {
         {/* HEADER */}
         <header className="flex justify-between items-center pt-2 px-1">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-amber-400" />
-            <span className="text-[11px] font-black uppercase tracking-widest text-amber-400">
+            <ShieldCheck className="w-6 h-6 text-amber-400" />
+            <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-amber-400">
               {t.portalTitle}
             </span>
           </div>
 
           <button
             onClick={toggleLanguage}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-zinc-900/90 border border-amber-500/20 text-xs font-black text-zinc-200 hover:text-amber-400 backdrop-blur-xl transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/90 border border-amber-500/30 text-xs sm:text-sm font-black text-zinc-200 hover:text-amber-400 backdrop-blur-xl transition-all shadow-md"
           >
-            <Globe className="w-3.5 h-3.5 text-amber-400" />
+            <Globe className="w-4 h-4 text-amber-400" />
             {lang === 'ar' ? 'Français' : lang === 'fr' ? 'English' : 'العربية'}
           </button>
         </header>
 
         {/* HERO BANNER RESTAURANT DYNAMIQUE */}
-        {restaurantData.restaurant_name && (
-          <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 via-amber-300 to-emerald-500 rounded-[28px] blur-sm opacity-70"></div>
-            <div className="relative bg-[#14161F] border-2 border-amber-400/40 rounded-[26px] p-6 text-center space-y-2 shadow-2xl">
-              <p className="text-xs font-bold text-amber-400 uppercase tracking-widest">{t.subTitle}</p>
-              <h1 className="text-3xl font-black text-white">{restaurantData.restaurant_name}</h1>
-              {restaurantData.city && <p className="text-xs text-zinc-400 font-bold">{restaurantData.city}</p>}
-            </div>
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 via-amber-300 to-emerald-500 rounded-[28px] blur-sm opacity-70"></div>
+          <div className="relative bg-[#14161F] border-2 border-amber-400/40 rounded-[26px] p-6 text-center space-y-2 shadow-2xl">
+            <p className="text-xs sm:text-sm font-bold text-amber-400 uppercase tracking-widest">{t.subTitle}</p>
+            <h1 className="text-3xl sm:text-4xl font-black text-white">{restaurantData.restaurant_name || "Halim Cafe"}</h1>
+            {restaurantData.city && <p className="text-xs sm:text-sm text-zinc-400 font-bold">{restaurantData.city}</p>}
           </div>
-        )}
+        </div>
 
         {/* ROUE DE LA FORTUNE 3D */}
-        <div className="bg-[#14161F] border-2 border-amber-500/40 p-6 rounded-[26px] text-center space-y-5 shadow-2xl relative overflow-hidden">
+        <div className="bg-[#14161F] border-2 border-amber-500/40 p-6 sm:p-8 rounded-[26px] text-center space-y-5 shadow-2xl relative overflow-hidden">
           
-          <div className="space-y-1">
-            <div className="inline-flex p-2.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-2xl mb-1">
-              <Trophy className="w-7 h-7" />
+          <div className="space-y-2">
+            <div className="inline-flex p-3 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-2xl mb-1">
+              <Trophy className="w-8 h-8" />
             </div>
-            <h2 className="text-xl font-black text-white">{t.spinCardTitle}</h2>
-            <p className="text-xs text-zinc-400 font-bold leading-relaxed">{t.spinCardDesc}</p>
+            <h2 className="text-2xl font-black text-white">{t.spinCardTitle}</h2>
+            <p className="text-sm text-zinc-300 font-bold leading-relaxed">{t.spinCardDesc}</p>
           </div>
 
-          <div className="relative w-60 h-60 mx-auto my-2">
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20 text-amber-400 text-xl drop-shadow-md">
+          <div className="relative w-64 h-60 sm:w-64 sm:h-64 mx-auto my-3">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20 text-amber-400 text-2xl drop-shadow-md">
               ▼
             </div>
             
@@ -432,13 +428,13 @@ export default function LuxuryRestaurantPortalV4() {
           <button 
             onClick={handleSpinWheel}
             disabled={mustSpin}
-            className="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-zinc-950 font-black text-sm py-4 rounded-xl transition shadow-xl hover:opacity-95 active:scale-95 flex items-center justify-center gap-2"
+            className="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-zinc-950 font-black text-base py-4 rounded-2xl transition shadow-xl hover:opacity-95 active:scale-95 flex items-center justify-center gap-2"
           >
-            {mustSpin ? <RefreshCw className="w-5 h-5 animate-spin" /> : t.spinBtnAction}
+            {mustSpin ? <RefreshCw className="w-6 h-6 animate-spin" /> : t.spinBtnAction}
           </button>
         </div>
 
-        {/* MODULES V4 */}
+        {/* MODULES V4 EN TAILES LISIBLES */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           
           <button 
@@ -446,12 +442,12 @@ export default function LuxuryRestaurantPortalV4() {
             className="bg-[#14161F] border border-emerald-500/40 p-4 rounded-2xl space-y-2 hover:border-emerald-400 transition text-start relative overflow-hidden"
           >
             <div className="flex items-center justify-between">
-              <HeartPulse className="w-6 h-6 text-emerald-400" />
-              <span className="text-[9px] font-black bg-emerald-500 text-zinc-950 px-1.5 py-0.5 rounded">v4.0</span>
+              <HeartPulse className="w-7 h-7 text-emerald-400" />
+              <span className="text-[10px] font-black bg-emerald-500 text-zinc-950 px-2 py-0.5 rounded">v4.0</span>
             </div>
             <div>
-              <h3 className="text-xs font-black text-white">{t.aiCardTitle}</h3>
-              <p className="text-[10px] text-zinc-400 mt-0.5 leading-snug">{t.aiCardDesc}</p>
+              <h3 className="text-sm font-black text-white">{t.aiCardTitle}</h3>
+              <p className="text-xs text-zinc-300 mt-1 leading-snug">{t.aiCardDesc}</p>
             </div>
           </button>
 
@@ -459,10 +455,10 @@ export default function LuxuryRestaurantPortalV4() {
             onClick={() => setActiveModal('wifi')}
             className="bg-[#14161F] border border-white/10 p-4 rounded-2xl space-y-2 hover:border-white/20 transition text-start"
           >
-            <Wifi className="w-6 h-6 text-blue-400" />
+            <Wifi className="w-7 h-7 text-blue-400" />
             <div>
-              <h3 className="text-xs font-black text-white">{t.wifiCardTitle}</h3>
-              <p className="text-[10px] text-zinc-400 mt-0.5 leading-snug">{t.wifiCardDesc}</p>
+              <h3 className="text-sm font-black text-white">{t.wifiCardTitle}</h3>
+              <p className="text-xs text-zinc-300 mt-1 leading-snug">{t.wifiCardDesc}</p>
             </div>
           </button>
 
@@ -472,53 +468,59 @@ export default function LuxuryRestaurantPortalV4() {
             rel="noopener noreferrer"
             className="bg-[#14161F] border border-white/10 p-4 rounded-2xl space-y-2 hover:border-white/20 transition text-start block"
           >
-            <Utensils className="w-6 h-6 text-purple-400" />
+            <Utensils className="w-7 h-7 text-purple-400" />
             <div>
-              <h3 className="text-xs font-black text-white">{t.menuCardTitle}</h3>
-              <p className="text-[10px] text-zinc-400 mt-0.5 leading-snug">{t.menuCardDesc}</p>
+              <h3 className="text-sm font-black text-white">{t.menuCardTitle}</h3>
+              <p className="text-xs text-zinc-300 mt-1 leading-snug">{t.menuCardDesc}</p>
             </div>
           </a>
 
         </div>
 
-        {/* POP-UP VICTOIRE */}
+        {/* ======================================================= */}
+        {/* POP-UP VICTOIRE (BOULE ET TEXTES TRÈS LISIBLES) */}
+        {/* ======================================================= */}
         {showWinnerModal && (
-          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
-            <div className="bg-[#14161F] border-2 border-amber-400 rounded-3xl p-6 max-w-md w-full text-center space-y-5 relative shadow-[0_0_50px_rgba(245,158,11,0.5)]">
+          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fade-in">
+            <div className="bg-[#14161F] border-2 border-amber-400 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-6 relative shadow-[0_0_50px_rgba(245,158,11,0.5)]">
               <button 
                 onClick={() => setShowWinnerModal(false)}
                 className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white"
               >
-                <X className="w-5 h-5" />
+                <X className="w-6 h-6" />
               </button>
 
-              <Gift className="w-12 h-12 text-amber-400 mx-auto animate-bounce" />
-              
-              <div className="space-y-1">
-                <p className="text-xs font-bold text-amber-300">{t.spinCongratsTitle}</p>
-                <h3 className="text-2xl font-black text-white">{restaurantData.reward_offer}</h3>
-              </div>
+              <div className="bg-amber-500/10 border-2 border-amber-400 p-6 rounded-3xl space-y-4 shadow-xl">
+                <Gift className="w-14 h-14 text-amber-400 mx-auto animate-bounce" />
+                
+                <div className="space-y-2">
+                  <p className="text-sm font-black text-amber-300 uppercase tracking-wider">{t.spinCongratsTitle}</p>
+                  <h3 className="text-3xl sm:text-4xl font-black text-amber-400 drop-shadow-md">
+                    {restaurantData.reward_offer || "1 hot drink"}
+                  </h3>
+                </div>
 
-              <p className="text-xs text-zinc-300 font-bold leading-relaxed">
-                {t.spinCongratsDesc}
-              </p>
+                <p className="text-sm sm:text-base text-zinc-200 font-bold leading-relaxed">
+                  {t.spinCongratsDesc}
+                </p>
 
-              {restaurantData.linked_evolution && (
+                {/* BOUTON WHATSAPP VERT PERMANENT & DYNAMIQUE */}
                 <a 
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full bg-emerald-500 hover:bg-emerald-600 text-zinc-950 font-black text-sm py-4 rounded-2xl transition shadow-lg flex items-center justify-center gap-2 transform active:scale-95"
+                  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-zinc-950 font-black text-base sm:text-lg py-4 px-6 rounded-2xl transition shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center justify-center gap-3 transform active:scale-95 border border-emerald-300/40"
                 >
-                  <Mic className="w-5 h-5 text-zinc-950" />
+                  <Mic className="w-6 h-6 text-zinc-950 shrink-0" />
                   <span>{t.sendReviewWhatsapp}</span>
                 </a>
-              )}
 
-              <div className="grid grid-cols-3 gap-2 pt-2 border-t border-white/10 text-[10px] font-black text-zinc-300">
-                <div className="bg-zinc-950 p-2 rounded-xl border border-zinc-800">{t.step1}</div>
-                <div className="bg-zinc-950 p-2 rounded-xl border border-zinc-800 text-amber-400">{t.step2}</div>
-                <div className="bg-zinc-950 p-2 rounded-xl border border-zinc-800 text-emerald-400">{t.step3}</div>
+                {/* 3 ÉTAPES TRÈS LISIBLES */}
+                <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/10 text-xs font-black text-zinc-200">
+                  <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">{t.step1}</div>
+                  <div className="bg-zinc-950 p-2.5 rounded-xl border border-amber-500/30 text-amber-400">{t.step2}</div>
+                  <div className="bg-zinc-950 p-2.5 rounded-xl border border-emerald-500/30 text-emerald-400">{t.step3}</div>
+                </div>
               </div>
 
             </div>
@@ -681,7 +683,7 @@ export default function LuxuryRestaurantPortalV4() {
 
         {/* FOOTER */}
         <footer className="pt-2 text-center">
-          <p className="text-[11px] text-zinc-500 font-bold tracking-wider flex items-center justify-center gap-1.5">
+          <p className="text-xs text-zinc-500 font-bold tracking-wider flex items-center justify-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             {t.poweredBy}
           </p>
