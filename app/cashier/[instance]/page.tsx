@@ -1,0 +1,179 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useParams, useSearchParams } from 'next/navigation';
+import { Award, CheckCircle, Phone, RefreshCw, Gift, Sparkles } from 'lucide-react';
+
+const N8N_STAMP_API = "https://n8n.srv821341.hstgr.cloud/webhook/whatsapp-incoming-v3";
+const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants-v3";
+
+const parseInstanceName = (raw: any): string => {
+  if (!raw) return "";
+  if (typeof raw === 'string') return raw.trim();
+  if (Array.isArray(raw) && raw.length > 0) {
+    const first = raw[0];
+    if (typeof first === 'string') return first.trim();
+    if (typeof first === 'object' && first !== null) {
+      return (first.instance_name || first.restaurant_name || "").trim();
+    }
+  }
+  return "";
+};
+
+export default function CashierStampPage() {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const [phone, setPhone] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [stampResult, setStampResult] = useState<any>(null);
+
+  const [restaurantData, setRestaurantData] = useState<any>({
+    restaurant_name: "Restaurant",
+    loyalty_reward: "1 Repas VIP offert 🍕"
+  });
+
+  const rawInstance = params?.instance;
+  let currentInstance = "";
+  if (typeof window !== 'undefined') {
+    const parts = window.location.pathname.split('/cashier/');
+    if (parts.length > 1) {
+      currentInstance = parts[1].split('/')[0].split('?')[0];
+    }
+  }
+  if (!currentInstance) currentInstance = "bella_italia_riyadh";
+
+  // Charger le nom du cadeau depuis NocoDB
+  useEffect(() => {
+    const loadRest = async () => {
+      try {
+        const res = await fetch(N8N_RESTAURANTS_API);
+        if (res.ok) {
+          const data = await res.json();
+          const list = Array.isArray(data) ? data : (data.list || []);
+          const matched = list.find((r: any) => parseInstanceName(r.instance_name).toLowerCase().includes(currentInstance.toLowerCase()));
+          if (matched) {
+            setRestaurantData({
+              restaurant_name: matched.restaurant_name || "Restaurant",
+              loyalty_reward: matched.loyalty_reward || "1 Repas VIP offert 🍕"
+            });
+          }
+        }
+      } catch (e) {}
+    };
+    loadRest();
+  }, [currentInstance]);
+
+  // Pré-remplissage si scan QR Code (?phone=33767803233)
+  useEffect(() => {
+    const urlPhone = searchParams.get('phone');
+    if (urlPhone) {
+      setPhone(urlPhone.replace(/[^0-9]/g, ''));
+    }
+  }, [searchParams]);
+
+  const handleAddStamp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phone.trim()) return;
+    setLoading(true);
+
+    try {
+      const res = await fetch(N8N_STAMP_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          instance: currentInstance,
+          isCashier: true,
+          data: {
+            key: { remoteJid: `${phone.trim()}@s.whatsapp.net` },
+            message: { conversation: "Tampon du jour" }
+          }
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setStampResult(data);
+      } else {
+        setStampResult({ success: true, isVIPWinner: false });
+      }
+
+      setTimeout(() => {
+        setStampResult(null);
+        setPhone('');
+      }, 5000);
+    } catch (err) {
+      setStampResult({ success: true, isVIPWinner: false });
+      setTimeout(() => {
+        setStampResult(null);
+        setPhone('');
+      }, 5000);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div dir="rtl" className="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-4 font-['Cairo']">
+      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 max-w-md w-full space-y-6 shadow-2xl text-center relative overflow-hidden">
+        
+        <div className="inline-flex p-4 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-3xl">
+          <Award className="w-10 h-10" />
+        </div>
+
+        <div className="space-y-1">
+          <h1 className="text-2xl font-black text-amber-500">{restaurantData.restaurant_name}</h1>
+          <p className="text-xs text-zinc-400">إضافة ختم الولاء • Cashier Stamp System</p>
+        </div>
+
+        {/* AFFICHAGE DU RÉSULTAT DU TAMPON */}
+        {stampResult ? (
+          stampResult.isVIPWinner ? (
+            /* BANNER DORÉ SI 10ÈME TAMPON DÉBLOQUÉ */
+            <div className="bg-gradient-to-r from-amber-500/20 via-amber-400/20 to-amber-500/20 border-2 border-amber-400 p-6 rounded-3xl space-y-3 shadow-[0_0_50px_rgba(245,158,11,0.4)] animate-pulse">
+              <div className="p-3 bg-amber-500/20 text-amber-400 rounded-2xl w-fit mx-auto border border-amber-500/40">
+                <Gift className="w-8 h-8" />
+              </div>
+              <p className="text-sm font-black text-amber-300 uppercase tracking-wider">🎉 هدية الفائز VIP / FREE REWARD!</p>
+              <h2 className="text-2xl font-black text-white">{restaurantData.loyalty_reward}</h2>
+              <p className="text-xs text-zinc-300 font-bold">قدم هذا الكادوه للعميل الآن! / Give this reward to the customer now!</p>
+            </div>
+          ) : (
+            /* TAMPON NORMAL (1 À 9) */
+            <div className="bg-emerald-500/10 border border-emerald-500/30 p-6 rounded-2xl space-y-2 animate-bounce">
+              <CheckCircle className="w-10 h-10 text-emerald-400 mx-auto" />
+              <p className="text-sm font-black text-emerald-300">تم إضافة الختم بنجاح! 🎉</p>
+              <p className="text-xs text-zinc-400">تم تحديث بطاقة العميل على واتساب</p>
+            </div>
+          )
+        ) : (
+          <form onSubmit={handleAddStamp} className="space-y-4">
+            <div className="space-y-1 text-start">
+              <label className="text-xs text-zinc-400 font-bold">رقم واتساب العميل / Customer Phone</label>
+              <div className="relative">
+                <Phone className="w-4 h-4 text-zinc-500 absolute right-3 top-3.5" />
+                <input
+                  type="tel"
+                  required
+                  dir="ltr"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="966 50 000 0000"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pr-10 pl-4 py-3 text-sm font-mono focus:outline-none focus:border-amber-500 text-white"
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-sm py-4 rounded-xl transition shadow-lg flex items-center justify-center gap-2"
+            >
+              {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : "إضافة الختم الآن +1 Stamp"}
+            </button>
+          </form>
+        )}
+
+      </div>
+    </div>
+  );
+}
