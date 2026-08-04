@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { 
   Sparkles, Wifi, Utensils, Camera, Flame, Activity, ShieldCheck, 
-  Globe, Award, Check, X, RefreshCw, Trophy, HeartPulse, Gift, Mic
+  Globe, Award, Check, X, RefreshCw, Trophy, HeartPulse, Gift, Mic, AlertCircle
 } from 'lucide-react';
 
 const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants-v3";
@@ -39,6 +39,7 @@ export default function LuxuryRestaurantPortalV4() {
 
   const [lang, setLang] = useState<'ar' | 'fr' | 'en'>('ar');
   const [loadingRest, setLoadingRest] = useState(true);
+  const [notFound, setNotFound] = useState(false);
 
   // Auto-détection de la langue du téléphone
   useEffect(() => {
@@ -50,14 +51,14 @@ export default function LuxuryRestaurantPortalV4() {
     }
   }, []);
 
-  // STATE INITIAL NEUTRE
+  // STATE INITIAL NEUTRE (ZÉRO VALEUR EN DUR)
   const [restaurantData, setRestaurantData] = useState<any>({
-    restaurant_name: "Halim Cafe",
-    city: "المدينة المنورة",
-    reward_offer: "1 hot drink",
-    wifi_password: "halim2030",
+    restaurant_name: "",
+    city: "",
+    reward_offer: "",
+    wifi_password: "",
     menu_url: "#",
-    linked_evolution: "41779874995"
+    linked_evolution: ""
   });
 
   const [currentInstanceName, setCurrentInstanceName] = useState("");
@@ -81,10 +82,11 @@ export default function LuxuryRestaurantPortalV4() {
   const [aiAnalysisLoading, setAiAnalysisLoading] = useState(false);
   const [aiResult, setAiResult] = useState<any>(null);
 
-  // CHARGEMENT RESTAURANT
+  // CHARGEMENT RESTAURANT SÉCURISÉ MULTI-TENANT
   useEffect(() => {
     const loadRestaurant = async () => {
       setLoadingRest(true);
+      setNotFound(false);
 
       let targetRaw = "";
       if (typeof window !== 'undefined') {
@@ -102,6 +104,12 @@ export default function LuxuryRestaurantPortalV4() {
 
       setCurrentInstanceName(targetRaw);
       const targetKey = normalizeKey(targetRaw);
+
+      if (!targetKey) {
+        setLoadingRest(false);
+        setNotFound(true);
+        return;
+      }
 
       try {
         const res = await fetch(`${N8N_RESTAURANTS_API}?t=${Date.now()}`, { cache: 'no-store' });
@@ -126,21 +134,26 @@ export default function LuxuryRestaurantPortalV4() {
           }
 
           if (matched) {
-            const rawPhone = matched.linked_evolution || matched.manager_whatsapp || "41779874995";
+            const rawPhone = matched.linked_evolution || matched.manager_whatsapp || "";
             const botPhone = String(rawPhone).replace(/[^0-9]/g, '');
 
             setRestaurantData({
-              restaurant_name: matched.restaurant_name || "Halim Cafe",
-              city: matched.city || "المدينة المنورة",
-              reward_offer: matched.reward_offer || matched.loyalty_reward || "1 hot drink",
-              wifi_password: matched.wifi_password || "halim2030",
+              restaurant_name: matched.restaurant_name || "",
+              city: matched.city || "",
+              reward_offer: matched.reward_offer || matched.loyalty_reward || "",
+              wifi_password: matched.wifi_password || "",
               menu_url: matched.menu_url || "#",
-              linked_evolution: botPhone || "41779874995"
+              linked_evolution: botPhone
             });
+          } else {
+            setNotFound(true);
           }
+        } else {
+          setNotFound(true);
         }
       } catch (e) {
         console.error("Erreur chargement restaurant:", e);
+        setNotFound(true);
       } finally {
         setLoadingRest(false);
       }
@@ -149,7 +162,7 @@ export default function LuxuryRestaurantPortalV4() {
     loadRestaurant();
   }, [params]);
 
-  // ANIMATION ROTATION ROUE V3 (OUVERTURE POPUP 0.3s AVANT LA FIN)
+  // ANIMATION ROTATION ROUE (OUVERTURE POPUP À 4.2S POUR DYNAMISME)
   const handleSpinWheel = () => {
     if (mustSpin) return;
     setMustSpin(true);
@@ -161,7 +174,6 @@ export default function LuxuryRestaurantPortalV4() {
 
     setRotationDegree(newTotalDegree);
 
-    // Ouverture de la pop-up à 4.2s (soit 0.3s avant l'arrêt complet à 4.5s)
     setTimeout(() => {
       setMustSpin(false);
       setShowWinnerModal(true);
@@ -236,9 +248,9 @@ export default function LuxuryRestaurantPortalV4() {
     }
   };
 
-  // URL WHATSAPP DYNAMIQUE DU BOT RESTAURANT
-  const botPhoneClean = String(restaurantData.linked_evolution || "41779874995").replace(/[^0-9]/g, '') || "41779874995";
-  const whatsappUrl = `https://wa.me/${botPhoneClean}`;
+  // URL WHATSAPP DYNAMIQUE STRICTE (SANS AUCUNE DONNÉE EN DUR)
+  const botPhoneClean = String(restaurantData.linked_evolution || "").replace(/[^0-9]/g, '');
+  const whatsappUrl = botPhoneClean ? `https://wa.me/${botPhoneClean}` : "";
 
   const t = {
     ar: {
@@ -269,6 +281,8 @@ export default function LuxuryRestaurantPortalV4() {
       step1: "1. فتح واتساب",
       step2: "2. صوتي أو نصي 🎙️",
       step3: "3. استلم هديتك 🎁",
+      notFoundTitle: "المطعم غير موجود",
+      notFoundDesc: "يرجى التأكد من مسح الرمز الضوئي (QR Code) الخاص بالمطعم الصحيح.",
       loadingText: "جاري تحميل بوابة المطعم...",
       poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
     },
@@ -300,6 +314,8 @@ export default function LuxuryRestaurantPortalV4() {
       step1: "1. Ouvrir WhatsApp",
       step2: "2. Vocal ou texto 🎙️",
       step3: "3. Votre Cadeau 🎁",
+      notFoundTitle: "Établissement Non Trouvé",
+      notFoundDesc: "Veuillez vérifier l'URL ou scanner le QR Code officiel de l'établissement.",
       loadingText: "Chargement du Portail VIP...",
       poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
     },
@@ -332,6 +348,8 @@ export default function LuxuryRestaurantPortalV4() {
       step1: "1. Tap to open",
       step2: "2. Voice or text 🎙️",
       step3: "3. Claim reward 🎁",
+      notFoundTitle: "Restaurant Not Found",
+      notFoundDesc: "Please check the URL or scan the official restaurant QR Code.",
       loadingText: "Loading VIP Portal...",
       poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
     }
@@ -343,12 +361,25 @@ export default function LuxuryRestaurantPortalV4() {
     else setLang('ar');
   };
 
-  // ÉCRAN DE CHARGEMENT
+  // 1. ÉCRAN DE CHARGEMENT SOMBRE NEUTRE
   if (loadingRest) {
     return (
       <div className="min-h-screen bg-[#090A0F] text-zinc-100 font-['Cairo',sans-serif] flex flex-col items-center justify-center p-6 space-y-4">
         <RefreshCw className="w-10 h-10 text-amber-400 animate-spin" />
         <p className="text-sm font-bold text-zinc-300 animate-pulse">{t.loadingText}</p>
+      </div>
+    );
+  }
+
+  // 2. ÉCRAN NEUTRE NOT FOUND (SI L'ÉTABLISSEMENT N'EXISTE PAS)
+  if (notFound || !restaurantData.restaurant_name) {
+    return (
+      <div className="min-h-screen bg-[#090A0F] text-zinc-100 font-['Cairo',sans-serif] flex flex-col items-center justify-center p-6 text-center space-y-4">
+        <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-full">
+          <AlertCircle className="w-10 h-10" />
+        </div>
+        <h2 className="text-xl font-black text-white">{t.notFoundTitle}</h2>
+        <p className="text-xs text-zinc-400 max-w-sm leading-relaxed">{t.notFoundDesc}</p>
       </div>
     );
   }
@@ -386,12 +417,12 @@ export default function LuxuryRestaurantPortalV4() {
           <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 via-amber-300 to-emerald-500 rounded-[28px] blur-sm opacity-70"></div>
           <div className="relative bg-[#14161F] border-2 border-amber-400/40 rounded-[26px] p-6 text-center space-y-2 shadow-2xl">
             <p className="text-xs sm:text-sm font-bold text-amber-400 uppercase tracking-widest">{t.subTitle}</p>
-            <h1 className="text-3xl sm:text-4xl font-black text-white">{restaurantData.restaurant_name || "Halim Cafe"}</h1>
+            <h1 className="text-3xl sm:text-4xl font-black text-white">{restaurantData.restaurant_name}</h1>
             {restaurantData.city && <p className="text-xs sm:text-sm text-zinc-400 font-bold">{restaurantData.city}</p>}
           </div>
         </div>
 
-        {/* ROUE DE LA FORTUNE 3D AVEC VALEURS SUR LES TRANCHES */}
+        {/* ROUE DE LA FORTUNE 3D (ÉTIQUETTES PARFAITEMENT CENTRÉES SUR TRANCHES) */}
         <div className="bg-[#14161F] border-2 border-amber-500/40 p-6 sm:p-8 rounded-[26px] text-center space-y-5 shadow-2xl relative overflow-hidden">
           
           <div className="space-y-2">
@@ -414,26 +445,32 @@ export default function LuxuryRestaurantPortalV4() {
                 transition: mustSpin ? 'transform 4.5s cubic-bezier(0.15, 0.9, 0.2, 1)' : 'none'
               }}
             >
-              {/* SVG ROUE AVEC ÉTIQUETTES / VALEURS DESSINÉES */}
+              {/* SVG ROUE AVEC COORDONNÉES RADIALES HARMONIEUSES ET LISIBLES */}
               <svg viewBox="0 0 100 100" className="w-full h-full">
                 <g transform="translate(50,50)">
+                  {/* Tranche 1 */}
                   <path d="M0,0 L50,0 A50,50 0 0,1 25,43.3 Z" fill="#D4AF37" />
-                  <text x="25" y="14" fill="#000" fontSize="5" fontWeight="900" transform="rotate(30)">☕ OFFRE</text>
+                  <text x="25" y="15" fill="#000" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(30, 25, 15)">☕ OFFRE</text>
 
+                  {/* Tranche 2 */}
                   <path d="M0,0 L25,43.3 A50,50 0 0,1 -25,43.3 Z" fill="#14161F" />
-                  <text x="0" y="30" fill="#D4AF37" fontSize="5" fontWeight="900" transform="rotate(90)">🎁 CADEAU</text>
+                  <text x="0" y="28" fill="#D4AF37" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(90, 0, 28)">🎁 CADEAU</text>
 
+                  {/* Tranche 3 */}
                   <path d="M0,0 L-25,43.3 A50,50 0 0,1 -50,0 Z" fill="#10B981" />
-                  <text x="-27" y="16" fill="#000" fontSize="5" fontWeight="900" transform="rotate(150)">🍰 VIP</text>
+                  <text x="-25" y="15" fill="#000" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(150, -25, 15)">⭐ WIN</text>
 
+                  {/* Tranche 4 */}
                   <path d="M0,0 L-50,0 A50,50 0 0,1 -25,-43.3 Z" fill="#D4AF37" />
-                  <text x="-25" y="-12" fill="#000" fontSize="5" fontWeight="900" transform="rotate(210)">🥤 SURPRISE</text>
+                  <text x="-25" y="-12" fill="#000" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(210, -25, -12)">🍰 CADEAU</text>
 
+                  {/* Tranche 5 */}
                   <path d="M0,0 L-25,-43.3 A50,50 0 0,1 25,-43.3 Z" fill="#14161F" />
-                  <text x="0" y="-26" fill="#10B981" fontSize="5" fontWeight="900" transform="rotate(270)">⭐ SPECIAL</text>
+                  <text x="0" y="-26" fill="#10B981" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(270, 0, -26)">🥤 SURPRISE</text>
 
+                  {/* Tranche 6 */}
                   <path d="M0,0 L25,-43.3 A50,50 0 0,1 50,0 Z" fill="#10B981" />
-                  <text x="25" y="-12" fill="#000" fontSize="5" fontWeight="900" transform="rotate(330)">🏆 GAGNANT</text>
+                  <text x="25" y="-12" fill="#000" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(330, 25, -12)">🏆 GAGNANT</text>
                 </g>
               </svg>
             </div>
@@ -491,7 +528,7 @@ export default function LuxuryRestaurantPortalV4() {
 
         </div>
 
-        {/* POP-UP VICTOIRE (BOULE ET TEXTES TRÈS LISIBLES) */}
+        {/* POP-UP VICTOIRE (BOULE ET TEXTES LISIBLES + BOUTON WHATSAPP VERT PERMANENT) */}
         {showWinnerModal && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
             <div className="bg-[#14161F] border-2 border-amber-400 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-6 relative shadow-[0_0_50px_rgba(245,158,11,0.5)]">
@@ -508,7 +545,7 @@ export default function LuxuryRestaurantPortalV4() {
                 <div className="space-y-2">
                   <p className="text-sm font-black text-amber-300 uppercase tracking-wider">{t.spinCongratsTitle}</p>
                   <h3 className="text-3xl sm:text-4xl font-black text-amber-400 drop-shadow-md">
-                    {restaurantData.reward_offer || "1 hot drink"}
+                    {restaurantData.reward_offer}
                   </h3>
                 </div>
 
@@ -516,18 +553,20 @@ export default function LuxuryRestaurantPortalV4() {
                   {t.spinCongratsDesc}
                 </p>
 
-                {/* BOUTON WHATSAPP VERT PERMANENT & LISIBLE */}
-                <a 
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-zinc-950 font-black text-base sm:text-lg py-4 px-6 rounded-2xl transition shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center justify-center gap-3 transform active:scale-95 border border-emerald-300/40"
-                >
-                  <Mic className="w-6 h-6 text-zinc-950 shrink-0" />
-                  <span>{t.sendReviewWhatsapp}</span>
-                </a>
+                {/* BOUTON WHATSAPP VERT PERMANENT */}
+                {whatsappUrl && (
+                  <a 
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-zinc-950 font-black text-base sm:text-lg py-4 px-6 rounded-2xl transition shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center justify-center gap-3 transform active:scale-95 border border-emerald-300/40"
+                  >
+                    <Mic className="w-6 h-6 text-zinc-950 shrink-0" />
+                    <span>{t.sendReviewWhatsapp}</span>
+                  </a>
+                )}
 
-                {/* 3 ÉTAPES LISIBLES ("Vocal ou texto") */}
+                {/* 3 ÉTAPES LISIBLES */}
                 <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/10 text-xs font-black text-zinc-200">
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">{t.step1}</div>
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-amber-500/30 text-amber-400">{t.step2}</div>
