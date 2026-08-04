@@ -27,11 +27,6 @@ export default function CashierStampPage() {
   const [loading, setLoading] = useState(false);
   const [stampResult, setStampResult] = useState<any>(null);
 
-  const [restaurantData, setRestaurantData] = useState<any>({
-    restaurant_name: "",
-    loyalty_reward: ""
-  });
-
   let currentInstance = "";
   if (typeof window !== 'undefined') {
     const parts = window.location.pathname.split('/cashier/');
@@ -43,6 +38,15 @@ export default function CashierStampPage() {
     currentInstance = (typeof params.instance === 'string' ? params.instance : '').trim().toLowerCase();
   }
 
+  const formattedUrlName = currentInstance
+    ? currentInstance.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    : "Cashier Stamp";
+
+  const [restaurantData, setRestaurantData] = useState<any>({
+    restaurant_name: formattedUrlName,
+    loyalty_reward: ""
+  });
+
   // Charger le nom du restaurant et du cadeau depuis NocoDB
   useEffect(() => {
     const loadRest = async () => {
@@ -51,10 +55,14 @@ export default function CashierStampPage() {
         if (res.ok) {
           const data = await res.json();
           const list = Array.isArray(data) ? data : (data.list || data.data || []);
-          const matched = list.find((r: any) => parseInstanceName(r.instance_name).toLowerCase().includes(currentInstance.toLowerCase()));
+          const matched = list.find((r: any) => {
+            const inst = parseInstanceName(r.instance_name || r.restaurant_name).toLowerCase();
+            return currentInstance ? (inst === currentInstance || inst.includes(currentInstance) || currentInstance.includes(inst)) : true;
+          });
+
           if (matched) {
             setRestaurantData({
-              restaurant_name: matched.restaurant_name || "",
+              restaurant_name: matched.restaurant_name || formattedUrlName,
               loyalty_reward: matched.loyalty_reward || matched.reward_offer || ""
             });
           }
@@ -92,8 +100,12 @@ export default function CashierStampPage() {
       });
 
       if (res.ok) {
-        const data = await res.json();
-        setStampResult(data);
+        const rawData = await res.json();
+        // DÉPAQUETAGE DU TABLEAU RETURNÉ PAR N8N
+        const dataItem = Array.isArray(rawData) ? rawData[0] : rawData;
+        const cleanData = (dataItem && dataItem.json) ? dataItem.json : dataItem;
+        
+        setStampResult(cleanData);
       } else {
         setStampResult({ success: false, notRegistered: true });
       }
@@ -113,6 +125,18 @@ export default function CashierStampPage() {
     }
   };
 
+  // DÉTECTION SÉCURISÉE DU STATUT "CLIENT NON INSCRIT"
+  const isNotRegistered = stampResult && (
+    stampResult.notRegistered === true || 
+    stampResult.success === false || 
+    stampResult.notRegistered === "true"
+  );
+
+  const isWinner = stampResult && (
+    stampResult.isVIPWinner === true || 
+    stampResult.isVIPWinner === "true"
+  );
+
   return (
     <div dir="rtl" className="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-4 font-['Cairo']">
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 max-w-md w-full space-y-6 shadow-2xl text-center relative overflow-hidden">
@@ -122,14 +146,14 @@ export default function CashierStampPage() {
         </div>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-black text-amber-500">{restaurantData.restaurant_name || "Cashier Stamp"}</h1>
+          <h1 className="text-2xl font-black text-amber-500">{restaurantData.restaurant_name || "Halim Cafe"}</h1>
           <p className="text-xs text-zinc-400">إضافة ختم الولاء • Cashier Stamp System</p>
         </div>
 
         {/* AFFICHAGE DU RÉSULTAT DU TAMPON */}
         {stampResult ? (
           /* CAS A : CLIENT NON INSCRIT (STRATÉGIE A) */
-          stampResult.notRegistered || stampResult.success === false ? (
+          isNotRegistered ? (
             <div className="bg-rose-500/10 border-2 border-rose-500 p-6 rounded-3xl space-y-3 shadow-[0_0_30px_rgba(244,63,94,0.3)] animate-pulse">
               <div className="p-3 bg-rose-500/20 text-rose-400 rounded-2xl w-fit mx-auto border border-rose-500/40">
                 <AlertTriangle className="w-8 h-8" />
@@ -143,8 +167,8 @@ export default function CashierStampPage() {
                 <span className="text-zinc-400">Veuillez inviter le client à scanner le QR Code à sa table pour laisser un avis et débloquer sa carte VIP !</span>
               </p>
             </div>
-          ) : stampResult.isVIPWinner ? (
-            /* CAS B : BANNER DORÉ SI 10ÈME TAMPON DÉBLOQUÉ */
+          ) : isWinner ? (
+            /* CAS B : BANNER DORÉ 10È TAMPON */
             <div className="bg-gradient-to-r from-amber-500/20 via-amber-400/20 to-amber-500/20 border-2 border-amber-400 p-6 rounded-3xl space-y-3 shadow-[0_0_50px_rgba(245,158,11,0.4)] animate-pulse">
               <div className="p-3 bg-amber-500/20 text-amber-400 rounded-2xl w-fit mx-auto border border-amber-500/40">
                 <Gift className="w-8 h-8" />
@@ -154,7 +178,7 @@ export default function CashierStampPage() {
               <p className="text-xs text-zinc-300 font-bold">قدم هذا الكادوه للعميل الآن! / Give this reward to the customer now!</p>
             </div>
           ) : (
-            /* CAS C : TAMPON NORMAL RÉUSSI (1 À 9) */
+            /* CAS C : TAMPON NORMAL RÉUSSI */
             <div className="bg-emerald-500/10 border border-emerald-500/30 p-6 rounded-2xl space-y-2 animate-bounce">
               <CheckCircle className="w-10 h-10 text-emerald-400 mx-auto" />
               <p className="text-sm font-black text-emerald-300">تم إضافة الختم بنجاح! 🎉</p>
@@ -174,7 +198,7 @@ export default function CashierStampPage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="966 50 000 0000"
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pr-10 pl-4 py-3 text-sm font-mono focus:outline-none focus:border-amber-500 text-white"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pr-10 pl-4 py-3 text-sm text-white font-mono focus:outline-none focus:border-amber-500 text-white"
                 />
               </div>
             </div>
