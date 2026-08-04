@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants-v3";
-const N8N_WIFI_LEADS_API = "https://n8n.srv821341.hstgr.cloud/webhook/save-wifi-lead-v3";
+const N8N_WIFI_LEADS_API = "https://n8n.srv821341.hstgr.cloud/webhook/save-wifi-lead-v2";
 const N8N_AI_FOOD_VISION_API = "https://n8n.srv821341.hstgr.cloud/webhook/ai-food-vision-v4";
 
 // NETTOYEUR UNIVERSEL DE CLEF D'INSTANCE
@@ -50,14 +50,14 @@ export default function LuxuryRestaurantPortalV4() {
     }
   }, []);
 
-  // State Initial
+  // STATE INITIAL NEUTRE (ZÉRO NUMÉRO PAR DÉFAUT)
   const [restaurantData, setRestaurantData] = useState<any>({
-    restaurant_name: "Halim Cafe",
-    city: "المدينة المنورة",
-    reward_offer: "1 hot drink",
-    wifi_password: "halim2030",
+    restaurant_name: "",
+    city: "",
+    reward_offer: "",
+    wifi_password: "",
     menu_url: "#",
-    linked_evolution: "41779874995"
+    linked_evolution: ""
   });
 
   const [currentInstanceName, setCurrentInstanceName] = useState("");
@@ -81,7 +81,7 @@ export default function LuxuryRestaurantPortalV4() {
   const [aiAnalysisLoading, setAiAnalysisLoading] = useState(false);
   const [aiResult, setAiResult] = useState<any>(null);
 
-  // CHARGEMENT RESTAURANT
+  // CHARGEMENT RESTAURANT (SÉCURISÉ POST-MONTAGE)
   useEffect(() => {
     const loadRestaurant = async () => {
       setLoadingRest(true);
@@ -126,15 +126,16 @@ export default function LuxuryRestaurantPortalV4() {
           }
 
           if (matched) {
-            const botPhone = (matched.linked_evolution || matched.manager_whatsapp || "41779874995").toString().replace(/[^0-9]/g, '');
+            const rawPhone = matched.linked_evolution || matched.manager_whatsapp || "";
+            const botPhone = String(rawPhone).replace(/[^0-9]/g, '');
 
             setRestaurantData({
-              restaurant_name: matched.restaurant_name || "Halim Cafe",
-              city: matched.city || "المدينة المنورة",
-              reward_offer: matched.reward_offer || matched.loyalty_reward || "1 hot drink",
-              wifi_password: matched.wifi_password || "halim2030",
+              restaurant_name: matched.restaurant_name || "",
+              city: matched.city || "",
+              reward_offer: matched.reward_offer || matched.loyalty_reward || "",
+              wifi_password: matched.wifi_password || "",
               menu_url: matched.menu_url || "#",
-              linked_evolution: botPhone || "41779874995"
+              linked_evolution: botPhone
             });
           }
         }
@@ -148,7 +149,7 @@ export default function LuxuryRestaurantPortalV4() {
     loadRestaurant();
   }, [params]);
 
-  // ANIMATION ROTATION ROUE V3 (4.5s FLUIDE ET PARFAITEMENT RONDE)
+  // ANIMATION ROTATION ROUE V3 (4.5s FLUIDE)
   const handleSpinWheel = () => {
     if (mustSpin) return;
     setMustSpin(true);
@@ -234,8 +235,8 @@ export default function LuxuryRestaurantPortalV4() {
     }
   };
 
-  // 🎯 URL WHATSAPP DYNAMIQUE DU BOT (SANS TEXTE PRÉ-REMPLI - NETTE ET PURE)
-  const botPhoneClean = (restaurantData.linked_evolution || "41779874995").replace(/[^0-9]/g, '');
+  // 🎯 URL WHATSAPP DYNAMIQUE DU BOT (EXTRAITE DE NOCODB UNIQUMENT)
+  const botPhoneClean = String(restaurantData.linked_evolution || "").replace(/[^0-9]/g, '');
   const whatsappUrl = botPhoneClean ? `https://wa.me/${botPhoneClean}` : "#";
 
   const t = {
@@ -380,16 +381,18 @@ export default function LuxuryRestaurantPortalV4() {
         </header>
 
         {/* HERO BANNER RESTAURANT DYNAMIQUE */}
-        <div className="relative group">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 via-amber-300 to-emerald-500 rounded-[28px] blur-sm opacity-70"></div>
-          <div className="relative bg-[#14161F] border-2 border-amber-400/40 rounded-[26px] p-6 text-center space-y-2 shadow-2xl">
-            <p className="text-xs sm:text-sm font-bold text-amber-400 uppercase tracking-widest">{t.subTitle}</p>
-            <h1 className="text-3xl sm:text-4xl font-black text-white">{restaurantData.restaurant_name || "Halim Cafe"}</h1>
-            {restaurantData.city && <p className="text-xs sm:text-sm text-zinc-400 font-bold">{restaurantData.city}</p>}
+        {restaurantData.restaurant_name && (
+          <div className="relative group">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 via-amber-300 to-emerald-500 rounded-[28px] blur-sm opacity-70"></div>
+            <div className="relative bg-[#14161F] border-2 border-amber-400/40 rounded-[26px] p-6 text-center space-y-2 shadow-2xl">
+              <p className="text-xs sm:text-sm font-bold text-amber-400 uppercase tracking-widest">{t.subTitle}</p>
+              <h1 className="text-3xl sm:text-4xl font-black text-white">{restaurantData.restaurant_name}</h1>
+              {restaurantData.city && <p className="text-xs sm:text-sm text-zinc-400 font-bold">{restaurantData.city}</p>}
+            </div>
           </div>
-        </div>
+        )}
 
-        {/* ROUE DE LA FORTUNE 3D (CARRÉE PARFAITE 1:1 POUR ROTATION CIRCULAIRE SANS BALOURD) */}
+        {/* ROUE DE LA FORTUNE 3D */}
         <div className="bg-[#14161F] border-2 border-amber-500/40 p-6 sm:p-8 rounded-[26px] text-center space-y-5 shadow-2xl relative overflow-hidden">
           
           <div className="space-y-2">
@@ -400,7 +403,6 @@ export default function LuxuryRestaurantPortalV4() {
             <p className="text-sm text-zinc-300 font-bold leading-relaxed">{t.spinCardDesc}</p>
           </div>
 
-          {/* CONTENEUR CARRÉ 1:1 INTÉGRAL (w-64 h-64 aspect-square origin-center) */}
           <div className="relative w-64 h-64 aspect-square mx-auto my-3 shrink-0">
             <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20 text-amber-400 text-2xl drop-shadow-md">
               ▼
@@ -478,7 +480,7 @@ export default function LuxuryRestaurantPortalV4() {
 
         </div>
 
-        {/* POP-UP VICTOIRE (AVEC NOM CADEAU ET BOUTON WHATSAPP VERT LISIBLE) */}
+        {/* POP-UP VICTOIRE */}
         {showWinnerModal && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
             <div className="bg-[#14161F] border-2 border-amber-400 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-6 relative shadow-[0_0_50px_rgba(245,158,11,0.5)]">
@@ -503,18 +505,19 @@ export default function LuxuryRestaurantPortalV4() {
                   {t.spinCongratsDesc}
                 </p>
 
-                {/* BOUTON WHATSAPP VERT PERMANENT & DYNAMIQUE SANS TEXTE PRÉ-REMPLI */}
-                <a 
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-zinc-950 font-black text-base sm:text-lg py-4 px-6 rounded-2xl transition shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center justify-center gap-3 transform active:scale-95 border border-emerald-300/40"
-                >
-                  <Mic className="w-6 h-6 text-zinc-950 shrink-0" />
-                  <span>{t.sendReviewWhatsapp}</span>
-                </a>
+                {/* BOUTON WHATSAPP VERT DYNAMIQUE STRICTEMENT ISSU DE NOCODB */}
+                {whatsappUrl !== "#" && (
+                  <a 
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-zinc-950 font-black text-base sm:text-lg py-4 px-6 rounded-2xl transition shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center justify-center gap-3 transform active:scale-95 border border-emerald-300/40"
+                  >
+                    <Mic className="w-6 h-6 text-zinc-950 shrink-0" />
+                    <span>{t.sendReviewWhatsapp}</span>
+                  </a>
+                )}
 
-                {/* 3 ÉTAPES TRÈS LISIBLES */}
                 <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/10 text-xs font-black text-zinc-200">
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">{t.step1}</div>
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-amber-500/30 text-amber-400">{t.step2}</div>
