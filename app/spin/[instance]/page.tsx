@@ -78,7 +78,7 @@ export default function LuxuryRestaurantPortalV4() {
     reward_offer: "1 hot drink",
     wifi_password: "halim2030",
     menu_url: "#",
-    linked_evolution: "41779874995"
+    linked_evolution: ""
   });
 
   // Modals States
@@ -236,8 +236,8 @@ export default function LuxuryRestaurantPortalV4() {
   };
 
   // URL WHATSAPP DYNAMIQUE DU BOT RESTAURANT
-  const botPhoneClean = String(restaurantData.linked_evolution || "41779874995").replace(/[^0-9]/g, '');
-  const whatsappUrl = `https://wa.me/${botPhoneClean}`;
+  const botPhoneClean = String(restaurantData.linked_evolution || "").replace(/[^0-9]/g, '');
+  const whatsappUrl = botPhoneClean ? `https://wa.me/${botPhoneClean}` : "#";
 
   const t = {
     ar: {
