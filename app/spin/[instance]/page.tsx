@@ -4,31 +4,38 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { 
   Sparkles, Wifi, Utensils, Camera, Flame, Activity, ShieldCheck, 
-  Globe, Award, Check, X, RefreshCw, Trophy, HeartPulse, Gift, Mic, AlertCircle
+  Globe, Award, Check, X, RefreshCw, Trophy, HeartPulse, Gift, Mic
 } from 'lucide-react';
 
 const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants-v3";
 const N8N_WIFI_LEADS_API = "https://n8n.srv821341.hstgr.cloud/webhook/save-wifi-lead-v2";
 const N8N_AI_FOOD_VISION_API = "https://n8n.srv821341.hstgr.cloud/webhook/ai-food-vision-v4";
 
+// DÉPAQUETEUR N8N UNIVERSEL ({ json: { ... } } vs { ... })
+const getItemData = (r: any) => (r && typeof r === 'object' && r.json) ? r.json : r;
+
 // NETTOYEUR UNIVERSEL DE CLEF D'INSTANCE
 const normalizeKey = (str: any): string => {
   if (!str) return "";
-  if (typeof str === 'object' && str !== null) {
-    str = str.instance_name || str.restaurant_name || "";
-  }
-  return String(str).toLowerCase().replace(/[^a-z0-9]/g, "").trim();
+  const item = getItemData(str);
+  const raw = typeof item === 'object' ? (item.instance_name || item.restaurant_name || "") : item;
+  return String(raw).toLowerCase().replace(/[^a-z0-9]/g, "").trim();
 };
 
-const parseInstanceName = (raw: any): string => {
-  if (!raw) return "";
-  if (typeof raw === 'string') return raw.trim();
-  if (Array.isArray(raw) && raw.length > 0) {
-    const first = raw[0];
+const parseInstanceName = (rawItem: any): string => {
+  if (!rawItem) return "";
+  const item = getItemData(rawItem);
+
+  if (typeof item === 'string') return item.trim();
+  if (Array.isArray(item) && item.length > 0) {
+    const first = getItemData(item[0]);
     if (typeof first === 'string') return first.trim();
     if (typeof first === 'object' && first !== null) {
       return (first.instance_name || first.restaurant_name || "").trim();
     }
+  }
+  if (typeof item === 'object' && item !== null) {
+    return (item.instance_name || item.restaurant_name || "").trim();
   }
   return "";
 };
@@ -51,7 +58,7 @@ export default function LuxuryRestaurantPortalV4() {
     }
   }, []);
 
-  // STATE INITIAL NEUTRE (ZÉRO VALEUR EN DUR)
+  // STATE INITIAL NEUTRE
   const [restaurantData, setRestaurantData] = useState<any>({
     restaurant_name: "",
     city: "",
@@ -82,7 +89,7 @@ export default function LuxuryRestaurantPortalV4() {
   const [aiAnalysisLoading, setAiAnalysisLoading] = useState(false);
   const [aiResult, setAiResult] = useState<any>(null);
 
-  // CHARGEMENT RESTAURANT SÉCURISÉ MULTI-TENANT
+  // CHARGEMENT RESTAURANT SÉCURISÉ (AVEC DÉPAQUETAGE N8N)
   useEffect(() => {
     const loadRestaurant = async () => {
       setLoadingRest(true);
@@ -120,31 +127,37 @@ export default function LuxuryRestaurantPortalV4() {
           let matched = null;
 
           if (targetKey) {
+            // 1. Match Exact avec dépaquetage N8N
             matched = list.find((r: any) => {
-              const dbKey = normalizeKey(parseInstanceName(r.instance_name) || r.instance_name || r.restaurant_name);
+              const item = getItemData(r);
+              const dbKey = normalizeKey(parseInstanceName(item) || item.instance_name || item.restaurant_name);
               return dbKey === targetKey;
             });
 
+            // 2. Match Partiel
             if (!matched && targetKey.length >= 3) {
               matched = list.find((r: any) => {
-                const dbKey = normalizeKey(parseInstanceName(r.instance_name) || r.instance_name || r.restaurant_name);
+                const item = getItemData(r);
+                const dbKey = normalizeKey(parseInstanceName(item) || item.instance_name || item.restaurant_name);
                 return dbKey.length > 0 && (dbKey.includes(targetKey) || targetKey.includes(dbKey));
               });
             }
           }
 
           if (matched) {
-            const rawPhone = matched.linked_evolution || matched.manager_whatsapp || "";
+            const item = getItemData(matched);
+            const rawPhone = item.linked_evolution || item.manager_whatsapp || "";
             const botPhone = String(rawPhone).replace(/[^0-9]/g, '');
 
             setRestaurantData({
-              restaurant_name: matched.restaurant_name || "",
-              city: matched.city || "",
-              reward_offer: matched.reward_offer || matched.loyalty_reward || "",
-              wifi_password: matched.wifi_password || "",
-              menu_url: matched.menu_url || "#",
+              restaurant_name: item.restaurant_name || "",
+              city: item.city || "",
+              reward_offer: item.reward_offer || item.loyalty_reward || "",
+              wifi_password: item.wifi_password || "",
+              menu_url: item.menu_url || "#",
               linked_evolution: botPhone
             });
+            setNotFound(false);
           } else {
             setNotFound(true);
           }
@@ -162,7 +175,7 @@ export default function LuxuryRestaurantPortalV4() {
     loadRestaurant();
   }, [params]);
 
-  // ANIMATION ROTATION ROUE (OUVERTURE POPUP À 4.2S POUR DYNAMISME)
+  // ANIMATION ROTATION ROUE V3 (OUVERTURE POPUP À 4.2S)
   const handleSpinWheel = () => {
     if (mustSpin) return;
     setMustSpin(true);
@@ -248,9 +261,9 @@ export default function LuxuryRestaurantPortalV4() {
     }
   };
 
-  // URL WHATSAPP DYNAMIQUE STRICTE (SANS AUCUNE DONNÉE EN DUR)
+  // URL WHATSAPP DYNAMIQUE DU BOT
   const botPhoneClean = String(restaurantData.linked_evolution || "").replace(/[^0-9]/g, '');
-  const whatsappUrl = botPhoneClean ? `https://wa.me/${botPhoneClean}` : "";
+  const whatsappUrl = botPhoneClean ? `https://wa.me/${botPhoneClean}` : "#";
 
   const t = {
     ar: {
@@ -371,7 +384,7 @@ export default function LuxuryRestaurantPortalV4() {
     );
   }
 
-  // 2. ÉCRAN NEUTRE NOT FOUND (SI L'ÉTABLISSEMENT N'EXISTE PAS)
+  // 2. ÉCRAN NEUTRE NOT FOUND (SI L'ÉTABLISSEMENT N'EXISTE PAS EN BDD)
   if (notFound || !restaurantData.restaurant_name) {
     return (
       <div className="min-h-screen bg-[#090A0F] text-zinc-100 font-['Cairo',sans-serif] flex flex-col items-center justify-center p-6 text-center space-y-4">
@@ -384,6 +397,7 @@ export default function LuxuryRestaurantPortalV4() {
     );
   }
 
+  // 3. ÉCRAN OFFICIEL DU RESTAURANT DÉPAQUETTÉ DYNAMIQUEMENT
   return (
     <div 
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
@@ -422,7 +436,7 @@ export default function LuxuryRestaurantPortalV4() {
           </div>
         </div>
 
-        {/* ROUE DE LA FORTUNE 3D (ÉTIQUETTES PARFAITEMENT CENTRÉES SUR TRANCHES) */}
+        {/* ROUE DE LA FORTUNE 3D */}
         <div className="bg-[#14161F] border-2 border-amber-500/40 p-6 sm:p-8 rounded-[26px] text-center space-y-5 shadow-2xl relative overflow-hidden">
           
           <div className="space-y-2">
@@ -445,30 +459,23 @@ export default function LuxuryRestaurantPortalV4() {
                 transition: mustSpin ? 'transform 4.5s cubic-bezier(0.15, 0.9, 0.2, 1)' : 'none'
               }}
             >
-              {/* SVG ROUE AVEC COORDONNÉES RADIALES HARMONIEUSES ET LISIBLES */}
               <svg viewBox="0 0 100 100" className="w-full h-full">
                 <g transform="translate(50,50)">
-                  {/* Tranche 1 */}
                   <path d="M0,0 L50,0 A50,50 0 0,1 25,43.3 Z" fill="#D4AF37" />
                   <text x="25" y="15" fill="#000" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(30, 25, 15)">☕ OFFRE</text>
 
-                  {/* Tranche 2 */}
                   <path d="M0,0 L25,43.3 A50,50 0 0,1 -25,43.3 Z" fill="#14161F" />
                   <text x="0" y="28" fill="#D4AF37" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(90, 0, 28)">🎁 CADEAU</text>
 
-                  {/* Tranche 3 */}
                   <path d="M0,0 L-25,43.3 A50,50 0 0,1 -50,0 Z" fill="#10B981" />
                   <text x="-25" y="15" fill="#000" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(150, -25, 15)">⭐ WIN</text>
 
-                  {/* Tranche 4 */}
                   <path d="M0,0 L-50,0 A50,50 0 0,1 -25,-43.3 Z" fill="#D4AF37" />
                   <text x="-25" y="-12" fill="#000" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(210, -25, -12)">🍰 CADEAU</text>
 
-                  {/* Tranche 5 */}
                   <path d="M0,0 L-25,-43.3 A50,50 0 0,1 25,-43.3 Z" fill="#14161F" />
                   <text x="0" y="-26" fill="#10B981" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(270, 0, -26)">🥤 SURPRISE</text>
 
-                  {/* Tranche 6 */}
                   <path d="M0,0 L25,-43.3 A50,50 0 0,1 50,0 Z" fill="#10B981" />
                   <text x="25" y="-12" fill="#000" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(330, 25, -12)">🏆 GAGNANT</text>
                 </g>
@@ -528,7 +535,7 @@ export default function LuxuryRestaurantPortalV4() {
 
         </div>
 
-        {/* POP-UP VICTOIRE (BOULE ET TEXTES LISIBLES + BOUTON WHATSAPP VERT PERMANENT) */}
+        {/* POP-UP VICTOIRE */}
         {showWinnerModal && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
             <div className="bg-[#14161F] border-2 border-amber-400 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-6 relative shadow-[0_0_50px_rgba(245,158,11,0.5)]">
@@ -554,7 +561,7 @@ export default function LuxuryRestaurantPortalV4() {
                 </p>
 
                 {/* BOUTON WHATSAPP VERT PERMANENT */}
-                {whatsappUrl && (
+                {whatsappUrl && whatsappUrl !== "#" && (
                   <a 
                     href={whatsappUrl}
                     target="_blank"
@@ -566,7 +573,6 @@ export default function LuxuryRestaurantPortalV4() {
                   </a>
                 )}
 
-                {/* 3 ÉTAPES LISIBLES */}
                 <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/10 text-xs font-black text-zinc-200">
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">{t.step1}</div>
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-amber-500/30 text-amber-400">{t.step2}</div>
