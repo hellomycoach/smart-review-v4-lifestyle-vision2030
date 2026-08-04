@@ -50,14 +50,14 @@ export default function LuxuryRestaurantPortalV4() {
     }
   }, []);
 
-  // STATE INITIAL NEUTRE (ZÉRO NUMÉRO PAR DÉFAUT)
+  // STATE INITIAL NEUTRE
   const [restaurantData, setRestaurantData] = useState<any>({
-    restaurant_name: "",
-    city: "",
-    reward_offer: "",
-    wifi_password: "",
+    restaurant_name: "Halim Cafe",
+    city: "المدينة المنورة",
+    reward_offer: "1 hot drink",
+    wifi_password: "halim2030",
     menu_url: "#",
-    linked_evolution: ""
+    linked_evolution: "41779874995"
   });
 
   const [currentInstanceName, setCurrentInstanceName] = useState("");
@@ -81,7 +81,7 @@ export default function LuxuryRestaurantPortalV4() {
   const [aiAnalysisLoading, setAiAnalysisLoading] = useState(false);
   const [aiResult, setAiResult] = useState<any>(null);
 
-  // CHARGEMENT RESTAURANT (SÉCURISÉ POST-MONTAGE)
+  // CHARGEMENT RESTAURANT
   useEffect(() => {
     const loadRestaurant = async () => {
       setLoadingRest(true);
@@ -126,16 +126,16 @@ export default function LuxuryRestaurantPortalV4() {
           }
 
           if (matched) {
-            const rawPhone = matched.linked_evolution || matched.manager_whatsapp || "";
+            const rawPhone = matched.linked_evolution || matched.manager_whatsapp || "41779874995";
             const botPhone = String(rawPhone).replace(/[^0-9]/g, '');
 
             setRestaurantData({
-              restaurant_name: matched.restaurant_name || "",
-              city: matched.city || "",
-              reward_offer: matched.reward_offer || matched.loyalty_reward || "",
-              wifi_password: matched.wifi_password || "",
+              restaurant_name: matched.restaurant_name || "Halim Cafe",
+              city: matched.city || "المدينة المنورة",
+              reward_offer: matched.reward_offer || matched.loyalty_reward || "1 hot drink",
+              wifi_password: matched.wifi_password || "halim2030",
               menu_url: matched.menu_url || "#",
-              linked_evolution: botPhone
+              linked_evolution: botPhone || "41779874995"
             });
           }
         }
@@ -149,7 +149,7 @@ export default function LuxuryRestaurantPortalV4() {
     loadRestaurant();
   }, [params]);
 
-  // ANIMATION ROTATION ROUE V3 (4.5s FLUIDE)
+  // ANIMATION ROTATION ROUE V3 (OUVERTURE POPUP 0.3s AVANT LA FIN)
   const handleSpinWheel = () => {
     if (mustSpin) return;
     setMustSpin(true);
@@ -161,10 +161,11 @@ export default function LuxuryRestaurantPortalV4() {
 
     setRotationDegree(newTotalDegree);
 
+    // Ouverture de la pop-up à 4.2s (soit 0.3s avant l'arrêt complet à 4.5s)
     setTimeout(() => {
       setMustSpin(false);
       setShowWinnerModal(true);
-    }, 4500);
+    }, 4200);
   };
 
   // Soumission Formulaire WiFi
@@ -235,9 +236,9 @@ export default function LuxuryRestaurantPortalV4() {
     }
   };
 
-  // 🎯 URL WHATSAPP DYNAMIQUE DU BOT (EXTRAITE DE NOCODB UNIQUMENT)
-  const botPhoneClean = String(restaurantData.linked_evolution || "").replace(/[^0-9]/g, '');
-  const whatsappUrl = botPhoneClean ? `https://wa.me/${botPhoneClean}` : "#";
+  // URL WHATSAPP DYNAMIQUE DU BOT RESTAURANT
+  const botPhoneClean = String(restaurantData.linked_evolution || "41779874995").replace(/[^0-9]/g, '') || "41779874995";
+  const whatsappUrl = `https://wa.me/${botPhoneClean}`;
 
   const t = {
     ar: {
@@ -263,10 +264,10 @@ export default function LuxuryRestaurantPortalV4() {
       workoutTitle: "حصة اللياقة المقترحة (بدون معدات) :",
       spinBtnAction: "أدر العجلة الآن 🎲",
       spinCongratsTitle: "🎉 مبروك! لقد كسبت :",
-      spinCongratsDesc: "سجل ملاحظة صوتية مدتها 5 ثوانٍ على واتساب لاستلام هديتك فوراً في الكاشير!",
-      sendReviewWhatsapp: "إرسال التقييم الصوتي عبر واتساب 💬",
-      step1: "1. انقر للفتح",
-      step2: "2. سجل فويس 5s 🎙️",
+      spinCongratsDesc: "أرسل ملاحظة صوتية أو نصية عبر واتساب لاستلام هديتك فوراً في الكاشير!",
+      sendReviewWhatsapp: "إرسال التقييم (صوتي أو نصي) 💬",
+      step1: "1. فتح واتساب",
+      step2: "2. صوتي أو نصي 🎙️",
       step3: "3. استلم هديتك 🎁",
       loadingText: "جاري تحميل بوابة المطعم...",
       poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
@@ -294,10 +295,10 @@ export default function LuxuryRestaurantPortalV4() {
       workoutTitle: "Séance Fitness 12 min (Sans matériel) :",
       spinBtnAction: "Tourner la Roue Maintenant 🎲",
       spinCongratsTitle: "🎉 FÉLICITATIONS ! VOUS AVEZ GAGNÉ :",
-      spinCongratsDesc: "Enregistrez une note vocale de 5s sur WhatsApp pour recevoir votre cadeau immédiatement en caisse !",
-      sendReviewWhatsapp: "Envoyer mon avis vocal sur WhatsApp 💬",
+      spinCongratsDesc: "Envoyez un message vocal ou texte sur WhatsApp pour recevoir votre cadeau immédiatement en caisse !",
+      sendReviewWhatsapp: "Envoyer mon avis (vocal ou texte) 💬",
       step1: "1. Ouvrir WhatsApp",
-      step2: "2. Vocal de 5s 🎙️",
+      step2: "2. Vocal ou texto 🎙️",
       step3: "3. Votre Cadeau 🎁",
       loadingText: "Chargement du Portail VIP...",
       poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
@@ -326,10 +327,10 @@ export default function LuxuryRestaurantPortalV4() {
       workoutTitle: "Recommended 12-min Bodyweight Workout:",
       spinBtnAction: "Spin the Wheel Now 🎲",
       spinCongratsTitle: "🎉 CONGRATULATIONS! YOU WON:",
-      spinCongratsDesc: "Record a 5-second voice review on WhatsApp to claim your reward at the cashier!",
-      sendReviewWhatsapp: "Send Voice Review on WhatsApp 💬",
+      spinCongratsDesc: "Send a voice note or text review on WhatsApp to claim your reward at the cashier!",
+      sendReviewWhatsapp: "Send Review (Voice or Text) 💬",
       step1: "1. Tap to open",
-      step2: "2. Record 5s voice 🎙️",
+      step2: "2. Voice or text 🎙️",
       step3: "3. Claim reward 🎁",
       loadingText: "Loading VIP Portal...",
       poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
@@ -381,18 +382,16 @@ export default function LuxuryRestaurantPortalV4() {
         </header>
 
         {/* HERO BANNER RESTAURANT DYNAMIQUE */}
-        {restaurantData.restaurant_name && (
-          <div className="relative group">
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 via-amber-300 to-emerald-500 rounded-[28px] blur-sm opacity-70"></div>
-            <div className="relative bg-[#14161F] border-2 border-amber-400/40 rounded-[26px] p-6 text-center space-y-2 shadow-2xl">
-              <p className="text-xs sm:text-sm font-bold text-amber-400 uppercase tracking-widest">{t.subTitle}</p>
-              <h1 className="text-3xl sm:text-4xl font-black text-white">{restaurantData.restaurant_name}</h1>
-              {restaurantData.city && <p className="text-xs sm:text-sm text-zinc-400 font-bold">{restaurantData.city}</p>}
-            </div>
+        <div className="relative group">
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 via-amber-300 to-emerald-500 rounded-[28px] blur-sm opacity-70"></div>
+          <div className="relative bg-[#14161F] border-2 border-amber-400/40 rounded-[26px] p-6 text-center space-y-2 shadow-2xl">
+            <p className="text-xs sm:text-sm font-bold text-amber-400 uppercase tracking-widest">{t.subTitle}</p>
+            <h1 className="text-3xl sm:text-4xl font-black text-white">{restaurantData.restaurant_name || "Halim Cafe"}</h1>
+            {restaurantData.city && <p className="text-xs sm:text-sm text-zinc-400 font-bold">{restaurantData.city}</p>}
           </div>
-        )}
+        </div>
 
-        {/* ROUE DE LA FORTUNE 3D */}
+        {/* ROUE DE LA FORTUNE 3D AVEC VALEURS SUR LES TRANCHES */}
         <div className="bg-[#14161F] border-2 border-amber-500/40 p-6 sm:p-8 rounded-[26px] text-center space-y-5 shadow-2xl relative overflow-hidden">
           
           <div className="space-y-2">
@@ -415,14 +414,26 @@ export default function LuxuryRestaurantPortalV4() {
                 transition: mustSpin ? 'transform 4.5s cubic-bezier(0.15, 0.9, 0.2, 1)' : 'none'
               }}
             >
+              {/* SVG ROUE AVEC ÉTIQUETTES / VALEURS DESSINÉES */}
               <svg viewBox="0 0 100 100" className="w-full h-full">
                 <g transform="translate(50,50)">
                   <path d="M0,0 L50,0 A50,50 0 0,1 25,43.3 Z" fill="#D4AF37" />
+                  <text x="25" y="14" fill="#000" fontSize="5" fontWeight="900" transform="rotate(30)">☕ OFFRE</text>
+
                   <path d="M0,0 L25,43.3 A50,50 0 0,1 -25,43.3 Z" fill="#14161F" />
+                  <text x="0" y="30" fill="#D4AF37" fontSize="5" fontWeight="900" transform="rotate(90)">🎁 CADEAU</text>
+
                   <path d="M0,0 L-25,43.3 A50,50 0 0,1 -50,0 Z" fill="#10B981" />
+                  <text x="-27" y="16" fill="#000" fontSize="5" fontWeight="900" transform="rotate(150)">🍰 VIP</text>
+
                   <path d="M0,0 L-50,0 A50,50 0 0,1 -25,-43.3 Z" fill="#D4AF37" />
+                  <text x="-25" y="-12" fill="#000" fontSize="5" fontWeight="900" transform="rotate(210)">🥤 SURPRISE</text>
+
                   <path d="M0,0 L-25,-43.3 A50,50 0 0,1 25,-43.3 Z" fill="#14161F" />
+                  <text x="0" y="-26" fill="#10B981" fontSize="5" fontWeight="900" transform="rotate(270)">⭐ SPECIAL</text>
+
                   <path d="M0,0 L25,-43.3 A50,50 0 0,1 50,0 Z" fill="#10B981" />
+                  <text x="25" y="-12" fill="#000" fontSize="5" fontWeight="900" transform="rotate(330)">🏆 GAGNANT</text>
                 </g>
               </svg>
             </div>
@@ -480,7 +491,7 @@ export default function LuxuryRestaurantPortalV4() {
 
         </div>
 
-        {/* POP-UP VICTOIRE */}
+        {/* POP-UP VICTOIRE (BOULE ET TEXTES TRÈS LISIBLES) */}
         {showWinnerModal && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
             <div className="bg-[#14161F] border-2 border-amber-400 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-6 relative shadow-[0_0_50px_rgba(245,158,11,0.5)]">
@@ -505,19 +516,18 @@ export default function LuxuryRestaurantPortalV4() {
                   {t.spinCongratsDesc}
                 </p>
 
-                {/* BOUTON WHATSAPP VERT DYNAMIQUE STRICTEMENT ISSU DE NOCODB */}
-                {whatsappUrl !== "#" && (
-                  <a 
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-zinc-950 font-black text-base sm:text-lg py-4 px-6 rounded-2xl transition shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center justify-center gap-3 transform active:scale-95 border border-emerald-300/40"
-                  >
-                    <Mic className="w-6 h-6 text-zinc-950 shrink-0" />
-                    <span>{t.sendReviewWhatsapp}</span>
-                  </a>
-                )}
+                {/* BOUTON WHATSAPP VERT PERMANENT & LISIBLE */}
+                <a 
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-zinc-950 font-black text-base sm:text-lg py-4 px-6 rounded-2xl transition shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center justify-center gap-3 transform active:scale-95 border border-emerald-300/40"
+                >
+                  <Mic className="w-6 h-6 text-zinc-950 shrink-0" />
+                  <span>{t.sendReviewWhatsapp}</span>
+                </a>
 
+                {/* 3 ÉTAPES LISIBLES ("Vocal ou texto") */}
                 <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/10 text-xs font-black text-zinc-200">
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">{t.step1}</div>
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-amber-500/30 text-amber-400">{t.step2}</div>
