@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { 
   Sparkles, Wifi, Utensils, Camera, Flame, Activity, ShieldCheck, 
-  Globe, Award, Check, X, RefreshCw, Trophy, HeartPulse, Gift, Mic, AlertCircle
+  Globe, Award, Check, X, RefreshCw, Trophy, HeartPulse, Gift, Mic
 } from 'lucide-react';
 
 const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants-v3";
@@ -46,7 +46,6 @@ export default function LuxuryRestaurantPortalV4() {
 
   const [lang, setLang] = useState<'ar' | 'fr' | 'en'>('ar');
   const [loadingRest, setLoadingRest] = useState(true);
-  const [notFound, setNotFound] = useState(false);
 
   // Auto-détection de la langue du téléphone
   useEffect(() => {
@@ -58,17 +57,32 @@ export default function LuxuryRestaurantPortalV4() {
     }
   }, []);
 
-  // STATE INITIAL NEUTRE
+  // 1. EXTRACTION DYNAMIQUE INFALLIBLE V3 DE L'INSTANCE
+  let currentInstance = "";
+  if (typeof window !== 'undefined') {
+    const parts = window.location.pathname.split('/spin/');
+    if (parts.length > 1) {
+      const raw = parts[1].split('/')[0].split('?')[0].split('#')[0];
+      if (raw) currentInstance = decodeURIComponent(raw).trim().toLowerCase();
+    }
+  }
+  if (!currentInstance) {
+    currentInstance = (typeof params?.instance === 'string' ? params.instance : (searchParams.get('instance') || "")).trim().toLowerCase();
+  }
+
+  // Nom formaté dynamique à partir de l'URL (ex: halim_cafe_madinah -> Halim Cafe Madinah)
+  const formattedUrlName = currentInstance
+    ? currentInstance.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    : "";
+
   const [restaurantData, setRestaurantData] = useState<any>({
-    restaurant_name: "",
+    restaurant_name: formattedUrlName,
     city: "",
     reward_offer: "",
     wifi_password: "",
     menu_url: "#",
     linked_evolution: ""
   });
-
-  const [currentInstanceName, setCurrentInstanceName] = useState("");
 
   // Modals States
   const [activeModal, setActiveModal] = useState<'wifi' | 'food_ai' | null>(null);
@@ -89,34 +103,11 @@ export default function LuxuryRestaurantPortalV4() {
   const [aiAnalysisLoading, setAiAnalysisLoading] = useState(false);
   const [aiResult, setAiResult] = useState<any>(null);
 
-  // CHARGEMENT RESTAURANT SÉCURISÉ (AVEC DÉPAQUETAGE N8N)
+  // CHARGEMENT NOCODB (MÊME LOGIQUE NON-BLOQUANTE QUE LA V3)
   useEffect(() => {
     const loadRestaurant = async () => {
       setLoadingRest(true);
-      setNotFound(false);
-
-      let targetRaw = "";
-      if (typeof window !== 'undefined') {
-        const parts = window.location.pathname.split('/spin/');
-        if (parts.length > 1) {
-          targetRaw = parts[1].split('/')[0].split('?')[0].trim();
-        }
-      }
-      if (!targetRaw && params?.instance) {
-        targetRaw = (typeof params.instance === 'string' ? params.instance : '').trim();
-      }
-      if (!targetRaw && searchParams.get('instance')) {
-        targetRaw = (searchParams.get('instance') || '').trim();
-      }
-
-      setCurrentInstanceName(targetRaw);
-      const targetKey = normalizeKey(targetRaw);
-
-      if (!targetKey) {
-        setLoadingRest(false);
-        setNotFound(true);
-        return;
-      }
+      const targetKey = normalizeKey(currentInstance);
 
       try {
         const res = await fetch(`${N8N_RESTAURANTS_API}?t=${Date.now()}`, { cache: 'no-store' });
@@ -148,30 +139,28 @@ export default function LuxuryRestaurantPortalV4() {
             const botPhone = String(rawPhone).replace(/[^0-9]/g, '');
 
             setRestaurantData({
-              restaurant_name: item.restaurant_name || "",
+              restaurant_name: item.restaurant_name || formattedUrlName,
               city: item.city || "",
               reward_offer: item.reward_offer || item.loyalty_reward || "",
               wifi_password: item.wifi_password || "",
               menu_url: item.menu_url || "#",
               linked_evolution: botPhone
             });
-            setNotFound(false);
-          } else {
-            setNotFound(true);
           }
-        } else {
-          setNotFound(true);
         }
       } catch (e) {
         console.error("Erreur chargement restaurant:", e);
-        setNotFound(true);
       } finally {
         setLoadingRest(false);
       }
     };
 
-    loadRestaurant();
-  }, [params]);
+    if (currentInstance) {
+      loadRestaurant();
+    } else {
+      setLoadingRest(false);
+    }
+  }, [currentInstance]);
 
   // ANIMATION ROTATION ROUE V3 (OUVERTURE POPUP À 4.2S)
   const handleSpinWheel = () => {
@@ -203,7 +192,7 @@ export default function LuxuryRestaurantPortalV4() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           client_phone: wifiPhone.trim(),
-          instance_name: currentInstanceName,
+          instance_name: currentInstance,
           source: 'WiFi Portal V4'
         })
       });
@@ -244,7 +233,7 @@ export default function LuxuryRestaurantPortalV4() {
           data: cleanBase64,
           client_email: clientEmail.trim(),
           language: lang,
-          instance: currentInstanceName
+          instance: currentInstance
         })
       });
 
@@ -259,7 +248,7 @@ export default function LuxuryRestaurantPortalV4() {
     }
   };
 
-  // URL WHATSAPP DYNAMIQUE DU BOT
+  // URL WHATSAPP DYNAMIQUE DU BOT RESTAURANT
   const botPhoneClean = String(restaurantData.linked_evolution || "").replace(/[^0-9]/g, '');
   const whatsappUrl = botPhoneClean ? `https://wa.me/${botPhoneClean}` : "#";
 
@@ -292,8 +281,6 @@ export default function LuxuryRestaurantPortalV4() {
       step1: "1. فتح واتساب",
       step2: "2. صوتي أو نصي 🎙️",
       step3: "3. استلم هديتك 🎁",
-      notFoundTitle: "المطعم غير موجود",
-      notFoundDesc: "يرجى التأكد من مسح الرمز الضوئي (QR Code) الخاص بالمطعم الصحيح.",
       loadingText: "جاري تحميل بوابة المطعم...",
       poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
     },
@@ -325,8 +312,6 @@ export default function LuxuryRestaurantPortalV4() {
       step1: "1. Ouvrir WhatsApp",
       step2: "2. Vocal ou texto 🎙️",
       step3: "3. Votre Cadeau 🎁",
-      notFoundTitle: "Établissement Non Trouvé",
-      notFoundDesc: "Veuillez vérifier l'URL ou scanner le QR Code officiel de l'établissement.",
       loadingText: "Chargement du Portail VIP...",
       poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
     },
@@ -359,8 +344,6 @@ export default function LuxuryRestaurantPortalV4() {
       step1: "1. Tap to open",
       step2: "2. Voice or text 🎙️",
       step3: "3. Claim reward 🎁",
-      notFoundTitle: "Restaurant Not Found",
-      notFoundDesc: "Please check the URL or scan the official restaurant QR Code.",
       loadingText: "Loading VIP Portal...",
       poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
     }
@@ -382,20 +365,7 @@ export default function LuxuryRestaurantPortalV4() {
     );
   }
 
-  // 2. ÉCRAN NEUTRE NOT FOUND
-  if (notFound || !restaurantData.restaurant_name) {
-    return (
-      <div className="min-h-screen bg-[#090A0F] text-zinc-100 font-['Cairo',sans-serif] flex flex-col items-center justify-center p-6 text-center space-y-4">
-        <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-400 rounded-full">
-          <AlertCircle className="w-10 h-10" />
-        </div>
-        <h2 className="text-xl font-black text-white">{t.notFoundTitle}</h2>
-        <p className="text-xs text-zinc-400 max-w-sm leading-relaxed">{t.notFoundDesc}</p>
-      </div>
-    );
-  }
-
-  // 3. ÉCRAN OFFICIEL DU RESTAURANT DÉPAQUETTÉ DYNAMIQUEMENT
+  // 2. ÉCRAN OFFICIEL DU RESTAURANT (Rendu instantané garanti)
   return (
     <div 
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
@@ -424,12 +394,12 @@ export default function LuxuryRestaurantPortalV4() {
           </button>
         </header>
 
-        {/* HERO BANNER RESTAURANT DYNAMIQUE */}
+        {/* HERO BANNER RESTAURANT DYNAMIQUE (Extrait de l'URL ou de NocoDB) */}
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 via-amber-300 to-emerald-500 rounded-[28px] blur-sm opacity-70"></div>
           <div className="relative bg-[#14161F] border-2 border-amber-400/40 rounded-[26px] p-6 text-center space-y-2 shadow-2xl">
             <p className="text-xs sm:text-sm font-bold text-amber-400 uppercase tracking-widest">{t.subTitle}</p>
-            <h1 className="text-3xl sm:text-4xl font-black text-white">{restaurantData.restaurant_name}</h1>
+            <h1 className="text-3xl sm:text-4xl font-black text-white">{restaurantData.restaurant_name || formattedUrlName}</h1>
             {restaurantData.city && <p className="text-xs sm:text-sm text-zinc-400 font-bold">{restaurantData.city}</p>}
           </div>
         </div>
@@ -550,7 +520,7 @@ export default function LuxuryRestaurantPortalV4() {
                 <div className="space-y-2">
                   <p className="text-sm font-black text-amber-300 uppercase tracking-wider">{t.spinCongratsTitle}</p>
                   <h3 className="text-3xl sm:text-4xl font-black text-amber-400 drop-shadow-md">
-                    {restaurantData.reward_offer}
+                    {restaurantData.reward_offer || "1 hot drink"}
                   </h3>
                 </div>
 
