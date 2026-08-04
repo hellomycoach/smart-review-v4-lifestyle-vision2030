@@ -12,6 +12,34 @@ const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-resta
 const N8N_COUPONS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-coupons-v3";
 const N8N_AI_FOOD_VISION_API = "https://n8n.srv821341.hstgr.cloud/webhook/ai-food-vision-v4";
 
+// DÉPAQUETEUR N8N UNIVERSEL ({ json: { ... } } vs { ... })
+const getItemData = (r: any) => (r && typeof r === 'object' && r.json) ? r.json : r;
+
+const normalizeKey = (str: any): string => {
+  if (!str) return "";
+  const item = getItemData(str);
+  const raw = typeof item === 'object' ? (item.instance_name || item.restaurant_name || "") : item;
+  return String(raw).toLowerCase().replace(/[^a-z0-9]/g, "").trim();
+};
+
+const parseInstanceName = (rawItem: any): string => {
+  if (!rawItem) return "";
+  const item = getItemData(rawItem);
+
+  if (typeof item === 'string') return item.trim();
+  if (Array.isArray(item) && item.length > 0) {
+    const first = getItemData(item[0]);
+    if (typeof first === 'string') return first.trim();
+    if (typeof first === 'object' && first !== null) {
+      return (first.instance_name || first.restaurant_name || "").trim();
+    }
+  }
+  if (typeof item === 'object' && item !== null) {
+    return (item.instance_name || item.restaurant_name || "").trim();
+  }
+  return "";
+};
+
 // --- GÉNÉRATEUR CODE-BARRES 1D (CODE 128) ---
 function Code128Barcode({ text }: { text: string }) {
   const bars = useMemo(() => {
@@ -77,19 +105,6 @@ function Code128Barcode({ text }: { text: string }) {
   );
 }
 
-const parseInstanceName = (raw: any): string => {
-  if (!raw) return "";
-  if (typeof raw === 'string') return raw.trim();
-  if (Array.isArray(raw) && raw.length > 0) {
-    const first = raw[0];
-    if (typeof first === 'string') return first.trim();
-    if (typeof first === 'object' && first !== null) {
-      return (first.instance_name || first.restaurant_name || "").trim();
-    }
-  }
-  return "";
-};
-
 export default function VirtualLoyaltyCardPageV4() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -131,9 +146,14 @@ export default function VirtualLoyaltyCardPageV4() {
 
   const urlInstance = (searchParams.get('instance') || "").trim().toLowerCase();
 
+  // Nom formaté dynamique depuis l'URL (ex: halim_cafe_madinah -> Halim Cafe)
+  const formattedUrlName = urlInstance
+    ? urlInstance.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    : "";
+
   const [stampsCount, setStampsCount] = useState(0);
   const [restaurantData, setRestaurantData] = useState<any>({
-    restaurant_name: "",
+    restaurant_name: formattedUrlName,
     city: "",
     loyalty_reward: "",
     max_stamps: 10
@@ -144,26 +164,28 @@ export default function VirtualLoyaltyCardPageV4() {
       setLoading(true);
       try {
         const cleanTargetPhone = clientPhone.replace(/[^0-9]/g, '');
-        const targetInst = urlInstance;
+        const targetInstKey = normalizeKey(urlInstance);
 
-        // 1. RESTAURANT
+        // 1. RESTAURANT (AVEC DÉPAQUETAGE N8N)
         try {
           const resRest = await fetch(`${N8N_RESTAURANTS_API}?t=${Date.now()}`, { cache: 'no-store' });
           if (resRest.ok) {
             const dataRest = await resRest.json();
-            const restList = Array.isArray(dataRest) ? dataRest : (dataRest.list || []);
+            const restList = Array.isArray(dataRest) ? dataRest : (dataRest.list || dataRest.data || []);
             
             const matchedRest = restList.find((r: any) => {
-              const inst = parseInstanceName(r.instance_name).toLowerCase();
-              return targetInst ? (inst.includes(targetInst) || targetInst.includes(inst)) : true;
+              const item = getItemData(r);
+              const dbKey = normalizeKey(parseInstanceName(item) || item.instance_name || item.restaurant_name);
+              return targetInstKey ? (dbKey === targetInstKey || dbKey.includes(targetInstKey) || targetInstKey.includes(dbKey)) : true;
             });
 
             if (matchedRest) {
+              const item = getItemData(matchedRest);
               setRestaurantData({
-                restaurant_name: matchedRest.restaurant_name || "",
-                city: matchedRest.city || "",
-                loyalty_reward: matchedRest.loyalty_reward || matchedRest.reward_offer || "",
-                max_stamps: Number(matchedRest.max_stamps) || 10
+                restaurant_name: item.restaurant_name || parseInstanceName(item) || formattedUrlName,
+                city: item.city || "",
+                loyalty_reward: item.loyalty_reward || item.reward_offer || "",
+                max_stamps: Number(item.max_stamps) || 10
               });
             }
           }
@@ -176,18 +198,20 @@ export default function VirtualLoyaltyCardPageV4() {
           const resFidelite = await fetch(`${N8N_FIDELITE_API}?t=${Date.now()}`, { cache: 'no-store' });
           if (resFidelite.ok) {
             const dataFidelite = await resFidelite.json();
-            const listFidelite = Array.isArray(dataFidelite) ? dataFidelite : (dataFidelite.list || []);
+            const listFidelite = Array.isArray(dataFidelite) ? dataFidelite : (dataFidelite.list || dataFidelite.data || []);
             const reversedList = [...listFidelite].reverse();
 
             const userCard = reversedList.find((c: any) => {
-              const p = c.client_phone?.toString().replace(/[^0-9]/g, '') || "";
-              const inst = parseInstanceName(c.instance_name).toLowerCase();
+              const item = getItemData(c);
+              const p = item.client_phone?.toString().replace(/[^0-9]/g, '') || "";
+              const inst = parseInstanceName(item).toLowerCase();
               return (p.includes(cleanTargetPhone) || cleanTargetPhone.includes(p)) &&
-                     (targetInst ? (inst === targetInst || inst.includes(targetInst) || targetInst.includes(inst)) : true);
+                     (urlInstance ? (inst === urlInstance || inst.includes(urlInstance) || urlInstance.includes(inst)) : true);
             });
 
             if (userCard) {
-              const rawVal = Number(userCard.stamps_count);
+              const item = getItemData(userCard);
+              const rawVal = Number(item.stamps_count);
               setStampsCount(isNaN(rawVal) ? 0 : rawVal);
             }
           }
@@ -199,21 +223,26 @@ export default function VirtualLoyaltyCardPageV4() {
             const resCoupons = await fetch(`${N8N_COUPONS_API}?t=${Date.now()}`, { cache: 'no-store' });
             if (resCoupons.ok) {
               const dataCoupons = await resCoupons.json();
-              const listCoupons = Array.isArray(dataCoupons) ? dataCoupons : (dataCoupons.list || []);
+              const listCoupons = Array.isArray(dataCoupons) ? dataCoupons : (dataCoupons.list || dataCoupons.data || []);
               
               const matchedCoupon = [...listCoupons].reverse().find((cp: any) => {
-                const p = cp.client_phone?.toString().replace(/[^0-9]/g, '') || "";
-                const status = (cp.status || "").toLowerCase().trim();
-                const inst = parseInstanceName(cp.instance_name).toLowerCase();
+                const item = getItemData(cp);
+                const p = item.client_phone?.toString().replace(/[^0-9]/g, '') || "";
+                const status = (item.status || "").toLowerCase().trim();
+                const inst = parseInstanceName(item).toLowerCase();
                 
                 const matchesPhone = p.includes(cleanTargetPhone) || cleanTargetPhone.includes(p);
-                const matchesInst = targetInst ? (inst === targetInst || inst.includes(targetInst) || targetInst.includes(inst)) : true;
+                const matchesInst = urlInstance ? (inst === urlInstance || inst.includes(urlInstance) || urlInstance.includes(inst)) : true;
                 const isPending = status === 'pending' || status === 'unclaimed' || status === 'non_utilise';
 
                 return matchesPhone && matchesInst && isPending;
               });
 
-              setPendingCoupon(matchedCoupon || null);
+              if (matchedCoupon) {
+                setPendingCoupon(getItemData(matchedCoupon));
+              } else {
+                setPendingCoupon(null);
+              }
             }
           } catch (e) {
             console.error("Erreur lecture coupons:", e);
@@ -364,7 +393,6 @@ export default function VirtualLoyaltyCardPageV4() {
     else setLang('ar');
   };
 
-  // ÉCRAN DE CHARGEMENT SOMBRE NEUTRE (ZÉRO FAUSSE DONNÉE)
   if (loading) {
     return (
       <div className="min-h-screen bg-[#090A0F] text-zinc-100 font-['Cairo',sans-serif] flex flex-col items-center justify-center p-6 space-y-4">
@@ -433,7 +461,8 @@ export default function VirtualLoyaltyCardPageV4() {
             <div className="flex justify-between items-start border-b border-white/10 pb-4">
               <div>
                 <p className="text-[10px] text-amber-400 font-bold uppercase tracking-widest">{t.cardTitle}</p>
-                <h1 className="text-2xl font-black text-white">{restaurantData.restaurant_name || "Restaurant VIP"}</h1>
+                {/* TITRE DYNAMIQUE PARFAITEMENT DÉPAQUETÉ DE NOCODB OU FORMATÉ DE L'URL */}
+                <h1 className="text-2xl font-black text-white">{restaurantData.restaurant_name || formattedUrlName}</h1>
                 {restaurantData.city && (
                   <p className="text-xs text-zinc-400 font-bold">{t.branch} {restaurantData.city}</p>
                 )}
@@ -563,9 +592,7 @@ export default function VirtualLoyaltyCardPageV4() {
 
       </div>
 
-      {/* ======================================================= */}
-      {/* MODAL V4.0 : COACH IA NUTRITION & CAPTURE D'EMAIL */}
-      {/* ======================================================= */}
+      {/* MODAL V4.0 */}
       {showFoodModal && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-[#14161F] border-2 border-emerald-500/40 rounded-3xl p-6 max-w-md w-full space-y-5 relative shadow-2xl my-auto">
@@ -643,7 +670,7 @@ export default function VirtualLoyaltyCardPageV4() {
 
               </form>
             ) : (
-              /* RÉSULTAT ANALYSE NUTRITION & WORKOUT REELLES DE GEMINI */
+              /* RÉSULTAT ANALYSE NUTRITION & WORKOUT */
               <div className="space-y-4 text-start">
                 <div className="bg-zinc-950 p-4 rounded-2xl border border-emerald-500/30 space-y-2">
                   <div className="flex justify-between items-center">
