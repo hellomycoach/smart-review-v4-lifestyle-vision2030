@@ -124,7 +124,7 @@ export default function CashierStampPage() {
     }
   };
 
-  // DÉTECTION STRICTE DU SUCCÈS OU DE L'ERREUR
+  // DÉTECTION STRICTE DU STATUT "CLIENT NON INSCRIT"
   const isNotRegistered = stampResult && (
     stampResult.notRegistered === true || 
     stampResult.success === false || 
@@ -142,7 +142,7 @@ export default function CashierStampPage() {
   );
 
   return (
-    <div dir="rtl" className="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-4 font-['Cairo']">
+    <div dir="ltr" className="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-4 font-['Cairo']">
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 max-w-md w-full space-y-6 shadow-2xl text-center relative overflow-hidden">
         
         <div className="inline-flex p-4 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-3xl">
@@ -150,25 +150,23 @@ export default function CashierStampPage() {
         </div>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-black text-amber-500">{restaurantData.restaurant_name || "Cashier Stamp"}</h1>
-          <p className="text-xs text-zinc-400">إضافة ختم الولاء • Cashier Stamp System</p>
+          <h1 className="text-2xl font-black text-amber-500">{restaurantData.restaurant_name || "Halim Cafe"}</h1>
+          <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">Cashier Stamp System</p>
         </div>
 
-        {/* AFFICHAGE DU RÉSULTAT DU TAMPON */}
+        {/* AFFICHAGE DU RÉSULTAT DU TAMPON (100% EN ANGLAIS) */}
         {stampResult ? (
-          /* CAS A : CLIENT NON INSCRIT */
+          /* CAS A : CLIENT NON INSCRIT (STRATÉGIE A) */
           isNotRegistered ? (
             <div className="bg-rose-500/10 border-2 border-rose-500 p-6 rounded-3xl space-y-3 shadow-[0_0_30px_rgba(244,63,94,0.3)] animate-pulse">
               <div className="p-3 bg-rose-500/20 text-rose-400 rounded-2xl w-fit mx-auto border border-rose-500/40">
                 <AlertTriangle className="w-8 h-8" />
               </div>
               <p className="text-sm font-black text-rose-400 uppercase tracking-wider">
-                ⚠️ العميل غير مسجل / CLIENT NON INSCRIT
+                ⚠️ CUSTOMER NOT REGISTERED
               </p>
-              <p className="text-xs text-zinc-300 font-bold leading-relaxed">
-                الرجاء دعوة العميل لمسح رمز QR لترك تقييم وتفعيل بطاقته!
-                <br />
-                <span className="text-zinc-400">Veuillez inviter le client à scanner le QR Code à sa table pour laisser un avis et débloquer sa carte VIP !</span>
+              <p className="text-xs text-zinc-200 font-bold leading-relaxed">
+                Please invite the customer to scan the QR Code at their table to leave a review and unlock their VIP Loyalty Pass!
               </p>
             </div>
           ) : isWinner ? (
@@ -177,24 +175,24 @@ export default function CashierStampPage() {
               <div className="p-3 bg-amber-500/20 text-amber-400 rounded-2xl w-fit mx-auto border border-amber-500/40">
                 <Gift className="w-8 h-8" />
               </div>
-              <p className="text-sm font-black text-amber-300 uppercase tracking-wider">🎉 هدية الفائز VIP / FREE REWARD!</p>
-              <h2 className="text-2xl font-black text-white">{restaurantData.loyalty_reward || "Cadeau VIP"}</h2>
-              <p className="text-xs text-zinc-300 font-bold">قدم هذا الكادوه للعميل الآن! / Give this reward to the customer now!</p>
+              <p className="text-sm font-black text-amber-300 uppercase tracking-wider">🎉 FREE REWARD UNLOCKED!</p>
+              <h2 className="text-2xl font-black text-white">{restaurantData.loyalty_reward || "VIP Reward"}</h2>
+              <p className="text-xs text-zinc-300 font-bold">Hand over this reward to the customer now!</p>
             </div>
           ) : isSuccess ? (
-            /* CAS C : TAMPON NORMAL RÉUSSI (EXIGE SUCCESS === TRUE) */
+            /* CAS C : TAMPON NORMAL RÉUSSI */
             <div className="bg-emerald-500/10 border border-emerald-500/30 p-6 rounded-2xl space-y-2 animate-bounce">
               <CheckCircle className="w-10 h-10 text-emerald-400 mx-auto" />
-              <p className="text-sm font-black text-emerald-300">تم إضافة الختم بنجاح! 🎉</p>
-              <p className="text-xs text-zinc-400">تم تحديث بطاقة العميل على واتساب</p>
+              <p className="text-sm font-black text-emerald-300">Stamp Added Successfully! 🎉</p>
+              <p className="text-xs text-zinc-400 font-bold">Customer's loyalty pass updated on WhatsApp.</p>
             </div>
           ) : null
         ) : (
           <form onSubmit={handleAddStamp} className="space-y-4">
             <div className="space-y-1 text-start">
-              <label className="text-xs text-zinc-400 font-bold">رقم واتساب العميل / Customer Phone</label>
+              <label className="text-xs text-zinc-400 font-bold">Customer WhatsApp Phone Number</label>
               <div className="relative">
-                <Phone className="w-4 h-4 text-zinc-500 absolute right-3 top-3.5" />
+                <Phone className="w-4 h-4 text-zinc-500 absolute left-3 top-3.5" />
                 <input
                   type="tel"
                   required
@@ -202,7 +200,7 @@ export default function CashierStampPage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="966 50 000 0000"
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pr-10 pl-4 py-3 text-sm font-mono focus:outline-none focus:border-amber-500 text-white"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-10 pr-4 py-3 text-sm font-mono focus:outline-none focus:border-amber-500 text-white"
                 />
               </div>
             </div>
@@ -212,7 +210,7 @@ export default function CashierStampPage() {
               disabled={loading}
               className="w-full bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-sm py-4 rounded-xl transition shadow-lg flex items-center justify-center gap-2"
             >
-              {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : "إضافة الختم الآن +1 Stamp"}
+              {loading ? <RefreshCw className="w-5 h-5 animate-spin" /> : "Add Stamp Now (+1 Stamp)"}
             </button>
           </form>
         )}
