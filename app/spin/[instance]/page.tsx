@@ -504,17 +504,15 @@ export default function LuxuryRestaurantPortalV4() {
                   {t.spinCongratsDesc}
                 </p>
 
-                {whatsappUrl && whatsappUrl !== "#" && (
-                  <a 
-                    href={whatsappUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-zinc-950 font-black text-base sm:text-lg py-4 px-6 rounded-2xl transition shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center justify-center gap-3 transform active:scale-95 border border-emerald-300/40"
-                  >
-                    <Mic className="w-6 h-6 text-zinc-950 shrink-0" />
-                    <span>{t.sendReviewWhatsapp}</span>
-                  </a>
-                )}
+                <a 
+                  href={whatsappUrl !== "#" ? whatsappUrl : `https://wa.me/${botPhoneClean || '966530629832'}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-zinc-950 font-black text-base sm:text-lg py-4 px-6 rounded-2xl transition shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center justify-center gap-3 transform active:scale-95 border border-emerald-300/40"
+                >
+                  <Mic className="w-6 h-6 text-zinc-950 shrink-0" />
+                  <span>{t.sendReviewWhatsapp}</span>
+                </a>
 
                 <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/10 text-xs font-black text-zinc-200">
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">{t.step1}</div>
