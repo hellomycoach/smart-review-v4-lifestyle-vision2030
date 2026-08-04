@@ -101,7 +101,6 @@ export default function CashierStampPage() {
 
       if (res.ok) {
         const rawData = await res.json();
-        // DÉPAQUETAGE DU TABLEAU RETURNÉ PAR N8N
         const dataItem = Array.isArray(rawData) ? rawData[0] : rawData;
         const cleanData = (dataItem && dataItem.json) ? dataItem.json : dataItem;
         
@@ -125,16 +124,21 @@ export default function CashierStampPage() {
     }
   };
 
-  // DÉTECTION SÉCURISÉE DU STATUT "CLIENT NON INSCRIT"
+  // DÉTECTION STRICTE DU SUCCÈS OU DE L'ERREUR
   const isNotRegistered = stampResult && (
     stampResult.notRegistered === true || 
     stampResult.success === false || 
+    stampResult.message === "Client non inscrit" ||
     stampResult.notRegistered === "true"
   );
 
   const isWinner = stampResult && (
     stampResult.isVIPWinner === true || 
     stampResult.isVIPWinner === "true"
+  );
+
+  const isSuccess = stampResult && stampResult.success !== false && !isNotRegistered && (
+    stampResult.success === true || stampResult.stampBar !== undefined || stampResult.message?.includes("نجاح")
   );
 
   return (
@@ -146,13 +150,13 @@ export default function CashierStampPage() {
         </div>
 
         <div className="space-y-1">
-          <h1 className="text-2xl font-black text-amber-500">{restaurantData.restaurant_name || "Halim Cafe"}</h1>
+          <h1 className="text-2xl font-black text-amber-500">{restaurantData.restaurant_name || "Cashier Stamp"}</h1>
           <p className="text-xs text-zinc-400">إضافة ختم الولاء • Cashier Stamp System</p>
         </div>
 
         {/* AFFICHAGE DU RÉSULTAT DU TAMPON */}
         {stampResult ? (
-          /* CAS A : CLIENT NON INSCRIT (STRATÉGIE A) */
+          /* CAS A : CLIENT NON INSCRIT */
           isNotRegistered ? (
             <div className="bg-rose-500/10 border-2 border-rose-500 p-6 rounded-3xl space-y-3 shadow-[0_0_30px_rgba(244,63,94,0.3)] animate-pulse">
               <div className="p-3 bg-rose-500/20 text-rose-400 rounded-2xl w-fit mx-auto border border-rose-500/40">
@@ -177,14 +181,14 @@ export default function CashierStampPage() {
               <h2 className="text-2xl font-black text-white">{restaurantData.loyalty_reward || "Cadeau VIP"}</h2>
               <p className="text-xs text-zinc-300 font-bold">قدم هذا الكادوه للعميل الآن! / Give this reward to the customer now!</p>
             </div>
-          ) : (
-            /* CAS C : TAMPON NORMAL RÉUSSI */
+          ) : isSuccess ? (
+            /* CAS C : TAMPON NORMAL RÉUSSI (EXIGE SUCCESS === TRUE) */
             <div className="bg-emerald-500/10 border border-emerald-500/30 p-6 rounded-2xl space-y-2 animate-bounce">
               <CheckCircle className="w-10 h-10 text-emerald-400 mx-auto" />
               <p className="text-sm font-black text-emerald-300">تم إضافة الختم بنجاح! 🎉</p>
               <p className="text-xs text-zinc-400">تم تحديث بطاقة العميل على واتساب</p>
             </div>
-          )
+          ) : null
         ) : (
           <form onSubmit={handleAddStamp} className="space-y-4">
             <div className="space-y-1 text-start">
@@ -198,7 +202,7 @@ export default function CashierStampPage() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="966 50 000 0000"
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pr-10 pl-4 py-3 text-sm text-white font-mono focus:outline-none focus:border-amber-500 text-white"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pr-10 pl-4 py-3 text-sm font-mono focus:outline-none focus:border-amber-500 text-white"
                 />
               </div>
             </div>
