@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { 
   Sparkles, Wifi, Utensils, Camera, Flame, Activity, ShieldCheck, 
-  Globe, Award, Check, X, RefreshCw, Trophy, HeartPulse, Gift, Mic
+  Globe, Award, Check, X, RefreshCw, Trophy, HeartPulse, Gift, Mic, AlertCircle
 } from 'lucide-react';
 
 const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants-v3";
@@ -127,14 +127,12 @@ export default function LuxuryRestaurantPortalV4() {
           let matched = null;
 
           if (targetKey) {
-            // 1. Match Exact avec dépaquetage N8N
             matched = list.find((r: any) => {
               const item = getItemData(r);
               const dbKey = normalizeKey(parseInstanceName(item) || item.instance_name || item.restaurant_name);
               return dbKey === targetKey;
             });
 
-            // 2. Match Partiel
             if (!matched && targetKey.length >= 3) {
               matched = list.find((r: any) => {
                 const item = getItemData(r);
@@ -384,7 +382,7 @@ export default function LuxuryRestaurantPortalV4() {
     );
   }
 
-  // 2. ÉCRAN NEUTRE NOT FOUND (SI L'ÉTABLISSEMENT N'EXISTE PAS EN BDD)
+  // 2. ÉCRAN NEUTRE NOT FOUND
   if (notFound || !restaurantData.restaurant_name) {
     return (
       <div className="min-h-screen bg-[#090A0F] text-zinc-100 font-['Cairo',sans-serif] flex flex-col items-center justify-center p-6 text-center space-y-4">
@@ -560,7 +558,6 @@ export default function LuxuryRestaurantPortalV4() {
                   {t.spinCongratsDesc}
                 </p>
 
-                {/* BOUTON WHATSAPP VERT PERMANENT */}
                 {whatsappUrl && whatsappUrl !== "#" && (
                   <a 
                     href={whatsappUrl}
