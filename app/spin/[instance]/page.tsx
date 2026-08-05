@@ -105,49 +105,67 @@ export default function LuxuryRestaurantPortalV4() {
     const loadRestaurant = async () => {
       const targetKey = normalizeKey(rawInstance);
       if (!targetKey) return;
-
+    
+      setLoadingRest(true);
+    
       try {
         const res = await fetch(`${N8N_RESTAURANTS_API}?t=${Date.now()}`, { cache: 'no-store' });
-        if (res.ok) {
-          const data = await res.json();
-          const list = Array.isArray(data) ? data : (data.list || data.data || []);
-
-          let matched = list.find((r: any) => {
+        if (!res.ok) {
+          console.error("Erreur API restaurants");
+          return;
+        }
+    
+        const data = await res.json();
+        const list = Array.isArray(data) ? data : (data.list || data.data || []);
+    
+        // Matching strict d'abord
+        let matched = list.find((r: any) => {
+          const item = getItemData(r);
+          const dbKey = normalizeKey(item.instance_name || item.restaurant_name);
+          return dbKey === targetKey;
+        });
+    
+        // Matching souple si besoin
+        if (!matched && targetKey.length >= 3) {
+          matched = list.find((r: any) => {
             const item = getItemData(r);
-            const dbKey = normalizeKey(parseInstanceName(item) || item.instance_name || item.restaurant_name);
-            return dbKey === targetKey;
+            const dbKey = normalizeKey(item.instance_name || item.restaurant_name);
+            return dbKey.includes(targetKey) || targetKey.includes(dbKey);
           });
-
-          if (!matched && targetKey.length >= 3) {
-            matched = list.find((r: any) => {
-              const item = getItemData(r);
-              const dbKey = normalizeKey(parseInstanceName(item) || item.instance_name || item.restaurant_name);
-              return dbKey.length > 0 && (dbKey.includes(targetKey) || targetKey.includes(dbKey));
-            });
-          }
-
-          if (matched) {
-            const item = getItemData(matched);
-            const rawPhone = item.linked_evolution || item.manager_whatsapp || "";
-            const botPhone = String(rawPhone).replace(/[^0-9]/g, '');
-
-            setRestaurantData({
-              restaurant_name: item.restaurant_name || formattedUrlName,
-              city: item.city || "المدينة المنورة",
-              reward_offer: item.reward_offer || item.loyalty_reward || "1 hot drink",
-              wifi_password: item.wifi_password || "halim2030",
-              menu_url: item.menu_url || "#",
-              linked_evolution: botPhone || "41779874995"
-            });
-          }
+        }
+    
+        if (matched) {
+          const item = getItemData(matched);
+          const rawPhone = item.linked_evolution || item.manager_whatsapp || "";
+          const botPhone = String(rawPhone).replace(/[^0-9]/g, '');
+    
+          setRestaurantData({
+            restaurant_name: item.restaurant_name || formattedUrlName,
+            city: item.city || "",
+            reward_offer: item.reward_offer || item.loyalty_reward || "1 hot drink",
+            wifi_password: item.wifi_password || "",
+            menu_url: item.menu_url || "#",
+            linked_evolution: botPhone,
+            found: true
+          });
+        } else {
+          // Restaurant non trouvé → on n'ouvre PAS de WhatsApp
+          setRestaurantData({
+            restaurant_name: formattedUrlName,
+            city: "",
+            reward_offer: "",
+            wifi_password: "",
+            menu_url: "#",
+            linked_evolution: "",
+            found: false
+          });
         }
       } catch (e) {
         console.error("Erreur chargement restaurant:", e);
+      } finally {
+        setLoadingRest(false);
       }
     };
-
-    loadRestaurant();
-  }, [rawInstance]);
 
   // ANIMATION ROTATION ROUE V3 (OUVERTURE POPUP À 4.2S)
   const handleSpinWheel = () => {
@@ -505,7 +523,7 @@ export default function LuxuryRestaurantPortalV4() {
                 </p>
 
                 <a 
-                  href={whatsappUrl !== "#" ? whatsappUrl : `https://wa.me/${botPhoneClean || '966530629832'}`}
+                  href={restaurantData.linked_evolution ? `https://wa.me/${restaurantData.linked_evolution}` : "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-zinc-950 font-black text-base sm:text-lg py-4 px-6 rounded-2xl transition shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center justify-center gap-3 transform active:scale-95 border border-emerald-300/40"
