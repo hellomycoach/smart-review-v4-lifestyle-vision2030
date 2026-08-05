@@ -201,7 +201,7 @@ export default function LuxuryRestaurantPortalV4() {
         body: JSON.stringify({
           client_phone: wifiPhone.trim(),
           instance_name: rawInstance,
-          source: 'WiFi Portal V4'
+          source: 'WiFi'
         })
       });
       setWifiSuccess(true);
