@@ -118,13 +118,23 @@ export default function SmartReviewDashboard() {
         }),
       });
   
-      const data = await res.json();
-  
+      const raw = await res.json();
+      const data = Array.isArray(raw) ? raw[0] : raw;
+      
       if (data.success && data.user) {
+        // NocoDB renvoie parfois des objets liés
+        const instanceName = typeof data.user.instance_name === 'object' 
+          ? (data.user.instance_name.instance_name || data.user.instance_name.Id || "")
+          : data.user.instance_name;
+      
+        const restaurantName = typeof data.user.restaurant_name === 'object'
+          ? (data.user.restaurant_name.instance_name || data.user.restaurant_name.restaurant_name || instanceName)
+          : (data.user.restaurant_name || instanceName);
+      
         const sessionData = {
           email: data.user.email,
-          instance_name: data.user.instance_name,
-          restaurant_name: data.user.restaurant_name || data.user.instance_name
+          instance_name: instanceName,
+          restaurant_name: restaurantName
         };
   
         setCurrentUser(sessionData);
