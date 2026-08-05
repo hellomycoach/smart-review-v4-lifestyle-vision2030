@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 
 const N8N_REVIEWS_API = "https://n8n.srv821341.hstgr.cloud/webhook/dashboard-data-v2";
-const N8N_USERS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-users-v2";
+const N8N_LOGIN_API = "https://n8n.srv821341.hstgr.cloud/webhook/login-manager";
 const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants-v2";
 const N8N_UPDATE_REWARD_API = "https://n8n.srv821341.hstgr.cloud/webhook/update-reward-v2";
 const N8N_LEADS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-leads-v2";
@@ -102,41 +102,39 @@ export default function SmartReviewDashboard() {
     e.preventDefault();
     setLoginError('');
     setIsLoggingIn(true);
-
+  
     const cleanEmail = emailInput.trim().toLowerCase();
     const cleanPassword = passwordInput.trim();
-
+  
     try {
-      const res = await fetch(N8N_USERS_API);
-      if (res.ok) {
-        const usersData = await res.json();
-        const usersList = Array.isArray(usersData) ? usersData : (usersData.list || []);
-
-        const foundUser = usersList.find((u: any) => 
-          u.email?.trim().toLowerCase() === cleanEmail && 
-          (u.password_hash?.trim() === cleanPassword || u.password?.trim() === cleanPassword)
-        );
-
-        if (foundUser) {
-          const targetInstance = parseInstanceName(foundUser.instance_name);
-
-          const sessionData = {
-            email: foundUser.email,
-            instance_name: targetInstance,
-            restaurant_name: foundUser.restaurant_name || targetInstance
-          };
-
-          setCurrentUser(sessionData);
-          localStorage.setItem('smart_review_session_v2', JSON.stringify(sessionData));
-          fetchLiveNocoDB(sessionData.instance_name);
-        } else {
-          setLoginError("البريد الإلكتروني أو كلمة المرور غير صحيحة / Incorrect email or password");
-        }
+      const res = await fetch(N8N_LOGIN_API, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: cleanEmail,
+          password: cleanPassword,
+        }),
+      });
+  
+      const data = await res.json();
+  
+      if (data.success && data.user) {
+        const sessionData = {
+          email: data.user.email,
+          instance_name: data.user.instance_name,
+          restaurant_name: data.user.restaurant_name || data.user.instance_name
+        };
+  
+        setCurrentUser(sessionData);
+        localStorage.setItem('smart_review_session_v2', JSON.stringify(sessionData));
+        fetchLiveNocoDB(sessionData.instance_name);
       } else {
-        setLoginError("تعذر الاتصال بالسيرفر / Server connection error");
+        setLoginError(data.error || 'Email ou mot de passe incorrect');
       }
     } catch (err) {
-      setLoginError("خطأ في الاتصال / Connection error");
+      setLoginError('Connection error / خطأ في الاتصال');
     } finally {
       setIsLoggingIn(false);
     }
