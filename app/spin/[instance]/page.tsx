@@ -166,6 +166,9 @@ export default function LuxuryRestaurantPortalV4() {
         setLoadingRest(false);
       }
     };
+    
+    loadRestaurant();
+  }, [rawInstance]);
 
   // ANIMATION ROTATION ROUE V3 (OUVERTURE POPUP À 4.2S)
   const handleSpinWheel = () => {
