@@ -1,17 +1,17 @@
 'use client';
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
-import {
-  Sparkles, Wifi, Utensils, Camera, Flame, Activity, ShieldCheck,
+import { 
+  Sparkles, Wifi, Utensils, Camera, Flame, Activity, ShieldCheck, 
   Globe, Award, Check, X, RefreshCw, Trophy, HeartPulse, Gift, Mic
 } from 'lucide-react';
 
 const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants";
-const N8N_WIFI_CHECK_API = "https://n8n.srv821341.hstgr.cloud/webhook/wifi-check";
-const N8N_WIFI_SEND_OTP_API = "https://n8n.srv821341.hstgr.cloud/webhook/wifi-send-otp";
-const N8N_WIFI_VERIFY_OTP_API = "https://n8n.srv821341.hstgr.cloud/webhook/wifi-verify-otp";
+const N8N_WIFI_LEADS_API = "https://n8n.srv821341.hstgr.cloud/webhook/save-wifi-lead-v2";
 const N8N_AI_FOOD_VISION_API = "https://n8n.srv821341.hstgr.cloud/webhook/ai-food-vision-v4";
 
+// DÉPAQUETEUR N8N UNIVERSEL ({ json: { ... } } vs { ... })
 const getItemData = (r: any) => (r && typeof r === 'object' && r.json) ? r.json : r;
 
 const normalizeKey = (str: any): string => {
@@ -24,6 +24,7 @@ const normalizeKey = (str: any): string => {
 const parseInstanceName = (rawItem: any): string => {
   if (!rawItem) return "";
   const item = getItemData(rawItem);
+
   if (typeof item === 'string') return item.trim();
   if (Array.isArray(item) && item.length > 0) {
     const first = getItemData(item[0]);
@@ -41,9 +42,11 @@ const parseInstanceName = (rawItem: any): string => {
 export default function LuxuryRestaurantPortalV4() {
   const params = useParams();
   const searchParams = useSearchParams();
+
   const [lang, setLang] = useState<'ar' | 'fr' | 'en'>('ar');
   const [loadingRest, setLoadingRest] = useState(false);
 
+  // Auto-détection de la langue du téléphone
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const userLang = (navigator.language || (navigator as any).userLanguage || 'ar').toLowerCase();
@@ -53,8 +56,10 @@ export default function LuxuryRestaurantPortalV4() {
     }
   }, []);
 
+  // Extraction d'instance
   const paramInst = typeof params?.instance === 'string' ? params.instance : (searchParams.get('instance') || '');
   let rawInstance = paramInst;
+
   if (typeof window !== 'undefined' && !rawInstance) {
     const parts = window.location.pathname.split('/spin/');
     if (parts.length > 1) {
@@ -62,54 +67,65 @@ export default function LuxuryRestaurantPortalV4() {
     }
   }
 
+  // Formatage dynamique du nom depuis l'URL (ex: halim_cafe_madinah -> Halim Cafe)
   const formattedUrlName = rawInstance
     ? rawInstance.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
     : "Halim Cafe";
 
   const [restaurantData, setRestaurantData] = useState<any>({
     restaurant_name: formattedUrlName,
-    city: "",
+    city: "المدينة المنورة",
     reward_offer: "1 hot drink",
-    wifi_password: "",
+    wifi_password: "halim2030",
     menu_url: "#",
-    linked_evolution: "",
-    found: false
+    linked_evolution: ""
   });
 
+  // Modals States
   const [activeModal, setActiveModal] = useState<'wifi' | 'food_ai' | null>(null);
+
+  // Spin Wheel State (ROUE V3)
   const [mustSpin, setMustSpin] = useState(false);
   const [rotationDegree, setRotationDegree] = useState(0);
   const [showWinnerModal, setShowWinnerModal] = useState(false);
 
-  // WiFi OTP states
+  // WiFi Lead Form
   const [wifiPhone, setWifiPhone] = useState('');
-  const [wifiOtp, setWifiOtp] = useState('');
-  const [wifiStep, setWifiStep] = useState<'phone' | 'otp' | 'success' | 'error'>('phone');
   const [wifiLoading, setWifiLoading] = useState(false);
-  const [wifiPassword, setWifiPassword] = useState('');
-  const [wifiError, setWifiError] = useState('');
+  const [wifiSuccess, setWifiSuccess] = useState(false);
 
-  // AI Food Vision
+  // AI Food Vision Form
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [clientEmail, setClientEmail] = useState('');
   const [aiAnalysisLoading, setAiAnalysisLoading] = useState(false);
   const [aiResult, setAiResult] = useState<any>(null);
 
+  // CHARGEMENT DYNAMIQUE NOCODB
   useEffect(() => {
     const loadRestaurant = async () => {
       const targetKey = normalizeKey(rawInstance);
       if (!targetKey) return;
+    
       setLoadingRest(true);
+    
       try {
         const res = await fetch(`${N8N_RESTAURANTS_API}?t=${Date.now()}`, { cache: 'no-store' });
-        if (!res.ok) return;
+        if (!res.ok) {
+          console.error("Erreur API restaurants");
+          return;
+        }
+    
         const data = await res.json();
         const list = Array.isArray(data) ? data : (data.list || data.data || []);
+    
+        // Matching strict d'abord
         let matched = list.find((r: any) => {
           const item = getItemData(r);
           const dbKey = normalizeKey(item.instance_name || item.restaurant_name);
           return dbKey === targetKey;
         });
+    
+        // Matching souple si besoin
         if (!matched && targetKey.length >= 3) {
           matched = list.find((r: any) => {
             const item = getItemData(r);
@@ -117,10 +133,12 @@ export default function LuxuryRestaurantPortalV4() {
             return dbKey.includes(targetKey) || targetKey.includes(dbKey);
           });
         }
+    
         if (matched) {
           const item = getItemData(matched);
           const rawPhone = item.linked_evolution || item.manager_whatsapp || "";
           const botPhone = String(rawPhone).replace(/[^0-9]/g, '');
+    
           setRestaurantData({
             restaurant_name: item.restaurant_name || formattedUrlName,
             city: item.city || "",
@@ -131,6 +149,7 @@ export default function LuxuryRestaurantPortalV4() {
             found: true
           });
         } else {
+          // Restaurant non trouvé → on n'ouvre PAS de WhatsApp
           setRestaurantData({
             restaurant_name: formattedUrlName,
             city: "",
@@ -147,114 +166,53 @@ export default function LuxuryRestaurantPortalV4() {
         setLoadingRest(false);
       }
     };
+    
     loadRestaurant();
   }, [rawInstance]);
 
+  // ANIMATION ROTATION ROUE V3 (OUVERTURE POPUP À 4.2S)
   const handleSpinWheel = () => {
     if (mustSpin) return;
     setMustSpin(true);
     setShowWinnerModal(false);
+
     const extraTurns = 360 * 6;
     const stopAngle = Math.floor(Math.random() * 300) + 30;
-    setRotationDegree(rotationDegree + extraTurns + stopAngle);
+    const newTotalDegree = rotationDegree + extraTurns + stopAngle;
+
+    setRotationDegree(newTotalDegree);
+
     setTimeout(() => {
       setMustSpin(false);
       setShowWinnerModal(true);
     }, 4200);
   };
 
-  const resetWifiModal = () => {
-    setWifiPhone('');
-    setWifiOtp('');
-    setWifiStep('phone');
-    setWifiPassword('');
-    setWifiError('');
-    setWifiLoading(false);
-  };
-
-  const handleWifiPhoneSubmit = async (e: React.FormEvent) => {
+  // Soumission Formulaire WiFi
+  const handleWifiSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!wifiPhone.trim()) return;
     setWifiLoading(true);
-    setWifiError('');
+
     try {
-      const checkRes = await fetch(N8N_WIFI_CHECK_API, {
+      await fetch(N8N_WIFI_LEADS_API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          client_phone: wifiPhone.trim().replace(/[^0-9]/g, ''),
-          instance_name: rawInstance
-        })
-      });
-      const checkData = await checkRes.json();
-      const check = Array.isArray(checkData) ? checkData[0] : checkData;
-
-      if (check?.exists === true && check?.wifi_password) {
-        setWifiPassword(check.wifi_password);
-        setWifiStep('success');
-        setWifiLoading(false);
-        return;
-      }
-
-      // Numéro inconnu → envoyer OTP
-      const otpRes = await fetch(N8N_WIFI_SEND_OTP_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          client_phone: wifiPhone.trim().replace(/[^0-9]/g, ''),
-          instance_name: rawInstance
-        })
-      });
-      const otpData = await otpRes.json();
-      const otpResult = Array.isArray(otpData) ? otpData[0] : otpData;
-
-      if (otpResult?.success) {
-        setWifiStep('otp');
-      } else {
-        setWifiError(otpResult?.error || 'Erreur envoi OTP');
-        setWifiStep('error');
-      }
-    } catch (err) {
-      setWifiError('Erreur de connexion');
-      setWifiStep('error');
-    } finally {
-      setWifiLoading(false);
-    }
-  };
-
-  const handleWifiOtpSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!wifiOtp.trim()) return;
-    setWifiLoading(true);
-    setWifiError('');
-    try {
-      const res = await fetch(N8N_WIFI_VERIFY_OTP_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          client_phone: wifiPhone.trim().replace(/[^0-9]/g, ''),
+          client_phone: wifiPhone.trim(),
           instance_name: rawInstance,
-          otp_code: wifiOtp.trim()
+          source: 'WiFi'
         })
       });
-      const data = await res.json();
-      const result = Array.isArray(data) ? data[0] : data;
-
-      if (result?.success && result?.wifi_password) {
-        setWifiPassword(result.wifi_password);
-        setWifiStep('success');
-      } else {
-        setWifiError(result?.error || 'Code invalide');
-        setWifiStep('error');
-      }
-    } catch (err) {
-      setWifiError('Erreur de vérification');
-      setWifiStep('error');
+      setWifiSuccess(true);
+    } catch (e) {
+      setWifiSuccess(true);
     } finally {
       setWifiLoading(false);
     }
   };
 
+  // Traitement Image IA Vision
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -271,7 +229,9 @@ export default function LuxuryRestaurantPortalV4() {
   const analyzeFoodImage = async (base64Image: string) => {
     setAiAnalysisLoading(true);
     setAiResult(null);
+
     const cleanBase64 = base64Image.replace(/^data:image\/\w+;base64,/, '');
+
     try {
       const res = await fetch(N8N_AI_FOOD_VISION_API, {
         method: 'POST',
@@ -284,6 +244,7 @@ export default function LuxuryRestaurantPortalV4() {
           instance: rawInstance
         })
       });
+
       if (res.ok) {
         const data = await res.json();
         setAiResult(data);
@@ -294,6 +255,10 @@ export default function LuxuryRestaurantPortalV4() {
       setAiAnalysisLoading(false);
     }
   };
+
+  // URL WHATSAPP DYNAMIQUE DU BOT RESTAURANT
+  const botPhoneClean = String(restaurantData.linked_evolution || "").replace(/[^0-9]/g, '');
+  const whatsappUrl = botPhoneClean ? `https://wa.me/${botPhoneClean}` : "#";
 
   const t = {
     ar: {
@@ -311,12 +276,8 @@ export default function LuxuryRestaurantPortalV4() {
       btnWifi: "احصل على كلمة السر 📶",
       btnMenu: "عرض القائمة 🍽️",
       wifiInputLabel: "أدخل رقم واتساب الخاص بك :",
-      wifiOtpLabel: "أدخل رمز التحقق المرسل على واتساب :",
-      wifiBtnSubmit: "متابعة",
-      wifiBtnVerify: "تأكيد الرمز",
+      wifiBtnSubmit: "عرض كلمة السر 🔓",
       wifiPassSuccess: "كلمة سر الواي فاي هي :",
-      wifiOtpSent: "تم إرسال رمز التحقق على واتساب",
-      wifiError: "حدث خطأ، حاول مرة أخرى",
       aiUploadInstruction: "التقط صورة لطبقك أو مشروبك الآن :",
       aiAnalyzing: "جاري تحليل الطبق بالذكاء الاصطناعي...",
       calories: "السعرات الحرارية المقدرة :",
@@ -346,12 +307,8 @@ export default function LuxuryRestaurantPortalV4() {
       btnWifi: "Obtenir le Code WiFi 📶",
       btnMenu: "Consulter le Menu 🍽️",
       wifiInputLabel: "Entrez votre numéro WhatsApp :",
-      wifiOtpLabel: "Entrez le code reçu sur WhatsApp :",
-      wifiBtnSubmit: "Continuer",
-      wifiBtnVerify: "Vérifier le code",
+      wifiBtnSubmit: "Voir le Mot de Passe 🔓",
       wifiPassSuccess: "Mot de Passe WiFi :",
-      wifiOtpSent: "Code envoyé sur WhatsApp",
-      wifiError: "Erreur, réessayez",
       aiUploadInstruction: "Prenez en photo votre plat ou boisson :",
       aiAnalyzing: "Analyse nutritionnelle IA en cours...",
       calories: "Calories estimées :",
@@ -377,16 +334,13 @@ export default function LuxuryRestaurantPortalV4() {
       wifiCardDesc: "Get the WiFi password instantly",
       menuCardTitle: "Digital Food Menu",
       menuCardDesc: "Browse our gourmet dishes & drinks",
+      btnSpin: "Spin the Wheel 🎲",
       btnAi: "Scan My Meal (AI) 📸",
       btnWifi: "Get WiFi Password 📶",
       btnMenu: "Browse Menu 🍽️",
       wifiInputLabel: "Enter your WhatsApp Number:",
-      wifiOtpLabel: "Enter the code received on WhatsApp:",
-      wifiBtnSubmit: "Continue",
-      wifiBtnVerify: "Verify code",
+      wifiBtnSubmit: "Unlock Password 🔓",
       wifiPassSuccess: "WiFi Password:",
-      wifiOtpSent: "Code sent on WhatsApp",
-      wifiError: "Error, please try again",
       aiUploadInstruction: "Take a photo of your meal or drink:",
       aiAnalyzing: "AI Nutritional Analysis in progress...",
       calories: "Estimated Calories:",
@@ -410,7 +364,7 @@ export default function LuxuryRestaurantPortalV4() {
   };
 
   return (
-    <div
+    <div 
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
       className="min-h-screen bg-[#090A0F] text-zinc-100 font-['Cairo',sans-serif] relative flex flex-col justify-between p-4 sm:p-6 overflow-x-hidden selection:bg-amber-500 selection:text-black"
     >
@@ -418,6 +372,8 @@ export default function LuxuryRestaurantPortalV4() {
       <div className="fixed bottom-[-10%] left-[-10%] w-96 h-96 bg-emerald-500/10 rounded-full blur-[160px] pointer-events-none" />
 
       <div className="max-w-xl mx-auto w-full space-y-6 relative z-10 my-auto">
+        
+        {/* HEADER */}
         <header className="flex justify-between items-center pt-2 px-1">
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-6 h-6 text-amber-400" />
@@ -425,6 +381,7 @@ export default function LuxuryRestaurantPortalV4() {
               {t.portalTitle}
             </span>
           </div>
+
           <button
             onClick={toggleLanguage}
             className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/90 border border-amber-500/30 text-xs sm:text-sm font-black text-zinc-200 hover:text-amber-400 backdrop-blur-xl transition-all shadow-md"
@@ -434,6 +391,7 @@ export default function LuxuryRestaurantPortalV4() {
           </button>
         </header>
 
+        {/* HERO BANNER RESTAURANT DYNAMIQUE (AFFICHAGE SANS FAUTE) */}
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 via-amber-300 to-emerald-500 rounded-[28px] blur-sm opacity-70"></div>
           <div className="relative bg-[#14161F] border-2 border-amber-400/40 rounded-[26px] p-6 text-center space-y-2 shadow-2xl">
@@ -443,8 +401,9 @@ export default function LuxuryRestaurantPortalV4() {
           </div>
         </div>
 
-        {/* ROUE */}
+        {/* ROUE DE LA FORTUNE 3D */}
         <div className="bg-[#14161F] border-2 border-amber-500/40 p-6 sm:p-8 rounded-[26px] text-center space-y-5 shadow-2xl relative overflow-hidden">
+          
           <div className="space-y-2">
             <div className="inline-flex p-3 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-2xl mb-1">
               <Trophy className="w-8 h-8" />
@@ -452,11 +411,15 @@ export default function LuxuryRestaurantPortalV4() {
             <h2 className="text-2xl font-black text-white">{t.spinCardTitle}</h2>
             <p className="text-sm text-zinc-300 font-bold leading-relaxed">{t.spinCardDesc}</p>
           </div>
+
           <div className="relative w-64 h-64 aspect-square mx-auto my-3 shrink-0">
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20 text-amber-400 text-2xl drop-shadow-md">▼</div>
-            <div
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20 text-amber-400 text-2xl drop-shadow-md">
+              ▼
+            </div>
+            
+            <div 
               className="w-full h-full rounded-full border-4 border-amber-400 shadow-[0_0_35px_rgba(245,158,11,0.5)] overflow-hidden origin-center"
-              style={{
+              style={{ 
                 transform: `rotate(${rotationDegree}deg)`,
                 transition: mustSpin ? 'transform 4.5s cubic-bezier(0.15, 0.9, 0.2, 1)' : 'none'
               }}
@@ -465,21 +428,27 @@ export default function LuxuryRestaurantPortalV4() {
                 <g transform="translate(50,50)">
                   <path d="M0,0 L50,0 A50,50 0 0,1 25,43.3 Z" fill="#D4AF37" />
                   <text x="25" y="15" fill="#000" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(30, 25, 15)">☕ OFFRE</text>
+
                   <path d="M0,0 L25,43.3 A50,50 0 0,1 -25,43.3 Z" fill="#14161F" />
                   <text x="0" y="28" fill="#D4AF37" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(90, 0, 28)">🎁 CADEAU</text>
+
                   <path d="M0,0 L-25,43.3 A50,50 0 0,1 -50,0 Z" fill="#10B981" />
                   <text x="-25" y="15" fill="#000" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(150, -25, 15)">⭐ WIN</text>
+
                   <path d="M0,0 L-50,0 A50,50 0 0,1 -25,-43.3 Z" fill="#D4AF37" />
                   <text x="-25" y="-12" fill="#000" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(210, -25, -12)">🍰 CADEAU</text>
+
                   <path d="M0,0 L-25,-43.3 A50,50 0 0,1 25,-43.3 Z" fill="#14161F" />
                   <text x="0" y="-26" fill="#10B981" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(270, 0, -26)">🥤 SURPRISE</text>
+
                   <path d="M0,0 L25,-43.3 A50,50 0 0,1 50,0 Z" fill="#10B981" />
                   <text x="25" y="-12" fill="#000" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(330, 25, -12)">🏆 GAGNANT</text>
                 </g>
               </svg>
             </div>
           </div>
-          <button
+
+          <button 
             onClick={handleSpinWheel}
             disabled={mustSpin}
             className="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-zinc-950 font-black text-base py-4 rounded-2xl transition shadow-xl hover:opacity-95 active:scale-95 flex items-center justify-center gap-2"
@@ -488,9 +457,13 @@ export default function LuxuryRestaurantPortalV4() {
           </button>
         </div>
 
-        {/* MODULES */}
+        {/* MODULES V4 */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <button onClick={() => setActiveModal('food_ai')} className="bg-[#14161F] border border-emerald-500/40 p-4 rounded-2xl space-y-2 hover:border-emerald-400 transition text-start relative overflow-hidden">
+          
+          <button 
+            onClick={() => setActiveModal('food_ai')}
+            className="bg-[#14161F] border border-emerald-500/40 p-4 rounded-2xl space-y-2 hover:border-emerald-400 transition text-start relative overflow-hidden"
+          >
             <div className="flex items-center justify-between">
               <HeartPulse className="w-7 h-7 text-emerald-400" />
               <span className="text-[10px] font-black bg-emerald-500 text-zinc-950 px-2 py-0.5 rounded">v4.0</span>
@@ -500,8 +473,9 @@ export default function LuxuryRestaurantPortalV4() {
               <p className="text-xs text-zinc-300 mt-1 leading-snug">{t.aiCardDesc}</p>
             </div>
           </button>
-          <button
-            onClick={() => { resetWifiModal(); setActiveModal('wifi'); }}
+
+          <button 
+            onClick={() => setActiveModal('wifi')}
             className="bg-[#14161F] border border-white/10 p-4 rounded-2xl space-y-2 hover:border-white/20 transition text-start"
           >
             <Wifi className="w-7 h-7 text-blue-400" />
@@ -510,30 +484,48 @@ export default function LuxuryRestaurantPortalV4() {
               <p className="text-xs text-zinc-300 mt-1 leading-snug">{t.wifiCardDesc}</p>
             </div>
           </button>
-          <a href={restaurantData.menu_url} target="_blank" rel="noopener noreferrer" className="bg-[#14161F] border border-white/10 p-4 rounded-2xl space-y-2 hover:border-white/20 transition text-start block">
+
+          <a 
+            href={restaurantData.menu_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-[#14161F] border border-white/10 p-4 rounded-2xl space-y-2 hover:border-white/20 transition text-start block"
+          >
             <Utensils className="w-7 h-7 text-purple-400" />
             <div>
               <h3 className="text-sm font-black text-white">{t.menuCardTitle}</h3>
               <p className="text-xs text-zinc-300 mt-1 leading-snug">{t.menuCardDesc}</p>
             </div>
           </a>
+
         </div>
 
         {/* POP-UP VICTOIRE */}
         {showWinnerModal && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
             <div className="bg-[#14161F] border-2 border-amber-400 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-6 relative shadow-[0_0_50px_rgba(245,158,11,0.5)]">
-              <button onClick={() => setShowWinnerModal(false)} className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white">
+              <button 
+                onClick={() => setShowWinnerModal(false)}
+                className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white"
+              >
                 <X className="w-6 h-6" />
               </button>
+
               <div className="bg-amber-500/10 border-2 border-amber-400 p-6 rounded-3xl space-y-4 shadow-xl">
                 <Gift className="w-14 h-14 text-amber-400 mx-auto animate-bounce" />
+                
                 <div className="space-y-2">
                   <p className="text-sm font-black text-amber-300 uppercase tracking-wider">{t.spinCongratsTitle}</p>
-                  <h3 className="text-3xl sm:text-4xl font-black text-amber-400 drop-shadow-md">{restaurantData.reward_offer}</h3>
+                  <h3 className="text-3xl sm:text-4xl font-black text-amber-400 drop-shadow-md">
+                    {restaurantData.reward_offer}
+                  </h3>
                 </div>
-                <p className="text-sm sm:text-base text-zinc-200 font-bold leading-relaxed">{t.spinCongratsDesc}</p>
-                <a
+
+                <p className="text-sm sm:text-base text-zinc-200 font-bold leading-relaxed">
+                  {t.spinCongratsDesc}
+                </p>
+
+                <a 
                   href={restaurantData.linked_evolution ? `https://wa.me/${restaurantData.linked_evolution}` : "#"}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -542,36 +534,39 @@ export default function LuxuryRestaurantPortalV4() {
                   <Mic className="w-6 h-6 text-zinc-950 shrink-0" />
                   <span>{t.sendReviewWhatsapp}</span>
                 </a>
+
                 <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/10 text-xs font-black text-zinc-200">
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">{t.step1}</div>
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-amber-500/30 text-amber-400">{t.step2}</div>
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-emerald-500/30 text-emerald-400">{t.step3}</div>
                 </div>
               </div>
+
             </div>
           </div>
         )}
 
-        {/* MODAL WIFI OTP */}
+        {/* MODAL WIFI */}
         {activeModal === 'wifi' && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
             <div className="bg-[#14161F] border-2 border-amber-500/40 rounded-3xl p-6 max-w-md w-full space-y-4 relative shadow-2xl">
-              <button
-                onClick={() => { setActiveModal(null); resetWifiModal(); }}
+              <button 
+                onClick={() => setActiveModal(null)}
                 className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
+
               <div className="text-center space-y-1 pt-2">
                 <Wifi className="w-10 h-10 text-blue-400 mx-auto" />
                 <h3 className="text-xl font-black text-white">{t.wifiCardTitle}</h3>
               </div>
 
-              {wifiStep === 'phone' && (
-                <form onSubmit={handleWifiPhoneSubmit} className="space-y-4">
+              {!wifiSuccess ? (
+                <form onSubmit={handleWifiSubmit} className="space-y-4">
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-zinc-400">{t.wifiInputLabel}</label>
-                    <input
+                    <input 
                       type="tel"
                       required
                       dir="ltr"
@@ -581,7 +576,7 @@ export default function LuxuryRestaurantPortalV4() {
                       className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white font-mono focus:outline-none focus:border-amber-500"
                     />
                   </div>
-                  <button
+                  <button 
                     type="submit"
                     disabled={wifiLoading}
                     className="w-full bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-xs py-3.5 rounded-xl transition flex items-center justify-center gap-2"
@@ -589,78 +584,52 @@ export default function LuxuryRestaurantPortalV4() {
                     {wifiLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : t.wifiBtnSubmit}
                   </button>
                 </form>
-              )}
-
-              {wifiStep === 'otp' && (
-                <form onSubmit={handleWifiOtpSubmit} className="space-y-4">
-                  <p className="text-xs text-emerald-400 font-bold text-center">{t.wifiOtpSent}</p>
-                  <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-400">{t.wifiOtpLabel}</label>
-                    <input
-                      type="text"
-                      required
-                      dir="ltr"
-                      placeholder="123456"
-                      value={wifiOtp}
-                      onChange={(e) => setWifiOtp(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white font-mono tracking-widest text-center focus:outline-none focus:border-amber-500"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={wifiLoading}
-                    className="w-full bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-xs py-3.5 rounded-xl transition flex items-center justify-center gap-2"
-                  >
-                    {wifiLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : t.wifiBtnVerify}
-                  </button>
-                </form>
-              )}
-
-              {wifiStep === 'success' && (
+              ) : (
                 <div className="bg-blue-500/10 border border-blue-500/30 p-4 rounded-2xl text-center space-y-2">
                   <p className="text-xs font-bold text-zinc-300">{t.wifiPassSuccess}</p>
                   <p className="text-2xl font-mono font-black text-amber-400 tracking-wider">
-                    {wifiPassword || restaurantData.wifi_password}
+                    {restaurantData.wifi_password}
                   </p>
-                </div>
-              )}
-
-              {wifiStep === 'error' && (
-                <div className="bg-red-500/10 border border-red-500/30 p-4 rounded-2xl text-center space-y-3">
-                  <p className="text-sm font-bold text-red-400">{wifiError || t.wifiError}</p>
-                  <button
-                    onClick={() => setWifiStep('phone')}
-                    className="text-xs font-bold text-amber-400 underline"
-                  >
-                    Réessayer
-                  </button>
                 </div>
               )}
             </div>
           </div>
         )}
 
-        {/* MODAL IA FITNESS - inchangé */}
+        {/* MODAL IA FITNESS */}
         {activeModal === 'food_ai' && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
             <div className="bg-[#14161F] border-2 border-emerald-500/40 rounded-3xl p-6 max-w-md w-full space-y-5 relative shadow-2xl my-auto">
-              <button onClick={() => setActiveModal(null)} className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white">
+              <button 
+                onClick={() => setActiveModal(null)}
+                className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white"
+              >
                 <X className="w-5 h-5" />
               </button>
+
               <div className="text-center space-y-1 pt-2">
                 <HeartPulse className="w-10 h-10 text-emerald-400 mx-auto animate-pulse" />
                 <h3 className="text-xl font-black text-white">{t.aiCardTitle}</h3>
               </div>
+
               {!aiResult ? (
                 <div className="space-y-4">
                   <p className="text-xs text-zinc-300 font-bold text-center">{t.aiUploadInstruction}</p>
+                  
                   <label className="border-2 border-dashed border-emerald-500/40 hover:border-emerald-400 bg-zinc-950/80 p-8 rounded-2xl text-center flex flex-col items-center justify-center gap-3 cursor-pointer transition">
                     <Camera className="w-10 h-10 text-emerald-400" />
                     <span className="text-xs font-bold text-zinc-300">
                       {selectedImage ? "Changer la photo" : "Prendre / Choisir une photo"}
                     </span>
-                    <input type="file" accept="image/*" capture="environment" onChange={handleImageUpload} className="hidden" />
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      capture="environment"
+                      onChange={handleImageUpload} 
+                      className="hidden" 
+                    />
                   </label>
+
                   {aiAnalysisLoading && (
                     <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-center space-y-2">
                       <RefreshCw className="w-6 h-6 text-emerald-400 animate-spin mx-auto" />
@@ -679,13 +648,47 @@ export default function LuxuryRestaurantPortalV4() {
                         {aiResult.health_status || "IA Verified"}
                       </span>
                     </div>
+
                     <div className="flex items-center gap-2 pt-1">
                       <Flame className="w-5 h-5 text-orange-500 shrink-0" />
                       <span className="text-xs font-bold text-zinc-300">{t.calories}</span>
-                      <span className="text-base font-black text-orange-400 font-mono">~{aiResult.estimated_calories} kcal</span>
+                      <span className="text-base font-black text-orange-400 font-mono">
+                        ~{aiResult.estimated_calories} kcal
+                      </span>
                     </div>
+
+                    {aiResult.macronutrients && (
+                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-zinc-800 text-center text-[10px] font-bold">
+                        <div className="bg-zinc-900 p-2 rounded-xl">Glucides: {aiResult.macronutrients.carbs || "-"}</div>
+                        <div className="bg-zinc-900 p-2 rounded-xl">Protéines: {aiResult.macronutrients.protein || "-"}</div>
+                        <div className="bg-zinc-900 p-2 rounded-xl">Lipides: {aiResult.macronutrients.fat || "-"}</div>
+                      </div>
+                    )}
                   </div>
-                  <button
+
+                  {aiResult.workout && (
+                    <div className="bg-gradient-to-br from-emerald-950/60 to-zinc-950 p-4 rounded-2xl border border-emerald-500/40 space-y-3">
+                      <div className="flex items-center gap-2 text-xs font-black text-emerald-400">
+                        <Activity className="w-4 h-4" />
+                        <span>{t.workoutTitle}</span>
+                      </div>
+
+                      <div className="space-y-2">
+                        {aiResult.workout.exercises?.map((ex: any, idx: number) => (
+                          <div key={idx} className="bg-zinc-900/90 p-2.5 rounded-xl flex items-center justify-between text-xs">
+                            <span className="font-bold text-white">
+                              {lang === 'ar' ? ex.name_ar : ex.name_fr || ex.name_en}
+                            </span>
+                            <span className="font-mono text-emerald-400 font-black px-2 py-0.5 bg-emerald-500/10 rounded border border-emerald-500/20">
+                              {ex.duration}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <button 
                     onClick={() => { setAiResult(null); setSelectedImage(null); }}
                     className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-black text-xs py-3 rounded-xl transition"
                   >
@@ -697,12 +700,14 @@ export default function LuxuryRestaurantPortalV4() {
           </div>
         )}
 
+        {/* FOOTER */}
         <footer className="pt-2 text-center">
           <p className="text-xs text-zinc-500 font-bold tracking-wider flex items-center justify-center gap-1.5">
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             {t.poweredBy}
           </p>
         </footer>
+
       </div>
     </div>
   );
