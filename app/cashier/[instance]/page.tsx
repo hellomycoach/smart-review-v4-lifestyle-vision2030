@@ -1,11 +1,10 @@
 'use client';
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
-import { Award, CheckCircle, Phone, RefreshCw, Gift } from 'lucide-react';
+import { Award, CheckCircle, Phone, RefreshCw, Gift, XCircle } from 'lucide-react';
 
 const N8N_STAMP_API = "https://n8n.srv821341.hstgr.cloud/webhook/whatsapp-incoming-v3";
-const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants-v3";
+const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants";
 
 const getItemData = (r: any) => (r && typeof r === 'object' && r.json) ? r.json : r;
 
@@ -33,7 +32,6 @@ export default function CashierStampPage() {
   const [loading, setLoading] = useState(false);
   const [stampResult, setStampResult] = useState<any>(null);
 
-  // Extraction dynamique de l'instance
   let currentInstance = "";
   if (typeof window !== 'undefined') {
     const parts = window.location.pathname.split('/cashier/');
@@ -54,7 +52,6 @@ export default function CashierStampPage() {
     loyalty_reward: ""
   });
 
-  // Charger le nom du restaurant et du cadeau depuis NocoDB
   useEffect(() => {
     const loadRest = async () => {
       try {
@@ -67,7 +64,6 @@ export default function CashierStampPage() {
             const inst = parseInstanceName(item.instance_name || item.restaurant_name).toLowerCase();
             return currentInstance ? (inst === currentInstance || inst.includes(currentInstance) || currentInstance.includes(inst)) : true;
           });
-
           if (matched) {
             const item = getItemData(matched);
             setRestaurantData({
@@ -81,7 +77,6 @@ export default function CashierStampPage() {
     if (currentInstance) loadRest();
   }, [currentInstance]);
 
-  // Pré-remplissage si scan QR Code (?phone=33767803233)
   useEffect(() => {
     const urlPhone = searchParams.get('phone');
     if (urlPhone) {
@@ -93,7 +88,6 @@ export default function CashierStampPage() {
     e.preventDefault();
     if (!phone.trim()) return;
     setLoading(true);
-
     try {
       const res = await fetch(N8N_STAMP_API, {
         method: 'POST',
@@ -112,13 +106,23 @@ export default function CashierStampPage() {
         const rawData = await res.json();
         const dataItem = Array.isArray(rawData) ? rawData[0] : rawData;
         const cleanData = (dataItem && dataItem.json) ? dataItem.json : dataItem;
-        
-        setStampResult({
-          success: true,
-          isVIPWinner: cleanData?.isVIPWinner === true || cleanData?.isVIPWinner === "true"
-        });
+
+        if (cleanData?.success === false) {
+          setStampResult({
+            success: false,
+            error: cleanData?.message || cleanData?.error || "Client inconnu"
+          });
+        } else {
+          setStampResult({
+            success: true,
+            isVIPWinner: cleanData?.isVIPWinner === true || cleanData?.isVIPWinner === "true"
+          });
+        }
       } else {
-        setStampResult({ success: true, isVIPWinner: false });
+        setStampResult({
+          success: false,
+          error: "Erreur de communication avec le serveur"
+        });
       }
 
       setTimeout(() => {
@@ -126,7 +130,10 @@ export default function CashierStampPage() {
         setPhone('');
       }, 4000);
     } catch (err) {
-      setStampResult({ success: true, isVIPWinner: false });
+      setStampResult({
+        success: false,
+        error: "Erreur technique"
+      });
       setTimeout(() => {
         setStampResult(null);
         setPhone('');
@@ -143,15 +150,23 @@ export default function CashierStampPage() {
         <div className="inline-flex p-4 bg-amber-500/10 border border-amber-500/20 text-amber-500 rounded-3xl">
           <Award className="w-10 h-10" />
         </div>
-
+        
         <div className="space-y-1">
           <h1 className="text-2xl font-black text-amber-500">{restaurantData.restaurant_name || "Cashier Stamp"}</h1>
           <p className="text-xs text-zinc-400 font-bold uppercase tracking-widest">Cashier Stamp System</p>
         </div>
 
-        {/* AFFICHAGE DU RÉSULTAT DU TAMPON AVEC ANIMATION DE CONFIRMATION */}
         {stampResult ? (
-          stampResult.isVIPWinner ? (
+          stampResult.success === false ? (
+            /* ERREUR - Client inconnu */
+            <div className="bg-red-500/10 border-2 border-red-500/50 p-6 rounded-3xl space-y-3">
+              <XCircle className="w-12 h-12 text-red-400 mx-auto" />
+              <p className="text-base font-black text-red-400">Client inconnu</p>
+              <p className="text-xs text-zinc-300 font-bold">
+                {stampResult.error || "Aucune carte de fidélité trouvée pour ce numéro."}
+              </p>
+            </div>
+          ) : stampResult.isVIPWinner ? (
             /* CAS A : BANNER DORÉ 10È TAMPON GAGNANT */
             <div className="bg-gradient-to-r from-amber-500/20 via-amber-400/20 to-amber-500/20 border-2 border-amber-400 p-6 rounded-3xl space-y-3 shadow-[0_0_50px_rgba(245,158,11,0.4)] animate-pulse">
               <div className="p-3 bg-amber-500/20 text-amber-400 rounded-2xl w-fit mx-auto border border-amber-500/40">
@@ -162,7 +177,7 @@ export default function CashierStampPage() {
               <p className="text-xs text-zinc-300 font-bold">Hand over this reward to the customer now!</p>
             </div>
           ) : (
-            /* CAS B : TAMPON NORMAL RÉUSSI (ANIMATION VERTE DE 4 SECONDES) */
+            /* CAS B : TAMPON NORMAL RÉUSSI */
             <div className="bg-emerald-500/10 border-2 border-emerald-500/50 p-6 rounded-3xl space-y-2 animate-bounce shadow-[0_0_30px_rgba(16,185,129,0.3)]">
               <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto" />
               <p className="text-base font-black text-emerald-300">Stamp Added Successfully! 🎉</p>
@@ -186,7 +201,6 @@ export default function CashierStampPage() {
                 />
               </div>
             </div>
-
             <button
               type="submit"
               disabled={loading}
@@ -196,7 +210,6 @@ export default function CashierStampPage() {
             </button>
           </form>
         )}
-
       </div>
     </div>
   );
