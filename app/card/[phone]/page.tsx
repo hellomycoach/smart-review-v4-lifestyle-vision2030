@@ -11,6 +11,7 @@ const N8N_FIDELITE_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-fidelite
 const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants-v3";
 const N8N_COUPONS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-coupons-v3";
 const N8N_AI_FOOD_VISION_API = "https://n8n.srv821341.hstgr.cloud/webhook/ai-food-vision-v4";
+const N8N_SAVE_EMAIL_API = "https://n8n.srv821341.hstgr.cloud/webhook/save-card-email";
 
 // DÉPAQUETEUR N8N UNIVERSEL ({ json: { ... } } vs { ... })
 const getItemData = (r: any) => (r && typeof r === 'object' && r.json) ? r.json : r;
@@ -121,6 +122,12 @@ export default function VirtualLoyaltyCardPageV4() {
   const [aiResult, setAiResult] = useState<any>(null);
   const [aiError, setAiError] = useState<string | null>(null);
 
+  // update/capture email
+  const [savedEmail, setSavedEmail] = useState<string | null>(null);
+  const [emailInput, setEmailInput] = useState('');
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailMsg, setEmailMsg] = useState<string | null>(null);
+
   // Auto-détection de la langue du téléphone
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -213,6 +220,10 @@ export default function VirtualLoyaltyCardPageV4() {
               const item = getItemData(userCard);
               const rawVal = Number(item.stamps_count);
               setStampsCount(isNaN(rawVal) ? 0 : rawVal);
+
+              if (item.email) {
+                setSavedEmail(String(item.email).trim());
+              }
             }
           }
         }
@@ -387,6 +398,38 @@ export default function VirtualLoyaltyCardPageV4() {
     }
   }[lang];
 
+  const handleSaveEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const email = emailInput.trim();
+    if (!email || !clientPhone || !urlInstance) return;
+  
+    setEmailLoading(true);
+    setEmailMsg(null);
+  
+    try {
+      const res = await fetch(N8N_SAVE_EMAIL_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_phone: clientPhone,
+          instance_name: urlInstance,
+          email
+        })
+      });
+      const data = await res.json();
+      if (data?.success) {
+        setSavedEmail(email);
+        setEmailMsg(lang === 'fr' ? 'Email enregistré ✔' : lang === 'en' ? 'Email saved ✔' : 'تم حفظ البريد ✔');
+      } else {
+        setEmailMsg(data?.error || 'Erreur');
+      }
+    } catch {
+      setEmailMsg('Erreur de connexion');
+    } finally {
+      setEmailLoading(false);
+    }
+  };
+  
   const toggleLanguage = () => {
     if (lang === 'ar') setLang('fr');
     else if (lang === 'fr') setLang('en');
@@ -562,6 +605,39 @@ export default function VirtualLoyaltyCardPageV4() {
           </div>
         </div>
 
+        {/* COLLECTE EMAIL FIDÉLITÉ */}
+        {!savedEmail ? (
+          <form onSubmit={handleSaveEmail} className="bg-zinc-900/90 border border-amber-500/20 p-4 rounded-2xl space-y-3">
+            <p className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+              <Mail className="w-4 h-4" />
+              {lang === 'fr' ? 'Recevoir mes mises à jour par email' : lang === 'en' ? 'Get loyalty updates by email' : 'استلام التحديثات عبر البريد'}
+            </p>
+            <input
+              type="email"
+              required
+              placeholder="nom@exemple.com"
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-500 font-mono"
+            />
+            <button
+              type="submit"
+              disabled={emailLoading}
+              className="w-full bg-amber-500 hover:bg-amber-600 disabled:opacity-50 text-zinc-950 font-black text-xs py-3 rounded-xl transition"
+            >
+              {emailLoading ? '...' : (lang === 'fr' ? 'Enregistrer mon email' : lang === 'en' ? 'Save my email' : 'حفظ البريد')}
+            </button>
+            {emailMsg && <p className="text-[11px] text-zinc-400 font-bold text-center">{emailMsg}</p>}
+          </form>
+        ) : (
+          <div className="bg-zinc-900/90 border border-emerald-500/20 p-3 rounded-2xl text-center">
+            <p className="text-[11px] text-emerald-400 font-bold">
+              {lang === 'fr' ? `Mises à jour : ${savedEmail}` : lang === 'en' ? `Updates: ${savedEmail}` : `التحديثات: ${savedEmail}`}
+            </p>
+          </div>
+        )}
+
+        
         {/* ======================================================= */}
         {/* BOUTON NOUVEAUTÉ V4.0 : COACH IA FITNESS & SCAN PLAT */}
         {/* ======================================================= */}
