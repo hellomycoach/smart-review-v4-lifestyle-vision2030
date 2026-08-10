@@ -241,15 +241,23 @@ export default function LuxuryRestaurantPortalV4() {
     }
   };
 
-  const analyzeFoodImage = async (base64Image: string) => {
+    const analyzeFoodImage = async (base64Image: string) => {
+    // ⛔ BLOQUAGE STRICT SI LE NUMÉRO EST VIDE
+    const phoneToSend = (clientPhone || wifiPhone || "").trim();
+    if (!phoneToSend) {
+      alert(
+        lang === 'ar' ? 'يرجى إدخال رقم الواتساب أولاً قبل إرسال الصورة!' :
+        lang === 'fr' ? 'Veuillez entrer votre numéro WhatsApp avant d\'envoyer la photo !' :
+        'Please enter your WhatsApp number before uploading the photo!'
+      );
+      return; // Interrompt immédiatement l'envoi
+    }
+  
     setAiAnalysisLoading(true);
     setAiResult(null);
-
-  const cleanBase64 = base64Image.replace(/^data:image\/\w+;base64,/, '');
-    
-   // Récupération du numéro (priorité au téléphone saisi ou stocké)
-  const phoneToSend = clientPhone.trim() || wifiPhone.trim();
-    
+  
+    const cleanBase64 = base64Image.replace(/^data:image\/\w+;base64,/, '');
+  
     try {
       const res = await fetch(N8N_AI_FOOD_VISION_API, {
         method: 'POST',
@@ -257,14 +265,14 @@ export default function LuxuryRestaurantPortalV4() {
         body: JSON.stringify({
           image_base64: cleanBase64,
           data: cleanBase64,
-          phone: phoneToSend,
-          client_phone: phoneToSend,
+          phone: phoneToSend,         // Numéro obligatoirement présent
+          client_phone: phoneToSend,  // Numéro obligatoirement présent
           client_email: clientEmail.trim(),
           language: lang,
           instance: rawInstance
         })
       });
-
+  
       if (res.ok) {
         const data = await res.json();
         setAiResult(data);
