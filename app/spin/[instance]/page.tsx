@@ -58,7 +58,7 @@ export default function LuxuryRestaurantPortalV4() {
     }
   }, []);
 
- // 2. Charger automatiquement le téléphone s'il a déjà été saisi ou passé dans l'URL
+  // Charger automatiquement le téléphone s'il a déjà été saisi ou passé dans l'URL
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const urlPhone = searchParams?.get('phone') || searchParams?.get('client_phone') || '';
@@ -164,7 +164,6 @@ export default function LuxuryRestaurantPortalV4() {
             found: true
           });
         } else {
-          // Restaurant non trouvé → on n'ouvre PAS de WhatsApp
           setRestaurantData({
             restaurant_name: formattedUrlName,
             city: "",
@@ -185,7 +184,7 @@ export default function LuxuryRestaurantPortalV4() {
     loadRestaurant();
   }, [rawInstance]);
 
-  // ANIMATION ROTATION ROUE V3 (OUVERTURE POPUP À 4.2S)
+  // ANIMATION ROTATION ROUE V3
   const handleSpinWheel = () => {
     if (mustSpin) return;
     setMustSpin(true);
@@ -227,22 +226,22 @@ export default function LuxuryRestaurantPortalV4() {
     }
   };
 
-  // Traitement Image IA Vision
+  // Chargement de la photo dans le state (sans déclenchement automatique d'analyse)
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        const base64String = reader.result as string;
-        setSelectedImage(base64String);
-        analyzeFoodImage(base64String);
+        setSelectedImage(reader.result as string);
       };
       reader.readAsDataURL(file);
     }
   };
 
-    const analyzeFoodImage = async (base64Image: string) => {
-    // ⛔ BLOQUAGE STRICT SI LE NUMÉRO EST VIDE
+  // Lancement manuel de l'analyse IA
+  const analyzeFoodImage = async () => {
+    if (!selectedImage) return;
+
     const phoneToSend = (clientPhone || wifiPhone || "").trim();
     if (!phoneToSend) {
       alert(
@@ -250,13 +249,13 @@ export default function LuxuryRestaurantPortalV4() {
         lang === 'fr' ? 'Veuillez entrer votre numéro WhatsApp avant d\'envoyer la photo !' :
         'Please enter your WhatsApp number before uploading the photo!'
       );
-      return; // Interrompt immédiatement l'envoi
+      return;
     }
   
     setAiAnalysisLoading(true);
     setAiResult(null);
   
-    const cleanBase64 = base64Image.replace(/^data:image\/\w+;base64,/, '');
+    const cleanBase64 = selectedImage.replace(/^data:image\/\w+;base64,/, '');
   
     try {
       const res = await fetch(N8N_AI_FOOD_VISION_API, {
@@ -265,8 +264,8 @@ export default function LuxuryRestaurantPortalV4() {
         body: JSON.stringify({
           image_base64: cleanBase64,
           data: cleanBase64,
-          phone: phoneToSend,         // Numéro obligatoirement présent
-          client_phone: phoneToSend,  // Numéro obligatoirement présent
+          phone: phoneToSend,
+          client_phone: phoneToSend,
           client_email: clientEmail.trim(),
           language: lang,
           instance: rawInstance
@@ -286,7 +285,6 @@ export default function LuxuryRestaurantPortalV4() {
 
   // URL WHATSAPP DYNAMIQUE DU BOT RESTAURANT
   const botPhoneClean = String(restaurantData.linked_evolution || "").replace(/[^0-9]/g, '');
-  const whatsappUrl = botPhoneClean ? `https://wa.me/${botPhoneClean}` : "#";
 
   const t = {
     ar: {
@@ -419,7 +417,7 @@ export default function LuxuryRestaurantPortalV4() {
           </button>
         </header>
 
-        {/* HERO BANNER RESTAURANT DYNAMIQUE (AFFICHAGE SANS FAUTE) */}
+        {/* HERO BANNER RESTAURANT DYNAMIQUE */}
         <div className="relative group">
           <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 via-amber-300 to-emerald-500 rounded-[28px] blur-sm opacity-70"></div>
           <div className="relative bg-[#14161F] border-2 border-amber-400/40 rounded-[26px] p-6 text-center space-y-2 shadow-2xl">
@@ -431,7 +429,6 @@ export default function LuxuryRestaurantPortalV4() {
 
         {/* ROUE DE LA FORTUNE 3D */}
         <div className="bg-[#14161F] border-2 border-amber-500/40 p-6 sm:p-8 rounded-[26px] text-center space-y-5 shadow-2xl relative overflow-hidden">
-          
           <div className="space-y-2">
             <div className="inline-flex p-3 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-2xl mb-1">
               <Trophy className="w-8 h-8" />
@@ -487,7 +484,6 @@ export default function LuxuryRestaurantPortalV4() {
 
         {/* MODULES V4 */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          
           <button 
             onClick={() => setActiveModal('food_ai')}
             className="bg-[#14161F] border border-emerald-500/40 p-4 rounded-2xl space-y-2 hover:border-emerald-400 transition text-start relative overflow-hidden"
@@ -525,7 +521,6 @@ export default function LuxuryRestaurantPortalV4() {
               <p className="text-xs text-zinc-300 mt-1 leading-snug">{t.menuCardDesc}</p>
             </div>
           </a>
-
         </div>
 
         {/* POP-UP VICTOIRE */}
@@ -569,7 +564,6 @@ export default function LuxuryRestaurantPortalV4() {
                   <div className="bg-zinc-950 p-2.5 rounded-xl border border-emerald-500/30 text-emerald-400">{t.step3}</div>
                 </div>
               </div>
-
             </div>
           </div>
         )}
@@ -642,50 +636,68 @@ export default function LuxuryRestaurantPortalV4() {
 
               {!aiResult ? (
                 <div className="space-y-4">
-                  <p className="text-xs text-zinc-300 font-bold text-center">{t.aiUploadInstruction}</p>
                   
-                  <label className="border-2 border-dashed border-emerald-500/40 hover:border-emerald-400 bg-zinc-950/80 p-8 rounded-2xl text-center flex flex-col items-center justify-center gap-3 cursor-pointer transition">
-                    <Camera className="w-10 h-10 text-emerald-400" />
-                    <span className="text-xs font-bold text-zinc-300">
-                      {selectedImage ? "Changer la photo" : "Prendre / Choisir une photo"}
-                    </span>
+                  {/* 1. SAISIE NUMÉRO WHATSAPP EN PREMIER */}
+                  <div className="space-y-2 text-start">
+                    <label className="text-xs font-bold text-zinc-300">
+                      {lang === 'ar' ? 'رقم الواتساب الخاص بك (لاستلام التحليل) :' : 
+                       lang === 'fr' ? 'Votre numéro WhatsApp (pour recevoir le bilan) :' : 
+                       'Your WhatsApp Number (to receive analysis) :'}
+                    </label>
                     <input 
-                      type="file" 
-                      accept="image/*" 
-                      capture="environment"
-                      onChange={handleImageUpload} 
-                      className="hidden" 
+                      type="tel"
+                      required
+                      dir="ltr"
+                      placeholder="966500000000"
+                      value={clientPhone}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setClientPhone(val);
+                        localStorage.setItem('user_phone', val);
+                      }}
+                      className="w-full bg-zinc-950 border border-emerald-500/40 rounded-xl px-4 py-3 text-sm text-white font-mono focus:outline-none focus:border-emerald-400"
                     />
-                  </label>
+                  </div>
 
-                  {/* Champ de saisie du numéro WhatsApp dans le modal Food AI */}
-              <div className="space-y-2 text-start">
-                <label className="text-xs font-bold text-zinc-300">
-                  {lang === 'ar' ? 'رقم الواتساب الخاص بك (لاستلام التحليل) :' : 
-                   lang === 'fr' ? 'Votre numéro WhatsApp (pour recevoir le bilan) :' : 
-                   'Your WhatsApp Number (to receive analysis) :'}
-                </label>
-                <input 
-                  type="tel"
-                  required
-                  dir="ltr"
-                  placeholder="966500000000"
-                  value={clientPhone}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setClientPhone(val);
-                    localStorage.setItem('user_phone', val); // Persistance locale
-                  }}
-                  className="w-full bg-zinc-950 border border-emerald-500/40 rounded-xl px-4 py-3 text-sm text-white font-mono focus:outline-none focus:border-emerald-400"
-                />
-              </div>
+                  {/* 2. SÉLECTION PHOTO */}
+                  <div className="space-y-2">
+                    <p className="text-xs text-zinc-300 font-bold text-center">{t.aiUploadInstruction}</p>
+                    <label className="border-2 border-dashed border-emerald-500/40 hover:border-emerald-400 bg-zinc-950/80 p-6 rounded-2xl text-center flex flex-col items-center justify-center gap-3 cursor-pointer transition">
+                      {selectedImage ? (
+                        <img src={selectedImage} alt="Plat" className="w-full h-32 object-cover rounded-xl border border-emerald-500/30" />
+                      ) : (
+                        <>
+                          <Camera className="w-10 h-10 text-emerald-400" />
+                          <span className="text-xs font-bold text-zinc-300">Prendre / Choisir une photo</span>
+                        </>
+                      )}
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        capture="environment"
+                        onChange={handleImageUpload} 
+                        className="hidden" 
+                      />
+                    </label>
+                  </div>
 
-                  {aiAnalysisLoading && (
-                    <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-center space-y-2">
-                      <RefreshCw className="w-6 h-6 text-emerald-400 animate-spin mx-auto" />
-                      <p className="text-xs font-bold text-emerald-300">{t.aiAnalyzing}</p>
-                    </div>
-                  )}
+                  {/* 3. BOUTON D'ENVOI D'ANALYSE EXPLICITE */}
+                  <button
+                    type="button"
+                    onClick={analyzeFoodImage}
+                    disabled={aiAnalysisLoading || !selectedImage}
+                    className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-zinc-950 font-black text-xs py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-lg"
+                  >
+                    {aiAnalysisLoading ? (
+                      <>
+                        <RefreshCw className="w-4 h-4 animate-spin" />
+                        <span>{t.aiAnalyzing}</span>
+                      </>
+                    ) : (
+                      <span>{lang === 'fr' ? 'Lancer l\'analyse du plat 🚀' : lang === 'ar' ? 'بدء تحليل الطبق 🚀' : 'Start Meal Analysis 🚀'}</span>
+                    )}
+                  </button>
+
                 </div>
               ) : (
                 <div className="space-y-4 text-start">
