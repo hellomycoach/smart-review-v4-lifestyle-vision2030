@@ -46,6 +46,8 @@ export default function LuxuryRestaurantPortalV4() {
   const [lang, setLang] = useState<'ar' | 'fr' | 'en'>('ar');
   const [loadingRest, setLoadingRest] = useState(false);
 
+  const [clientPhone, setClientPhone] = useState('');
+  
   // Auto-détection de la langue du téléphone
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -56,6 +58,19 @@ export default function LuxuryRestaurantPortalV4() {
     }
   }, []);
 
+ // 2. Charger automatiquement le téléphone s'il a déjà été saisi ou passé dans l'URL
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlPhone = searchParams?.get('phone') || searchParams?.get('client_phone') || '';
+      const storedPhone = localStorage.getItem('user_phone') || '';
+      const phoneToUse = urlPhone || storedPhone;
+      
+      if (phoneToUse) {
+        setClientPhone(phoneToUse);
+      }
+    }
+  }, [searchParams]);
+  
   // Extraction d'instance
   const paramInst = typeof params?.instance === 'string' ? params.instance : (searchParams.get('instance') || '');
   let rawInstance = paramInst;
@@ -230,8 +245,11 @@ export default function LuxuryRestaurantPortalV4() {
     setAiAnalysisLoading(true);
     setAiResult(null);
 
-    const cleanBase64 = base64Image.replace(/^data:image\/\w+;base64,/, '');
-
+  const cleanBase64 = base64Image.replace(/^data:image\/\w+;base64,/, '');
+    
+   // Récupération du numéro (priorité au téléphone saisi ou stocké)
+  const phoneToSend = clientPhone.trim() || wifiPhone.trim();
+    
     try {
       const res = await fetch(N8N_AI_FOOD_VISION_API, {
         method: 'POST',
@@ -239,6 +257,8 @@ export default function LuxuryRestaurantPortalV4() {
         body: JSON.stringify({
           image_base64: cleanBase64,
           data: cleanBase64,
+          phone: phoneToSend,
+          client_phone: phoneToSend,
           client_email: clientEmail.trim(),
           language: lang,
           instance: rawInstance
@@ -629,6 +649,28 @@ export default function LuxuryRestaurantPortalV4() {
                       className="hidden" 
                     />
                   </label>
+
+                  {/* Champ de saisie du numéro WhatsApp dans le modal Food AI */}
+              <div className="space-y-2 text-start">
+                <label className="text-xs font-bold text-zinc-300">
+                  {lang === 'ar' ? 'رقم الواتساب الخاص بك (لاستلام التحليل) :' : 
+                   lang === 'fr' ? 'Votre numéro WhatsApp (pour recevoir le bilan) :' : 
+                   'Your WhatsApp Number (to receive analysis) :'}
+                </label>
+                <input 
+                  type="tel"
+                  required
+                  dir="ltr"
+                  placeholder="966500000000"
+                  value={clientPhone}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setClientPhone(val);
+                    localStorage.setItem('user_phone', val); // Persistance locale
+                  }}
+                  className="w-full bg-zinc-950 border border-emerald-500/40 rounded-xl px-4 py-3 text-sm text-white font-mono focus:outline-none focus:border-emerald-400"
+                />
+              </div>
 
                   {aiAnalysisLoading && (
                     <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-center space-y-2">
