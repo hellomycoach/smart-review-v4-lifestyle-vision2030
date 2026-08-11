@@ -47,6 +47,9 @@ export default function LuxuryRestaurantPortalV4() {
   const [loadingRest, setLoadingRest] = useState(false);
 
   const [clientPhone, setClientPhone] = useState('');
+
+  const [fitnessLevel, setFitnessLevel] = useState<'beginner' | 'intermediate' | 'advanced'>('intermediate');
+  const [userNotes, setUserNotes] = useState('');
   
   // Auto-détection de la langue du téléphone
   useEffect(() => {
@@ -242,12 +245,22 @@ export default function LuxuryRestaurantPortalV4() {
   const analyzeFoodImage = async () => {
     if (!selectedImage) return;
 
+    // ⛔ BLOQUAGE STRICT SI LE NUMÉRO EST VIDE
     const phoneToSend = (clientPhone || wifiPhone || "").trim();
     if (!phoneToSend) {
       alert(
-        lang === 'ar' ? 'يرجى إدخال رقم الواتساب أولاً قبل إرسال الصورة!' :
-        lang === 'fr' ? 'Veuillez entrer votre numéro WhatsApp avant d\'envoyer la photo !' :
-        'Please enter your WhatsApp number before uploading the photo!'
+        lang === 'ar' ? 'يرجى إدخال رقم الواتساب أولاً!' :
+        lang === 'fr' ? 'Veuillez entrer votre numéro WhatsApp !' :
+        'Please enter your WhatsApp number!'
+      );
+      return;
+    }
+  
+    if (!clientEmail.trim()) {
+      alert(
+        lang === 'ar' ? 'يرجى إدخال البريد الإلكتروني لاستلام الخطة الكاملة!' :
+        lang === 'fr' ? 'Veuillez entrer votre e-mail pour recevoir le bilan complet !' :
+        'Please enter your email to receive full fitness report!'
       );
       return;
     }
@@ -267,6 +280,8 @@ export default function LuxuryRestaurantPortalV4() {
           phone: phoneToSend,
           client_phone: phoneToSend,
           client_email: clientEmail.trim(),
+          fitness_level: fitnessLevel,
+          user_notes: userNotes.trim(),
           language: lang,
           instance: rawInstance
         })
@@ -277,7 +292,7 @@ export default function LuxuryRestaurantPortalV4() {
         setAiResult(data);
       }
     } catch (err) {
-      console.error("Erreur analyse IA:", err);
+      console.error("Erreur IA:", err);
     } finally {
       setAiAnalysisLoading(false);
     }
@@ -621,28 +636,26 @@ export default function LuxuryRestaurantPortalV4() {
         {/* MODAL IA FITNESS */}
         {activeModal === 'food_ai' && (
           <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4 overflow-y-auto">
-            <div className="bg-[#14161F] border-2 border-emerald-500/40 rounded-3xl p-6 max-w-md w-full space-y-5 relative shadow-2xl my-auto">
+            <div className="bg-[#14161F] border-2 border-emerald-500/40 rounded-3xl p-6 max-w-md w-full space-y-4 relative shadow-2xl my-auto">
               <button 
                 onClick={() => setActiveModal(null)}
                 className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white"
               >
                 <X className="w-5 h-5" />
               </button>
-
+        
               <div className="text-center space-y-1 pt-2">
                 <HeartPulse className="w-10 h-10 text-emerald-400 mx-auto animate-pulse" />
                 <h3 className="text-xl font-black text-white">{t.aiCardTitle}</h3>
               </div>
-
+        
               {!aiResult ? (
-                <div className="space-y-4">
+                <div className="space-y-3 text-start">
                   
-                  {/* 1. SAISIE NUMÉRO WHATSAPP EN PREMIER */}
-                  <div className="space-y-2 text-start">
+                  {/* 1. WHATSAPP */}
+                  <div>
                     <label className="text-xs font-bold text-zinc-300">
-                      {lang === 'ar' ? 'رقم الواتساب الخاص بك (لاستلام التحليل) :' : 
-                       lang === 'fr' ? 'Votre numéro WhatsApp (pour recevoir le bilan) :' : 
-                       'Your WhatsApp Number (to receive analysis) :'}
+                      {lang === 'ar' ? 'رقم الواتساب الخاص بك :' : lang === 'fr' ? 'Votre numéro WhatsApp :' : 'Your WhatsApp Number:'}
                     </label>
                     <input 
                       type="tel"
@@ -655,19 +668,79 @@ export default function LuxuryRestaurantPortalV4() {
                         setClientPhone(val);
                         localStorage.setItem('user_phone', val);
                       }}
-                      className="w-full bg-zinc-950 border border-emerald-500/40 rounded-xl px-4 py-3 text-sm text-white font-mono focus:outline-none focus:border-emerald-400"
+                      className="w-full bg-zinc-950 border border-emerald-500/40 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-400 mt-1"
                     />
                   </div>
-
-                  {/* 2. SÉLECTION PHOTO */}
-                  <div className="space-y-2">
+        
+                  {/* 2. EMAIL */}
+                  <div>
+                    <label className="text-xs font-bold text-zinc-300">
+                      {lang === 'ar' ? 'البريد الإلكتروني (لاستلام التقرير) :' : lang === 'fr' ? 'Votre e-mail (pour le bilan) :' : 'Your Email:'}
+                    </label>
+                    <input 
+                      type="email"
+                      required
+                      dir="ltr"
+                      placeholder="nom@exemple.com"
+                      value={clientEmail}
+                      onChange={(e) => setClientEmail(e.target.value)}
+                      className="w-full bg-zinc-950 border border-emerald-500/40 rounded-xl px-4 py-2.5 text-sm text-white font-mono focus:outline-none focus:border-emerald-400 mt-1"
+                    />
+                  </div>
+        
+                  {/* 3. NIVEAU FITNESS */}
+                  <div>
+                    <label className="text-xs font-bold text-zinc-300">
+                      {lang === 'ar' ? 'مستوى اللياقة البدنية :' : lang === 'fr' ? 'Niveau de Fitness :' : 'Fitness Level:'}
+                    </label>
+                    <div className="grid grid-cols-3 gap-2 mt-1 text-xs font-bold">
+                      <button 
+                        type="button" 
+                        onClick={() => setFitnessLevel('beginner')} 
+                        className={`p-2 rounded-xl border transition ${fitnessLevel === 'beginner' ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300' : 'bg-zinc-950 border-zinc-800 text-zinc-400'}`}
+                      >
+                        🟢 {lang === 'ar' ? 'مبتدئ' : lang === 'fr' ? 'Débutant' : 'Beginner'}
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={() => setFitnessLevel('intermediate')} 
+                        className={`p-2 rounded-xl border transition ${fitnessLevel === 'intermediate' ? 'bg-amber-500/20 border-amber-400 text-amber-300' : 'bg-zinc-950 border-zinc-800 text-zinc-400'}`}
+                      >
+                        🟡 {lang === 'ar' ? 'متوسط' : lang === 'fr' ? 'Intermédiaire' : 'Intermediate'}
+                      </button>
+                      <button 
+                        type="button" 
+                        onClick={() => setFitnessLevel('advanced')} 
+                        className={`p-2 rounded-xl border transition ${fitnessLevel === 'advanced' ? 'bg-rose-500/20 border-rose-400 text-rose-300' : 'bg-zinc-950 border-zinc-800 text-zinc-400'}`}
+                      >
+                        🔴 {lang === 'ar' ? 'متقدم' : lang === 'fr' ? 'Confirmé' : 'Advanced'}
+                      </button>
+                    </div>
+                  </div>
+        
+                  {/* 4. REMARQUES / REGIME */}
+                  <div>
+                    <label className="text-xs font-bold text-zinc-300">
+                      {lang === 'ar' ? 'ملاحظات / مكونات إضافية (اختياري) :' : lang === 'fr' ? 'Remarques / Ingrédients (optionnel) :' : 'Notes / Ingredients (optional):'}
+                    </label>
+                    <input 
+                      type="text" 
+                      placeholder={lang === 'fr' ? 'Ex: sans sucre, lait d\'avoine...' : 'e.g. sugar-free, oat milk...'} 
+                      value={userNotes} 
+                      onChange={(e) => setUserNotes(e.target.value)} 
+                      className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-emerald-400 mt-1" 
+                    />
+                  </div>
+        
+                  {/* 5. PHOTO */}
+                  <div className="space-y-1">
                     <p className="text-xs text-zinc-300 font-bold text-center">{t.aiUploadInstruction}</p>
-                    <label className="border-2 border-dashed border-emerald-500/40 hover:border-emerald-400 bg-zinc-950/80 p-6 rounded-2xl text-center flex flex-col items-center justify-center gap-3 cursor-pointer transition">
+                    <label className="border-2 border-dashed border-emerald-500/40 hover:border-emerald-400 bg-zinc-950/80 p-4 rounded-2xl text-center flex flex-col items-center justify-center gap-2 cursor-pointer transition">
                       {selectedImage ? (
-                        <img src={selectedImage} alt="Plat" className="w-full h-32 object-cover rounded-xl border border-emerald-500/30" />
+                        <img src={selectedImage} alt="Plat" className="w-full h-28 object-cover rounded-xl border border-emerald-500/30" />
                       ) : (
                         <>
-                          <Camera className="w-10 h-10 text-emerald-400" />
+                          <Camera className="w-8 h-8 text-emerald-400" />
                           <span className="text-xs font-bold text-zinc-300">Prendre / Choisir une photo</span>
                         </>
                       )}
@@ -680,12 +753,12 @@ export default function LuxuryRestaurantPortalV4() {
                       />
                     </label>
                   </div>
-
-                  {/* 3. BOUTON D'ENVOI D'ANALYSE EXPLICITE */}
-                  <button
-                    type="button"
-                    onClick={analyzeFoodImage}
-                    disabled={aiAnalysisLoading || !selectedImage}
+        
+                  {/* 6. BOUTON D'ENVOI */}
+                  <button 
+                    type="button" 
+                    onClick={analyzeFoodImage} 
+                    disabled={aiAnalysisLoading || !selectedImage} 
                     className="w-full bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-zinc-950 font-black text-xs py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-lg"
                   >
                     {aiAnalysisLoading ? (
@@ -697,62 +770,21 @@ export default function LuxuryRestaurantPortalV4() {
                       <span>{lang === 'fr' ? 'Lancer l\'analyse du plat 🚀' : lang === 'ar' ? 'بدء تحليل الطبق 🚀' : 'Start Meal Analysis 🚀'}</span>
                     )}
                   </button>
-
+        
                 </div>
               ) : (
+                /* RÉSULTAT AFFICHE DANS LA POPUP */
                 <div className="space-y-4 text-start">
                   <div className="bg-zinc-950 p-4 rounded-2xl border border-emerald-500/30 space-y-2">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-black text-white">
-                        {lang === 'ar' ? aiResult.dish_name_ar : aiResult.dish_name_fr || aiResult.dish_name_en}
-                      </span>
-                      <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                        {aiResult.health_status || "IA Verified"}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-2 pt-1">
-                      <Flame className="w-5 h-5 text-orange-500 shrink-0" />
-                      <span className="text-xs font-bold text-zinc-300">{t.calories}</span>
-                      <span className="text-base font-black text-orange-400 font-mono">
-                        ~{aiResult.estimated_calories} kcal
-                      </span>
-                    </div>
-
-                    {aiResult.macronutrients && (
-                      <div className="grid grid-cols-3 gap-2 pt-2 border-t border-zinc-800 text-center text-[10px] font-bold">
-                        <div className="bg-zinc-900 p-2 rounded-xl">Glucides: {aiResult.macronutrients.carbs || "-"}</div>
-                        <div className="bg-zinc-900 p-2 rounded-xl">Protéines: {aiResult.macronutrients.protein || "-"}</div>
-                        <div className="bg-zinc-900 p-2 rounded-xl">Lipides: {aiResult.macronutrients.fat || "-"}</div>
-                      </div>
-                    )}
+                    <p className="text-sm font-black text-white">{lang === 'ar' ? aiResult.dish_name_ar : aiResult.dish_name_fr || aiResult.dish_name_en}</p>
+                    <p className="text-xs text-orange-400 font-bold">~{aiResult.estimated_calories} kcal</p>
                   </div>
-
-                  {aiResult.workout && (
-                    <div className="bg-gradient-to-br from-emerald-950/60 to-zinc-950 p-4 rounded-2xl border border-emerald-500/40 space-y-3">
-                      <div className="flex items-center gap-2 text-xs font-black text-emerald-400">
-                        <Activity className="w-4 h-4" />
-                        <span>{t.workoutTitle}</span>
-                      </div>
-
-                      <div className="space-y-2">
-                        {aiResult.workout.exercises?.map((ex: any, idx: number) => (
-                          <div key={idx} className="bg-zinc-900/90 p-2.5 rounded-xl flex items-center justify-between text-xs">
-                            <span className="font-bold text-white">
-                              {lang === 'ar' ? ex.name_ar : ex.name_fr || ex.name_en}
-                            </span>
-                            <span className="font-mono text-emerald-400 font-black px-2 py-0.5 bg-emerald-500/10 rounded border border-emerald-500/20">
-                              {ex.duration}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
+                  <p className="text-xs text-emerald-400 font-bold text-center">
+                    {lang === 'fr' ? '✅ Votre bilan complet et votre séance ont été envoyés par e-mail et WhatsApp !' : '✅ تم إرسال تقريرك الكامل عبر البريد والواتساب!'}
+                  </p>
                   <button 
-                    onClick={() => { setAiResult(null); setSelectedImage(null); }}
-                    className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-black text-xs py-3 rounded-xl transition"
+                    onClick={() => { setAiResult(null); setSelectedImage(null); }} 
+                    className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs py-3 rounded-xl transition"
                   >
                     Analyser un autre plat 📸
                   </button>
