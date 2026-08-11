@@ -74,27 +74,27 @@ export default function LuxuryRestaurantPortalV4() {
     }
   }, [searchParams]);
   
-  // Extraction d'instance
+  // Extraction dynamique propre depuis l'URL (sans valeurs en dur)
   const paramInst = typeof params?.instance === 'string' ? params.instance : (searchParams.get('instance') || '');
-  let rawInstance = paramInst;
+  let rawInstance = paramInst.trim().toLowerCase();
 
   if (typeof window !== 'undefined' && !rawInstance) {
     const parts = window.location.pathname.split('/spin/');
     if (parts.length > 1) {
-      rawInstance = parts[1].split('/')[0].split('?')[0].trim();
+      rawInstance = parts[1].split('/')[0].split('?')[0].trim().toLowerCase();
     }
   }
 
-  // Formatage dynamique du nom depuis l'URL (ex: halim_cafe_madinah -> Halim Cafe)
+  // Nom d'affichage généré dynamiquement depuis l'URL
   const formattedUrlName = rawInstance
     ? rawInstance.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
-    : "Halim Cafe";
+    : "";
 
   const [restaurantData, setRestaurantData] = useState<any>({
     restaurant_name: formattedUrlName,
-    city: "المدينة المنورة",
-    reward_offer: "1 hot drink",
-    wifi_password: "halim2030",
+    city: "",
+    reward_offer: "",
+    wifi_password: "",
     menu_url: "#",
     linked_evolution: ""
   });
