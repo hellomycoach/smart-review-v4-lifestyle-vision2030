@@ -777,7 +777,7 @@ export default function LuxuryRestaurantPortalV4() {
                 <div className="space-y-4 text-start">
                   <div className="bg-zinc-950 p-4 rounded-2xl border border-emerald-500/30 space-y-2">
                     <p className="text-sm font-black text-white">{lang === 'ar' ? aiResult.dish_name_ar : aiResult.dish_name_fr || aiResult.dish_name_en}</p>
-                    <p className="text-xs text-orange-400 font-bold">~{aiResult.estimated_calories} kcal</p>
+                    <p className="text-xs text-orange-400 font-bold">~{aiResult?.estimated_calories || aiResult?.calories || aiResult?.estimatedCalories || 0} kcal</p>
                   </div>
                   <p className="text-xs text-emerald-400 font-bold text-center">
                     {lang === 'fr' ? '✅ Votre bilan complet et votre séance ont été envoyés par e-mail et WhatsApp !' : '✅ تم إرسال تقريرك الكامل عبر البريد والواتساب!'}
