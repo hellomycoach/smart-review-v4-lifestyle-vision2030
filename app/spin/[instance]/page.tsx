@@ -321,6 +321,8 @@ export default function LuxuryRestaurantPortalV4() {
       wifiPassSuccess: "كلمة سر الواي فاي هي :",
       aiUploadInstruction: "التقط صورة لطبقك أو مشروبك الآن :",
       aiAnalyzing: "جاري تحليل الطبق بالذكاء الاصطناعي...",
+      successTitle: "تم إرسال التقرير والحصة بنجاح!",
+      successSub: "تفقد بريدك الإلكتروني (ومجلد Spams) والواتساب.",
       calories: "السعرات الحرارية المقدرة :",
       workoutTitle: "حصة اللياقة المقترحة (بدون معدات) :",
       spinBtnAction: "أدر العجلة الآن 🎲",
@@ -334,7 +336,7 @@ export default function LuxuryRestaurantPortalV4() {
       poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
     },
     fr: {
-      portalTitle: "PORTAIL DE GASTRONOMIE VIP",
+      portalTitle: "PORTAIL VIP",
       subTitle: "Bienvenue chez",
       spinCardTitle: "Roue de la Fortune & Cadeaux VIP",
       spinCardDesc: "Tournez la roue et gagnez un cadeau en laissant votre avis",
@@ -351,7 +353,9 @@ export default function LuxuryRestaurantPortalV4() {
       wifiBtnSubmit: "Voir le Mot de Passe 🔓",
       wifiPassSuccess: "Mot de Passe WiFi :",
       aiUploadInstruction: "Prenez en photo votre plat ou boisson :",
-      aiAnalyzing: "Analyse nutritionnelle IA en cours...",
+      aiAnalyzing: "Analyse nutritionnelle en cours...",
+      successTitle: "Bilan & séance envoyés avec succès !",
+      successSub: "Consultez votre boîte e-mail (pensez aux spams !) et votre WhatsApp.",
       calories: "Calories estimées :",
       workoutTitle: "Séance Fitness 12 min (Sans matériel) :",
       spinBtnAction: "Tourner la Roue Maintenant 🎲",
@@ -383,8 +387,10 @@ export default function LuxuryRestaurantPortalV4() {
       wifiBtnSubmit: "Unlock Password 🔓",
       wifiPassSuccess: "WiFi Password:",
       aiUploadInstruction: "Take a photo of your meal or drink:",
-      aiAnalyzing: "AI Nutritional Analysis in progress...",
+      aiAnalyzing: "Nutritional Analysis in progress...",
       calories: "Estimated Calories:",
+      successTitle: "Full Report & Workout Sent!",
+      successSub: "Check your Email inbox (and Spam folder) & WhatsApp.",
       workoutTitle: "Recommended 12-min Bodyweight Workout:",
       spinBtnAction: "Spin the Wheel Now 🎲",
       spinCongratsTitle: "🎉 CONGRATULATIONS! YOU WON:",
@@ -779,9 +785,16 @@ export default function LuxuryRestaurantPortalV4() {
                     <p className="text-sm font-black text-white">{lang === 'ar' ? aiResult.dish_name_ar : aiResult.dish_name_fr || aiResult.dish_name_en}</p>
                     <p className="text-xs text-orange-400 font-bold">~{aiResult?.estimated_calories || aiResult?.calories || aiResult?.estimatedCalories || 0} kcal</p>
                   </div>
-                  <p className="text-xs text-emerald-400 font-bold text-center">
-                    {lang === 'fr' ? '✅ Votre bilan complet et votre séance ont été envoyés par e-mail et WhatsApp !' : '✅ تم إرسال تقريرك الكامل عبر البريد والواتساب!'}
-                  </p>
+                 {/* BANNIÈRE DE CONFIRMATION ENVOI (ULTRA VISIBLE) */}
+                  <div className="bg-emerald-500/15 border-2 border-emerald-500/40 p-4 rounded-2xl text-center space-y-1.5 shadow-lg shadow-emerald-500/10">
+                    <div className="text-emerald-400 font-black text-sm md:text-base flex items-center justify-center gap-2">
+                      <span className="text-lg">✅</span>
+                      <span>{t.successTitle}</span>
+                    </div>
+                    <p className="text-xs font-bold text-emerald-200/90 leading-relaxed">
+                      {t.successSub}
+                    </p>
+                  </div>
                   <button 
                     onClick={() => { setAiResult(null); setSelectedImage(null); }} 
                     className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs py-3 rounded-xl transition"
