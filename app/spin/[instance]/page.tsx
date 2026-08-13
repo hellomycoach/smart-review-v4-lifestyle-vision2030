@@ -775,18 +775,17 @@ export default function LuxuryRestaurantPortalV4() {
               ) : (
             
              {/* RÉSULTAT AFFICHE DANS LA POPUP */}
-              {aiResult && (
                 <div className="space-y-4 text-start">
-
+                  
                   {/* CARD PLAT & CALORIES */}
                   <div className="bg-zinc-950 p-4 rounded-2xl border border-emerald-500/30 space-y-2 text-center">
                     <p className="text-base font-black text-white">
-                      🍽️ {lang === 'ar'
-                        ? (aiResult?.dish_name_ar || aiResult?.dish_name_fr)
+                      🍽️ {lang === 'ar' 
+                        ? (aiResult?.dish_name_ar || aiResult?.dish_name_fr) 
                         : (aiResult?.dish_name_fr || aiResult?.dish_name_en || aiResult?.dish_name_ar || 'Votre plat')}
                     </p>
                     <div className="inline-block bg-amber-500/20 text-amber-400 text-sm font-black px-4 py-1.5 rounded-xl border border-amber-500/30">
-                      ~{aiResult?.estimated_calories || aiResult?.calories || aiResult?.kcal || 0} kcal
+                      ~{aiResult?.estimated_calories || aiResult?.calories || aiResult?.estimatedCalories || 0} kcal
                     </div>
                   </div>
 
@@ -812,18 +811,17 @@ export default function LuxuryRestaurantPortalV4() {
                   </div>
 
                   {/* BOUTON RECOMMENCER */}
-                  <button
-                    onClick={() => { setAiResult(null); setSelectedImage(null); }}
-                    className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs py-3.5 rounded-xl transition flex items-center justify-center gap-2"
+                  <button 
+                    onClick={() => { setAiResult(null); setSelectedImage(null); }} 
+                    className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs py-3.5 rounded-xl transition"
                   >
-                    <span>📸</span>
-                    <span>
-                      {lang === 'en' ? 'Analyze another meal' : lang === 'ar' ? 'تحليل وجبة أخرى' : 'Analyser un autre plat'}
-                    </span>
+                    📸 {lang === 'en' ? 'Analyze another meal' : lang === 'ar' ? 'تحليل وجبة أخرى' : 'Analyser un autre plat'}
                   </button>
-
                 </div>
               )}
+            </div>
+          </div>
+        )}
 
         {/* FOOTER */}
         <footer className="pt-2 text-center">
