@@ -774,54 +774,56 @@ export default function LuxuryRestaurantPortalV4() {
                 </div>
               ) : (
             
-               {/* RÉSULTAT AFFICHE DANS LA POPUP */}
-              <div className="space-y-4 text-start">
+             {/* RÉSULTAT AFFICHE DANS LA POPUP */}
+              {aiResult && (
+                <div className="space-y-4 text-start">
 
-        {/* CARD PLAT & CALORIES */}
-        <div className="bg-zinc-950 p-4 rounded-2xl border border-emerald-500/30 space-y-2 text-center">
-          <p className="text-base font-black text-white">
-            🍽️ {lang === 'ar'
-              ? (aiResult?.dish_name_ar || aiResult?.dish_name_fr)
-              : (aiResult?.dish_name_fr || aiResult?.dish_name_en || aiResult?.dish_name_ar || 'Votre plat')}
-          </p>
-          <div className="inline-block bg-amber-500/20 text-amber-400 text-sm font-black px-4 py-1.5 rounded-xl border border-amber-500/30">
-            ~{aiResult?.estimated_calories || aiResult?.calories || aiResult?.kcal || 0} kcal
-          </div>
-        </div>
+                  {/* CARD PLAT & CALORIES */}
+                  <div className="bg-zinc-950 p-4 rounded-2xl border border-emerald-500/30 space-y-2 text-center">
+                    <p className="text-base font-black text-white">
+                      🍽️ {lang === 'ar'
+                        ? (aiResult?.dish_name_ar || aiResult?.dish_name_fr)
+                        : (aiResult?.dish_name_fr || aiResult?.dish_name_en || aiResult?.dish_name_ar || 'Votre plat')}
+                    </p>
+                    <div className="inline-block bg-amber-500/20 text-amber-400 text-sm font-black px-4 py-1.5 rounded-xl border border-amber-500/30">
+                      ~{aiResult?.estimated_calories || aiResult?.calories || aiResult?.kcal || 0} kcal
+                    </div>
+                  </div>
 
-        {/* BANNIÈRE DE CONFIRMATION EMAIL & WHATSAPP (VIP & ULTRA VISIBLE) */}
-        <div className="bg-emerald-500/15 border-2 border-emerald-500/40 p-4 rounded-2xl text-center space-y-1.5 shadow-lg shadow-emerald-500/10">
-          <div className="text-emerald-400 font-black text-sm md:text-base flex items-center justify-center gap-2">
-            <span className="text-lg">✅</span>
-            <span>
-              {lang === 'en'
-                ? 'Full Report & Workout Sent!'
-                : lang === 'ar'
-                ? 'تم إرسال التقرير والحصة بنجاح!'
-                : 'Bilan & séance envoyés avec succès !'}
-            </span>
-          </div>
-          <p className="text-xs font-bold text-emerald-200/90 leading-relaxed">
-            {lang === 'en'
-              ? 'Check your Email inbox (and Spam folder) & WhatsApp.'
-              : lang === 'ar'
-              ? 'تفقد بريدك الإلكتروني (ومجلد Spams) والواتساب.'
-              : 'Consultez votre boîte e-mail (pensez aux spams !) et votre WhatsApp.'}
-          </p>
-        </div>
+                  {/* BANNIÈRE DE CONFIRMATION EMAIL & WHATSAPP (VIP & ULTRA VISIBLE) */}
+                  <div className="bg-emerald-500/15 border-2 border-emerald-500/40 p-4 rounded-2xl text-center space-y-1.5 shadow-lg shadow-emerald-500/10">
+                    <div className="text-emerald-400 font-black text-sm md:text-base flex items-center justify-center gap-2">
+                      <span className="text-lg">✅</span>
+                      <span>
+                        {lang === 'en'
+                          ? 'Full Report & Workout Sent!'
+                          : lang === 'ar'
+                          ? 'تم إرسال التقرير والحصة بنجاح!'
+                          : 'Bilan & séance envoyés avec succès !'}
+                      </span>
+                    </div>
+                    <p className="text-xs font-bold text-emerald-200/90 leading-relaxed">
+                      {lang === 'en'
+                        ? 'Check your Email inbox (and Spam folder) & WhatsApp.'
+                        : lang === 'ar'
+                        ? 'تفقد بريدك الإلكتروني (ومجلد Spams) والواتساب.'
+                        : 'Consultez votre boîte e-mail (pensez aux spams !) et votre WhatsApp.'}
+                    </p>
+                  </div>
 
-        {/* BOUTON RECOMMENCER */}
-        <button
-          onClick={() => { setAiResult(null); setSelectedImage(null); }}
-          className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs py-3.5 rounded-xl transition flex items-center justify-center gap-2"
-        >
-          <span>📸</span>
-          <span>
-            {lang === 'en' ? 'Analyze another meal' : lang === 'ar' ? 'تحليل وجبة أخرى' : 'Analyser un autre plat'}
-          </span>
-        </button>
+                  {/* BOUTON RECOMMENCER */}
+                  <button
+                    onClick={() => { setAiResult(null); setSelectedImage(null); }}
+                    className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs py-3.5 rounded-xl transition flex items-center justify-center gap-2"
+                  >
+                    <span>📸</span>
+                    <span>
+                      {lang === 'en' ? 'Analyze another meal' : lang === 'ar' ? 'تحليل وجبة أخرى' : 'Analyser un autre plat'}
+                    </span>
+                  </button>
 
-      </div>
+                </div>
+              )}
 
         {/* FOOTER */}
         <footer className="pt-2 text-center">
