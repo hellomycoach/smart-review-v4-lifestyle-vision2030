@@ -773,47 +773,21 @@ export default function LuxuryRestaurantPortalV4() {
         
                 </div>
               ) : (
-                {/* RÉSULTAT AFFICHE DANS LA POPUP */}
+                /* RÉSULTAT AFFICHE DANS LA POPUP */
                 <div className="space-y-4 text-start">
-                  
-                 {/* CARD PLAT & CALORIES */}
-              <div className="bg-zinc-950 p-4 rounded-2xl border border-emerald-500/30 space-y-2 text-center">
-                <p className="text-base font-black text-white">
-                  🍽️ {lang === 'ar' ? (aiResult?.dish_name_ar || aiResult?.dish_name_fr) : (aiResult?.dish_name_fr || aiResult?.dish_name_en || aiResult?.dish_name_ar || 'Votre plat')}
-                </p>
-                <div className="inline-block bg-amber-500/20 text-amber-400 text-sm font-black px-4 py-1.5 rounded-xl border border-amber-500/30">
-                  ~{aiResult?.estimated_calories || aiResult?.calories || aiResult?.estimatedCalories || 0} kcal
-                </div>
-              </div>
-
-              {/* BANNIÈRE CONFIRMATION ENVOI */}
-              <div className="bg-emerald-500/15 border-2 border-emerald-500/40 p-4 rounded-2xl text-center space-y-1.5 shadow-lg shadow-emerald-500/10">
-                <div className="text-emerald-400 font-black text-sm md:text-base flex items-center justify-center gap-2">
-                  <span className="text-lg">✅</span>
-                  <span>
-                    {lang === 'en' && "Full Report & Workout Sent!"}
-                    {lang === 'ar' && "تم إرسال التقرير والحصة بنجاح!"}
-                    {lang !== 'en' && lang !== 'ar' && "Bilan & séance envoyés avec succès !"}
-                  </span>
-                </div>
-                <p className="text-xs font-bold text-emerald-200/90 leading-relaxed">
-                  {lang === 'en' && "Check your Email inbox (and Spam folder) & WhatsApp."}
-                  {lang === 'ar' && "تفقد بريدك الإلكتروني والواتساب."}
-                  {lang !== 'en' && lang !== 'ar' && "Consultez votre boîte e-mail (pensez aux spams !) et votre WhatsApp."}
-                </p>
-              </div>
-
-                  {/* BOUTON RECOMMENCER */}
+                  <div className="bg-zinc-950 p-4 rounded-2xl border border-emerald-500/30 space-y-2">
+                    <p className="text-sm font-black text-white">{lang === 'ar' ? aiResult.dish_name_ar : aiResult.dish_name_fr || aiResult.dish_name_en}</p>
+                    <p className="text-xs text-orange-400 font-bold">~{aiResult?.estimated_calories || aiResult?.calories || aiResult?.estimatedCalories || 0} kcal</p>
+                  </div>
+                  <p className="text-xs text-emerald-400 font-bold text-center">
+                    {lang === 'fr' ? '✅ Votre bilan complet et votre séance ont été envoyés par e-mail et WhatsApp !' : '✅ تم إرسال تقريرك الكامل عبر البريد والواتساب!'}
+                  </p>
                   <button 
                     onClick={() => { setAiResult(null); setSelectedImage(null); }} 
-                    className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs py-3.5 rounded-xl transition flex items-center justify-center gap-2"
+                    className="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold text-xs py-3 rounded-xl transition"
                   >
-                    <span>📸</span>
-                    <span>
-                      {lang === 'en' ? 'Analyze another meal' : lang === 'ar' ? 'تحليل وجبة أخرى' : 'Analyser un autre plat'}
-                    </span>
+                    Analyser un autre plat 📸
                   </button>
-
                 </div>
               )}
             </div>
