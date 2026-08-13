@@ -819,10 +819,6 @@ export default function LuxuryRestaurantPortalV4() {
                 </button>
 
               </div>
-              )}
-            </div>
-          </div>
-        )}
 
         {/* FOOTER */}
         <footer className="pt-2 text-center">
