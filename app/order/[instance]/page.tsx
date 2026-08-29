@@ -67,12 +67,13 @@ export default function TableOrderingPage() {
   const [showTableModal, setShowTableModal] = useState(false);
   const [tempTableInput, setTempTableInput] = useState(tableNumber);
 
-  // Restaurant data
+  // Restaurant data (Par défaut configuré pour le Qatar 🇶🇦 : Doha, QAR, TVA 0%)
   const [restaurant, setRestaurant] = useState<any>({
     name: formattedUrlName,
-    city: "Riyadh",
-    currency: "SAR",
-    taxRate: 0.15, // 15% TVA Golfe
+    city: "Doha",
+    country: "Qatar",
+    currency: "QAR",
+    taxRate: 0.0, // 0% TVA au Qatar
     coverImage: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
     isOpen: true
   });
@@ -135,11 +136,15 @@ export default function TableOrderingPage() {
         });
 
         if (matched) {
+          const isQatar = matched.country === "Qatar" || matched.city?.toLowerCase().includes("doha");
+          const isFrance = matched.country === "France";
           setRestaurant((prev: any) => ({
             ...prev,
             name: matched.restaurant_name || prev.name,
-            city: matched.city || prev.city,
-            currency: matched.country === "Qatar" ? "QAR" : (matched.country === "France" ? "EUR" : "SAR"),
+            city: matched.city || (isQatar ? "Doha" : prev.city),
+            country: matched.country || (isQatar ? "Qatar" : "Qatar"),
+            currency: isQatar ? "QAR" : (isFrance ? "EUR" : "SAR"),
+            taxRate: isQatar ? 0.0 : (isFrance ? 0.10 : 0.15),
             coverImage: matched.cover_image || prev.coverImage
           }));
         }
@@ -149,6 +154,8 @@ export default function TableOrderingPage() {
     };
     fetchRestInfo();
   }, [rawInstance]);
+
+  const isQatarLocation = restaurant.currency === "QAR" || restaurant.country === "Qatar";
 
   // Dictionnaire de traductions
   const t = {
@@ -173,19 +180,19 @@ export default function TableOrderingPage() {
       specialNotes: "ملاحظات إضافية للمطبخ (اختياري)",
       specialNotesPlaceholder: "مثال: بدون بصل، الصلصة جانباً...",
       subtotal: "المجموع الفرعي",
-      vat: "ضريبة القيمة المضافة (15% مشمولة)",
+      vat: isQatarLocation ? "ضريبة القيمة المضافة (0% - قطر)" : "ضريبة القيمة المضافة (15% مشمولة)",
       tip: "إكرامية الخدمة",
       total: "المجموع الكلي",
       orderNow: "تأكيد الطلب والدفع",
       orderProcessing: "جاري تأكيد طلبك...",
       paymentMethod: "طريقة الدفع",
-      applePay: "Apple Pay (دفع سريع)",
-      cardPay: "مدى / بطاقة ائتمانية",
+      applePay: "Apple Pay (دفع فوري)",
+      cardPay: isQatarLocation ? "نابس (NAPS) / بطاقة بنكية" : "مدى (Mada) / بطاقة بنكية",
       counterPay: "الدفع عند الكاشير",
       phone: "رقم الجوال (لإرسال الفاتورة ونقاط الولاء)",
       guestName: "اسم العميل (اختياري)",
       tipCustom: "مخصص",
-      currency: restaurant.currency === "SAR" ? "ر.س" : (restaurant.currency === "QAR" ? "ر.ق" : "€"),
+      currency: restaurant.currency === "QAR" ? "ر.ق" : (restaurant.currency === "SAR" ? "ر.س" : "€"),
       optionsRequired: "يرجى تحديد الخيارات الإلزامية",
       openHours: "مفتوح لاستقبال الطلبات",
       poweredBy: "تجربة ضيافة ذكية برعاية Smart Review AI"
@@ -211,19 +218,19 @@ export default function TableOrderingPage() {
       specialNotes: "Instructions particulières pour la cuisine",
       specialNotesPlaceholder: "Ex: cuisson d'appoint, sauce à part, sans oignon...",
       subtotal: "Sous-total",
-      vat: "TVA (15% incluse)",
+      vat: isQatarLocation ? "TVA (0% - Qatar)" : "TVA (15% incluse)",
       tip: "Pourboire équipe",
       total: "Total à régler",
       orderNow: "Commander & Régler",
       orderProcessing: "Validation de votre commande...",
       paymentMethod: "Moyen de règlement",
       applePay: "Apple Pay (1-Clic)",
-      cardPay: "Carte Bancaire / Mada",
+      cardPay: isQatarLocation ? "Carte Bancaire / NAPS Qatar" : "Carte Bancaire / Mada",
       counterPay: "Règlement en caisse",
       phone: "N° de téléphone (reçu SMS & fidélité)",
       guestName: "Votre prénom (optionnel)",
       tipCustom: "Autre",
-      currency: restaurant.currency === "SAR" ? "SAR" : (restaurant.currency === "QAR" ? "QAR" : "€"),
+      currency: restaurant.currency === "QAR" ? "QAR" : (restaurant.currency === "SAR" ? "SAR" : "€"),
       optionsRequired: "Veuillez renseigner les choix obligatoires",
       openHours: "Service ouvert en continu",
       poweredBy: "Expérience culinaire propulsée par Smart Review AI"
@@ -249,19 +256,19 @@ export default function TableOrderingPage() {
       specialNotes: "Kitchen notes or dietary preferences",
       specialNotesPlaceholder: "E.g., dressing on the side, well done...",
       subtotal: "Subtotal",
-      vat: "VAT (15% incl.)",
+      vat: isQatarLocation ? "VAT (0% - Qatar)" : "VAT (15% incl.)",
       tip: "Staff Tip",
       total: "Total Amount",
       orderNow: "Place Order & Pay",
       orderProcessing: "Confirming your order...",
       paymentMethod: "Payment Method",
       applePay: "Apple Pay (Instant)",
-      cardPay: "Credit Card / Mada",
+      cardPay: isQatarLocation ? "Debit / Credit Card (NAPS)" : "Debit / Credit Card (Mada)",
       counterPay: "Pay at Cashier",
       phone: "Phone Number (for digital receipt & points)",
       guestName: "Guest Name (optional)",
       tipCustom: "Custom",
-      currency: restaurant.currency === "SAR" ? "SAR" : (restaurant.currency === "QAR" ? "QAR" : "€"),
+      currency: restaurant.currency === "QAR" ? "QAR" : (restaurant.currency === "SAR" ? "SAR" : "€"),
       optionsRequired: "Please select all required options",
       openHours: "Kitchen is open & ready",
       poweredBy: "Smart Hospitality powered by Smart Review AI"

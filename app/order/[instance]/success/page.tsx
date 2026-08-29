@@ -85,7 +85,7 @@ export default function OrderSuccessPage() {
       spinButton: "تدوير عجلة الهدايا",
       loyaltyButton: "عرض بطاقة الولاء والنقاط",
       orderAgain: "طلب المزيد من الأطباق",
-      currency: orderData?.currency === "EUR" ? "€" : (orderData?.currency === "QAR" ? "ر.ق" : "ر.س"),
+      currency: orderData?.currency === "EUR" ? "€" : (orderData?.currency === "SAR" ? "ر.س" : "ر.ق"),
     },
     fr: {
       successTitle: "Commande Confirmée avec Succès !",
@@ -109,7 +109,7 @@ export default function OrderSuccessPage() {
       spinButton: "Faire tourner la roue cadeau",
       loyaltyButton: "Consulter ma carte fidélité",
       orderAgain: "Commander un autre plat",
-      currency: orderData?.currency === "EUR" ? "€" : (orderData?.currency === "QAR" ? "QAR" : "SAR"),
+      currency: orderData?.currency === "EUR" ? "€" : (orderData?.currency === "SAR" ? "SAR" : "QAR"),
     },
     en: {
       successTitle: "Order Placed Successfully!",
@@ -133,7 +133,7 @@ export default function OrderSuccessPage() {
       spinButton: "Spin the Reward Wheel",
       loyaltyButton: "View Digital Loyalty Card",
       orderAgain: "Order more items",
-      currency: orderData?.currency === "EUR" ? "€" : (orderData?.currency === "QAR" ? "QAR" : "SAR"),
+      currency: orderData?.currency === "EUR" ? "€" : (orderData?.currency === "SAR" ? "SAR" : "QAR"),
     }
   }[lang];
 
