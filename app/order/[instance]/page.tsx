@@ -74,6 +74,7 @@ export default function TableOrderingPage() {
     country: "Qatar",
     currency: "QAR",
     taxRate: 0.0, // 0% TVA au Qatar
+    totalTables: 20, // Nombre total de tables par défaut
     coverImage: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
     isOpen: true
   });
@@ -120,7 +121,7 @@ export default function TableOrderingPage() {
     }
   }, [urlTable]);
 
-  // Chargement métadonnées restaurant N8N si dispo
+  // Chargement métadonnées restaurant N8N si dispo (y compris total_tables NocoDB)
   useEffect(() => {
     const fetchRestInfo = async () => {
       if (!rawInstance) return;
@@ -138,6 +139,9 @@ export default function TableOrderingPage() {
         if (matched) {
           const isQatar = matched.country === "Qatar" || matched.city?.toLowerCase().includes("doha");
           const isFrance = matched.country === "France";
+          const rawTotalTables = parseInt(matched.total_tables || matched.total_table || matched.tables_count || "20", 10);
+          const parsedTotalTables = isNaN(rawTotalTables) || rawTotalTables <= 0 ? 20 : rawTotalTables;
+
           setRestaurant((prev: any) => ({
             ...prev,
             name: matched.restaurant_name || prev.name,
@@ -145,6 +149,7 @@ export default function TableOrderingPage() {
             country: matched.country || (isQatar ? "Qatar" : "Qatar"),
             currency: isQatar ? "QAR" : (isFrance ? "EUR" : "SAR"),
             taxRate: isQatar ? 0.0 : (isFrance ? 0.10 : 0.15),
+            totalTables: parsedTotalTables,
             coverImage: matched.cover_image || prev.coverImage
           }));
         }
@@ -1089,19 +1094,55 @@ export default function TableOrderingPage() {
         </div>
       )}
 
-      {/* MODAL CHANGEMENT NUMÉRO DE TABLE */}
+      {/* MODAL CHANGEMENT NUMÉRO DE TABLE (GRILLE INTERACTIVE 1 À TOTAL_TABLES) */}
       {showTableModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-          <div className="w-full max-w-xs bg-[#FAF8F5] rounded-3xl p-5 border border-[#E5DAD0] shadow-2xl space-y-4 text-center">
-            <h3 className="font-black text-base text-[#2E2722]">{t.enterTable}</h3>
-            <input
-              type="text"
-              value={tempTableInput}
-              onChange={(e) => setTempTableInput(e.target.value)}
-              placeholder="01, 12, VIP-3..."
-              className="w-full text-center text-xl font-black p-3 rounded-2xl bg-[#EFE8DF] border border-[#D5C4B4] text-[#2E2722] focus:ring-2 focus:ring-[#B39F8D]"
-            />
-            <div className="flex gap-2">
+          <div className="w-full max-w-sm bg-[#FAF8F5] rounded-3xl p-5 border border-[#E5DAD0] shadow-2xl space-y-4">
+            
+            <div className="text-center">
+              <h3 className="font-black text-base text-[#2E2722]">{t.enterTable}</h3>
+              <p className="text-xs text-[#8C7A6B] mt-0.5">
+                {lang === 'ar' ? `اختر من 1 إلى ${restaurant.totalTables || 20}` : (lang === 'fr' ? `Tables disponibles (1 à ${restaurant.totalTables || 20})` : `Available tables (1 to ${restaurant.totalTables || 20})`)}
+              </p>
+            </div>
+
+            {/* Grille interactive de tables rapides */}
+            <div className="max-h-48 overflow-y-auto p-1 grid grid-cols-4 sm:grid-cols-5 gap-2 scrollbar-thin">
+              {Array.from({ length: restaurant.totalTables || 20 }, (_, i) => {
+                const numStr = String(i + 1).padStart(2, '0');
+                const isCurrent = tempTableInput === numStr || tempTableInput === String(i + 1);
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setTempTableInput(numStr)}
+                    className={`py-2.5 rounded-xl font-black text-xs transition-all border ${
+                      isCurrent
+                        ? 'bg-[#3D352E] text-[#FAF8F5] border-[#3D352E] shadow-sm scale-105 ring-2 ring-[#C5A880]'
+                        : 'bg-[#F3ECE2] text-[#4A3D34] border-[#E0D5C7] hover:bg-[#EAE0D5]'
+                    }`}
+                  >
+                    {numStr}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Champ de saisie personnalisé (ex: VIP, Terrasse) */}
+            <div className="pt-2 border-t border-[#E8DFD5] space-y-1.5 text-center">
+              <label className="text-[11px] font-bold text-[#8C7A6B]">
+                {lang === 'ar' ? "أو اكتب رقم / اسم طاولة مخصص (مثل VIP-1)" : (lang === 'fr' ? "Ou numéro personnalisé (ex: VIP-1, Terrasse)" : "Or custom table name (e.g. VIP-1)")}
+              </label>
+              <input
+                type="text"
+                value={tempTableInput}
+                onChange={(e) => setTempTableInput(e.target.value)}
+                placeholder="01, 12, VIP-1..."
+                className="w-full text-center text-sm font-black p-2.5 rounded-xl bg-[#EFE8DF] border border-[#D5C4B4] text-[#2E2722] focus:ring-2 focus:ring-[#B39F8D]"
+              />
+            </div>
+
+            {/* Boutons d'action */}
+            <div className="flex gap-2 pt-1">
               <button
                 onClick={() => setShowTableModal(false)}
                 className="flex-1 py-2.5 rounded-xl bg-[#EAE0D5] text-[#5C4D41] font-bold text-xs hover:bg-[#DFCDBF]"
@@ -1118,7 +1159,7 @@ export default function TableOrderingPage() {
                   }
                   setShowTableModal(false);
                 }}
-                className="flex-1 py-2.5 rounded-xl bg-[#3D352E] text-[#FAF8F5] font-bold text-xs hover:bg-[#241E1A]"
+                className="flex-1 py-2.5 rounded-xl bg-[#3D352E] text-[#FAF8F5] font-bold text-xs hover:bg-[#241E1A] shadow-md"
               >
                 {t.confirm}
               </button>
