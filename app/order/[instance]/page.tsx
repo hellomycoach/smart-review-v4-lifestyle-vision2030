@@ -420,6 +420,7 @@ export default function TableOrderingPage() {
       customer_phone: customerPhone,
       customer_email: customerEmail,
       customer_name: customerName || "Guest",
+      lang: lang || 'ar',
       items: cart.map(c => ({
         id: c.menuItem.id,
         name: c.menuItem.name[lang],
