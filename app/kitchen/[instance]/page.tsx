@@ -37,105 +37,12 @@ export interface KitchenOrder {
   elapsedMinutes?: number;
 }
 
-// Commandes de démonstration réalistes pour démarrage immédiat
-const INITIAL_DEMO_ORDERS: KitchenOrder[] = [
-  {
-    order_id: "SR-849201",
-    instance_name: "doha_pilot",
-    restaurant_name: "Lusail Courtyard Café",
-    table_number: "07",
-    customer_name: "Ahmed K.",
-    customer_phone: "+974 5512 3456",
-    items: [
-      {
-        id: "sig-1",
-        name: "ستيك تندرلوين واغيو بالزعفران / Wagyu Tenderloin",
-        quantity: 2,
-        options: ["درجة الاستواء: وسط مائل للاستواء (Med Rare)", "كمأة سوداء إضافية (+35 QAR)"],
-        special_instructions: "الصلصة جانباً بدون فلفل حار"
-      },
-      {
-        id: "bev-1",
-        name: "سبانش لاتيه بارد مميز / Iced Spanish Latte",
-        quantity: 2,
-        options: ["حليب شوفان عضوي (+5 QAR)"]
-      }
-    ],
-    subtotal: 444,
-    tip: 20,
-    total_amount: 464,
-    currency: "QAR",
-    payment_method: "apple_pay",
-    status: "recue",
-    timestamp: new Date(Date.now() - 3 * 60000).toISOString() // Il y a 3 min
-  },
-  {
-    order_id: "SR-718294",
-    instance_name: "doha_pilot",
-    restaurant_name: "Lusail Courtyard Café",
-    table_number: "03",
-    customer_name: "Sarah M.",
-    customer_phone: "+974 3388 9900",
-    items: [
-      {
-        id: "sig-2",
-        name: "ريزوتو الروبيان الملكي / Royal Prawn Risotto",
-        quantity: 1,
-        options: ["روبيان إضافي (2 حبة)"]
-      },
-      {
-        id: "star-1",
-        name: "سلطة البوراتا والشمندر / Burrata Salad",
-        quantity: 1
-      },
-      {
-        id: "bev-2",
-        name: "موهيتو الباشن فروت / Passion Fruit Mocktail",
-        quantity: 1
-      }
-    ],
-    subtotal: 232,
-    tip: 0,
-    total_amount: 232,
-    currency: "QAR",
-    payment_method: "counter", // Règlement en caisse
-    status: "en_cuisine",
-    timestamp: new Date(Date.now() - 11 * 60000).toISOString() // Il y a 11 min
-  },
-  {
-    order_id: "SR-629105",
-    instance_name: "doha_pilot",
-    restaurant_name: "Lusail Courtyard Café",
-    table_number: "12",
-    customer_name: "Fahad A.",
-    items: [
-      {
-        id: "des-1",
-        name: "كيكة التمر بالكراميل والآيس كريم / Saudi Date Cake",
-        quantity: 2
-      },
-      {
-        id: "bev-1",
-        name: "سبانش لاتيه بارد مميز / Spanish Latte",
-        quantity: 2
-      }
-    ],
-    subtotal: 156,
-    tip: 10,
-    total_amount: 166,
-    currency: "QAR",
-    payment_method: "card",
-    status: "prete",
-    timestamp: new Date(Date.now() - 18 * 60000).toISOString() // Il y a 18 min
-  }
-];
-
 export default function KitchenDisplaySystemPage() {
   const params = useParams();
   const searchParams = useSearchParams();
 
   const [lang, setLang] = useState<'fr' | 'ar' | 'en'>('fr');
-  const [orders, setOrders] = useState<KitchenOrder[]>(INITIAL_DEMO_ORDERS);
+  const [orders, setOrders] = useState<KitchenOrder[]>([]);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [filterTable, setFilterTable] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'recue' | 'en_cuisine' | 'prete'>('all');
@@ -175,60 +82,33 @@ export default function KitchenDisplaySystemPage() {
     }
   };
 
-  // Chargement et persistance des commandes (localStorage + BroadcastChannel)
+  // Synchronisation Cloud en temps réel avec /api/orders (Polling 3s)
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('sr_kitchen_orders_v5');
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setOrders(parsed);
-          }
-        } catch (e) {}
-      } else {
-        localStorage.setItem('sr_kitchen_orders_v5', JSON.stringify(INITIAL_DEMO_ORDERS));
-      }
+    let lastOrderIds = new Set<string>();
 
-      // Écouter les nouvelles commandes en temps réel émises par le checkout
-      let channel: BroadcastChannel | null = null;
+    const fetchServerOrders = async () => {
       try {
-        channel = new BroadcastChannel('sr_order_sync');
-        channel.onmessage = (event) => {
-          if (event.data?.type === 'NEW_ORDER' && event.data?.order) {
-            const newOrder: KitchenOrder = {
-              ...event.data.order,
-              status: 'recue',
-              timestamp: event.data.order.timestamp || new Date().toISOString()
-            };
-            setOrders(prev => {
-              const exists = prev.some(o => o.order_id === newOrder.order_id);
-              if (exists) return prev;
-              const updated = [newOrder, ...prev];
-              localStorage.setItem('sr_kitchen_orders_v5', JSON.stringify(updated));
-              return updated;
-            });
-            playChimeSound();
+        const res = await fetch(`/api/orders?instance=${rawInstance}&t=${Date.now()}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.success && Array.isArray(data.orders)) {
+          // Détecter si une nouvelle commande est arrivée pour sonner le bip
+          const newOrders = data.orders as KitchenOrder[];
+          if (lastOrderIds.size > 0 && newOrders.length > lastOrderIds.size) {
+            const hasNew = newOrders.some(o => !lastOrderIds.has(o.order_id));
+            if (hasNew) playChimeSound();
           }
-        };
-      } catch (e) {}
-
-      // Écouter les changements dans le stockage local
-      const handleStorage = (e: StorageEvent) => {
-        if (e.key === 'sr_kitchen_orders_v5' && e.newValue) {
-          try {
-            setOrders(JSON.parse(e.newValue));
-          } catch (err) {}
+          lastOrderIds = new Set(newOrders.map(o => o.order_id));
+          setOrders(newOrders);
         }
-      };
-      window.addEventListener('storage', handleStorage);
+      } catch (err) {}
+    };
 
-      return () => {
-        if (channel) channel.close();
-        window.removeEventListener('storage', handleStorage);
-      };
-    }
-  }, []);
+    fetchServerOrders();
+    const interval = setInterval(fetchServerOrders, 3000);
+
+    return () => clearInterval(interval);
+  }, [rawInstance, soundEnabled]);
 
   // Horloge temps réel pour le chrono de préparation
   useEffect(() => {
@@ -242,52 +122,29 @@ export default function KitchenDisplaySystemPage() {
     return Math.max(1, Math.floor(diff / 60000));
   };
 
-  // Changement de statut d'une commande (1-clic) avec persistance et notification client
-  const handleUpdateStatus = (orderId: string, newStatus: OrderStatus) => {
-    setOrders(prev => {
-      const updated = prev.map(order => {
-        if (order.order_id === orderId) {
-          return { ...order, status: newStatus };
-        }
-        return order;
-      });
-
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('sr_kitchen_orders_v5', JSON.stringify(updated));
-
-        // Mettre à jour sr_last_order si c'est la même commande pour le client
-        const lastOrderRaw = localStorage.getItem('sr_last_order');
-        if (lastOrderRaw) {
-          try {
-            const lastOrder = JSON.parse(lastOrderRaw);
-            if (lastOrder.order_id === orderId) {
-              lastOrder.status = newStatus;
-              localStorage.setItem('sr_last_order', JSON.stringify(lastOrder));
-            }
-          } catch (e) {}
-        }
-
-        // Émettre le signal temps réel à tous les onglets/clients
-        try {
-          const channel = new BroadcastChannel('sr_order_sync');
-          channel.postMessage({ type: 'STATUS_UPDATE', orderId, status: newStatus });
-          channel.close();
-        } catch (e) {}
+  // Changement de statut d'une commande (1-clic) avec synchronisation Cloud et signal client
+  const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
+    // Mise à jour optimiste immédiate sur l'écran
+    setOrders(prev => prev.map(order => {
+      if (order.order_id === orderId) {
+        return { ...order, status: newStatus };
       }
+      return order;
+    }));
 
-      return updated;
-    });
-
-    // Envoi asynchrone à n8n pour mise à jour NocoDB en arrière-plan
-    fetch('https://n8n.srv821341.hstgr.cloud/webhook/update-order-status', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ order_id: orderId, status: newStatus })
-    }).catch(() => {});
-
-    // Si la commande passe à "Prête", émettre un son d'alerte
     if (newStatus === 'prete') {
       playChimeSound();
+    }
+
+    // Mise à jour sur le serveur API (qui synchronisera le smartphone du client)
+    try {
+      await fetch('/api/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order_id: orderId, status: newStatus, instance_name: rawInstance })
+      });
+    } catch (e) {
+      console.log('Erreur PATCH /api/orders:', e);
     }
   };
 

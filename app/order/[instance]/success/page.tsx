@@ -67,13 +67,28 @@ export default function OrderSuccessPage() {
         } catch (e) {}
       }
 
-      // Synchronisation en direct avec le Dashboard Cuisine KDS (BroadcastChannel)
+      // Synchronisation Cloud multi-appareils (Polling toutes les 3 secondes)
+      const checkOrderStatus = async () => {
+        try {
+          const res = await fetch(`/api/orders?orderId=${orderId}&t=${Date.now()}`);
+          if (!res.ok) return;
+          const data = await res.json();
+          if (data.success && data.order && data.order.status) {
+            setOrderStatusIndex(getIndexFromStatus(data.order.status));
+            setOrderData((prev: any) => ({ ...prev, ...data.order }));
+          }
+        } catch (e) {}
+      };
+
+      checkOrderStatus();
+      const interval = setInterval(checkOrderStatus, 3000);
+
+      // Synchronisation en direct avec le Dashboard Cuisine KDS (BroadcastChannel sur même appareil)
       let channel: BroadcastChannel | null = null;
       try {
         channel = new BroadcastChannel('sr_order_sync');
         channel.onmessage = (event) => {
           if (event.data?.type === 'STATUS_UPDATE' && event.data?.status) {
-            // Si c'est cette commande ou la commande active
             if (!event.data.orderId || event.data.orderId === orderId) {
               setOrderStatusIndex(getIndexFromStatus(event.data.status));
               setOrderData((prev: any) => prev ? { ...prev, status: event.data.status } : prev);
@@ -97,6 +112,7 @@ export default function OrderSuccessPage() {
       window.addEventListener('storage', handleStorage);
 
       return () => {
+        clearInterval(interval);
         if (channel) channel.close();
         window.removeEventListener('storage', handleStorage);
       };

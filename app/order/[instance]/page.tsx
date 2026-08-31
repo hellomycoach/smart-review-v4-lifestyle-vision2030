@@ -457,12 +457,12 @@ export default function TableOrderingPage() {
         } catch (e) {}
       }
 
-      // Envoi asynchrone au webhook n8n (création NocoDB & impression automatique)
-      fetch(N8N_CREATE_ORDER_API, {
+      // Envoi à l'API interne du serveur pour affichage immédiat sur les écrans cuisine et relais n8n
+      fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderPayload)
-      }).catch(e => console.log('Webhook n8n en arrière-plan:', e));
+      }).catch(e => console.log('Envoi /api/orders:', e));
 
       // Délai agréable de confirmation
       setTimeout(() => {
