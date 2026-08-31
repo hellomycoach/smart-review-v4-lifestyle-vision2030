@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 
 const N8N_CREATE_ORDER_API = "https://n8n.srv821341.hstgr.cloud/webhook/create-table-order";
 const N8N_UPDATE_STATUS_API = "https://n8n.srv821341.hstgr.cloud/webhook/update-order-status";
 
-// Magasin global en mémoire sur le serveur Node.js (persiste pendant que le serveur tourne)
-// Partagé en direct entre tous les smartphones et toutes les tablettes !
+// Fichier de persistance sur disque pour partager l'état entre tous les workers Node.js
+const DB_FILE = path.join(process.cwd(), '.orders_db.json');
+
 interface StoredOrder {
   order_id: string;
   instance_name: string;
@@ -23,15 +26,26 @@ interface StoredOrder {
   timestamp: string;
 }
 
-declare global {
-  var __SR_ORDERS_STORE__: StoredOrder[] | undefined;
+// Helpers lecture/écriture persistante
+function getStoredOrders(): StoredOrder[] {
+  try {
+    if (fs.existsSync(DB_FILE)) {
+      const data = fs.readFileSync(DB_FILE, 'utf-8');
+      return JSON.parse(data) || [];
+    }
+  } catch (e) {
+    console.error("Erreur lecture orders_db:", e);
+  }
+  return [];
 }
 
-if (!global.__SR_ORDERS_STORE__) {
-  global.__SR_ORDERS_STORE__ = [];
+function saveStoredOrders(orders: StoredOrder[]) {
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(orders.slice(0, 100), null, 2), 'utf-8');
+  } catch (e) {
+    console.error("Erreur écriture orders_db:", e);
+  }
 }
-
-const ordersStore = global.__SR_ORDERS_STORE__;
 
 // GET /api/orders?instance=doha_pilot OU /api/orders?orderId=SR-123456
 export async function GET(request: Request) {
@@ -39,24 +53,26 @@ export async function GET(request: Request) {
   const instance = searchParams.get('instance')?.toLowerCase();
   const orderId = searchParams.get('orderId');
 
-  // Si on cherche le statut d'une commande précise (pour la page de succès client)
+  const orders = getStoredOrders();
+
+  // Si on cherche le statut d'une commande précise
   if (orderId) {
-    const order = ordersStore.find(o => o.order_id === orderId);
+    const order = orders.find(o => o.order_id.toLowerCase() === orderId.toLowerCase());
     if (order) {
       return NextResponse.json({ success: true, order });
     }
     return NextResponse.json({ success: true, order: { order_id: orderId, status: 'recue' } });
   }
 
-  // Si on cherche toutes les commandes pour l'écran cuisine KDS
+  // Si on cherche les commandes d'une instance pour le KDS
   if (instance) {
-    const filtered = ordersStore
-      .filter(o => o.instance_name.toLowerCase().includes(instance) || instance.includes(o.instance_name.toLowerCase()))
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    const filtered = orders.filter(o => 
+      o.instance_name.toLowerCase().includes(instance) || instance.includes(o.instance_name.toLowerCase())
+    );
     return NextResponse.json({ success: true, orders: filtered });
   }
 
-  return NextResponse.json({ success: true, orders: ordersStore });
+  return NextResponse.json({ success: true, orders });
 }
 
 // POST /api/orders (Création d'une nouvelle commande par le client)
@@ -67,29 +83,30 @@ export async function POST(request: Request) {
       order_id: body.order_id || `SR-${Math.floor(100000 + Math.random() * 900000)}`,
       instance_name: body.instance_name || 'doha_pilot',
       restaurant_name: body.restaurant_name || 'Lusail Courtyard Café',
-      table_number: body.table_number || '01',
+      table_number: String(body.table_number || '01'),
       customer_phone: body.customer_phone || '',
       customer_email: body.customer_email || '',
       customer_name: body.customer_name || 'Guest',
       items: body.items || [],
-      subtotal: body.subtotal || 0,
-      tip: body.tip || 0,
-      total_amount: body.total_amount || 0,
+      subtotal: Number(body.subtotal) || 0,
+      tip: Number(body.tip) || 0,
+      total_amount: Number(body.total_amount) || 0,
       currency: body.currency || 'QAR',
       payment_method: body.payment_method || 'counter',
       status: 'recue',
       timestamp: body.timestamp || new Date().toISOString()
     };
 
-    // Insérer en tête du tableau
-    const existingIdx = ordersStore.findIndex(o => o.order_id === newOrder.order_id);
+    const orders = getStoredOrders();
+    const existingIdx = orders.findIndex(o => o.order_id === newOrder.order_id);
     if (existingIdx >= 0) {
-      ordersStore[existingIdx] = newOrder;
+      orders[existingIdx] = newOrder;
     } else {
-      ordersStore.unshift(newOrder);
+      orders.unshift(newOrder);
     }
+    saveStoredOrders(orders);
 
-    // Transmettre au webhook n8n pour NocoDB & WhatsApp
+    // Relais au webhook n8n
     fetch(N8N_CREATE_ORDER_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -112,16 +129,16 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ success: false, error: 'order_id et status requis' }, { status: 400 });
     }
 
-    const order = ordersStore.find(o => o.order_id === order_id);
+    const orders = getStoredOrders();
+    const order = orders.find(o => o.order_id === order_id);
     if (order) {
       order.status = status;
     } else {
-      // Si la commande n'était pas en mémoire, la créer avec ce statut
-      ordersStore.unshift({
+      orders.unshift({
         order_id,
         instance_name: body.instance_name || 'doha_pilot',
         restaurant_name: body.restaurant_name || '',
-        table_number: body.table_number || '',
+        table_number: String(body.table_number || ''),
         items: [],
         subtotal: 0,
         total_amount: 0,
@@ -131,8 +148,9 @@ export async function PATCH(request: Request) {
         timestamp: new Date().toISOString()
       });
     }
+    saveStoredOrders(orders);
 
-    // Informer n8n de la mise à jour
+    // Relais à n8n
     fetch(N8N_UPDATE_STATUS_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

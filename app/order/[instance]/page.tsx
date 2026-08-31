@@ -457,19 +457,21 @@ export default function TableOrderingPage() {
         } catch (e) {}
       }
 
-      // Envoi à l'API interne du serveur pour affichage immédiat sur les écrans cuisine et relais n8n
-      fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(orderPayload)
-      }).catch(e => console.log('Envoi /api/orders:', e));
+      // Envoi garanti à l'API interne du serveur pour affichage immédiat sur tous les écrans
+      try {
+        await fetch('/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderPayload),
+          keepalive: true
+        });
+      } catch (apiErr) {
+        console.log('Envoi /api/orders:', apiErr);
+      }
 
-      // Délai agréable de confirmation
-      setTimeout(() => {
-        setIsSubmitting(false);
-        setOrderSuccess(true);
-        router.push(`/order/${rawInstance}/success?orderId=${orderId}&table=${tableNumber}`);
-      }, 1200);
+      setIsSubmitting(false);
+      setOrderSuccess(true);
+      router.push(`/order/${rawInstance}/success?orderId=${orderId}&table=${tableNumber}`);
 
     } catch (err) {
       console.error(err);
