@@ -141,8 +141,8 @@ export default function TableOrderingPage() {
         });
 
         if (matched) {
-          const isQatar = matched.country === "Qatar" || matched.city?.toLowerCase().includes("doha");
-          const isFrance = matched.country === "France";
+          const isQatar = matched.country === "Qatar" || matched.city?.toLowerCase().includes("doha") || rawInstance.includes("doha") || matched.currency === "QAR";
+          const isFrance = matched.country === "France" || matched.currency === "EUR";
           const rawTotalTables = parseInt(matched.total_tables || matched.total_table || matched.tables_count || "20", 10);
           const parsedTotalTables = isNaN(rawTotalTables) || rawTotalTables <= 0 ? 20 : rawTotalTables;
 
@@ -150,8 +150,8 @@ export default function TableOrderingPage() {
             ...prev,
             name: matched.restaurant_name || prev.name,
             city: matched.city || (isQatar ? "Doha" : prev.city),
-            country: matched.country || (isQatar ? "Qatar" : "Qatar"),
-            currency: isQatar ? "QAR" : (isFrance ? "EUR" : "SAR"),
+            country: matched.country || (isQatar ? "Qatar" : prev.country),
+            currency: matched.currency || (isQatar ? "QAR" : (isFrance ? "EUR" : "QAR")),
             taxRate: isQatar ? 0.0 : (isFrance ? 0.10 : 0.15),
             totalTables: parsedTotalTables,
             coverImage: matched.cover_image || prev.coverImage
