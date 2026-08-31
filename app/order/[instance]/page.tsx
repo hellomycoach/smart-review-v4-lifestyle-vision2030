@@ -442,6 +442,19 @@ export default function TableOrderingPage() {
         localStorage.setItem('sr_last_order', JSON.stringify(orderPayload));
         if (customerPhone) localStorage.setItem('user_phone', customerPhone);
         if (customerEmail) localStorage.setItem('user_email', customerEmail);
+
+        // Ajouter automatiquement au tableau de bord KDS de la cuisine
+        try {
+          const storedOrders = localStorage.getItem('sr_kitchen_orders_v5');
+          const currentList = storedOrders ? JSON.parse(storedOrders) : [];
+          const updatedList = [{ ...orderPayload, status: 'recue' }, ...currentList];
+          localStorage.setItem('sr_kitchen_orders_v5', JSON.stringify(updatedList));
+
+          // Émettre vers l'écran KDS ouvert en direct
+          const channel = new BroadcastChannel('sr_order_sync');
+          channel.postMessage({ type: 'NEW_ORDER', order: orderPayload });
+          channel.close();
+        } catch (e) {}
       }
 
       // Envoi asynchrone au webhook n8n (création NocoDB & impression automatique)

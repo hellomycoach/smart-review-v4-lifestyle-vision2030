@@ -175,24 +175,58 @@ export default function KitchenDisplaySystemPage() {
     }
   };
 
-  // Chargement des commandes sauvegardées localement si nouvelles commandes passées sur ce navigateur
+  // Chargement et persistance des commandes (localStorage + BroadcastChannel)
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('sr_last_order');
-      if (saved) {
+      const stored = localStorage.getItem('sr_kitchen_orders_v5');
+      if (stored) {
         try {
-          const parsed = JSON.parse(saved);
-          // Vérifier si elle est déjà dans la liste
-          setOrders(prev => {
-            if (prev.some(o => o.order_id === parsed.order_id)) return prev;
-            return [{
-              ...parsed,
-              status: parsed.status || 'recue',
-              timestamp: parsed.timestamp || new Date().toISOString()
-            }, ...prev];
-          });
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setOrders(parsed);
+          }
         } catch (e) {}
+      } else {
+        localStorage.setItem('sr_kitchen_orders_v5', JSON.stringify(INITIAL_DEMO_ORDERS));
       }
+
+      // Écouter les nouvelles commandes en temps réel émises par le checkout
+      let channel: BroadcastChannel | null = null;
+      try {
+        channel = new BroadcastChannel('sr_order_sync');
+        channel.onmessage = (event) => {
+          if (event.data?.type === 'NEW_ORDER' && event.data?.order) {
+            const newOrder: KitchenOrder = {
+              ...event.data.order,
+              status: 'recue',
+              timestamp: event.data.order.timestamp || new Date().toISOString()
+            };
+            setOrders(prev => {
+              const exists = prev.some(o => o.order_id === newOrder.order_id);
+              if (exists) return prev;
+              const updated = [newOrder, ...prev];
+              localStorage.setItem('sr_kitchen_orders_v5', JSON.stringify(updated));
+              return updated;
+            });
+            playChimeSound();
+          }
+        };
+      } catch (e) {}
+
+      // Écouter les changements dans le stockage local
+      const handleStorage = (e: StorageEvent) => {
+        if (e.key === 'sr_kitchen_orders_v5' && e.newValue) {
+          try {
+            setOrders(JSON.parse(e.newValue));
+          } catch (err) {}
+        }
+      };
+      window.addEventListener('storage', handleStorage);
+
+      return () => {
+        if (channel) channel.close();
+        window.removeEventListener('storage', handleStorage);
+      };
     }
   }, []);
 
@@ -208,14 +242,48 @@ export default function KitchenDisplaySystemPage() {
     return Math.max(1, Math.floor(diff / 60000));
   };
 
-  // Changement de statut d'une commande (1-clic)
+  // Changement de statut d'une commande (1-clic) avec persistance et notification client
   const handleUpdateStatus = (orderId: string, newStatus: OrderStatus) => {
-    setOrders(prev => prev.map(order => {
-      if (order.order_id === orderId) {
-        return { ...order, status: newStatus };
+    setOrders(prev => {
+      const updated = prev.map(order => {
+        if (order.order_id === orderId) {
+          return { ...order, status: newStatus };
+        }
+        return order;
+      });
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('sr_kitchen_orders_v5', JSON.stringify(updated));
+
+        // Mettre à jour sr_last_order si c'est la même commande pour le client
+        const lastOrderRaw = localStorage.getItem('sr_last_order');
+        if (lastOrderRaw) {
+          try {
+            const lastOrder = JSON.parse(lastOrderRaw);
+            if (lastOrder.order_id === orderId) {
+              lastOrder.status = newStatus;
+              localStorage.setItem('sr_last_order', JSON.stringify(lastOrder));
+            }
+          } catch (e) {}
+        }
+
+        // Émettre le signal temps réel à tous les onglets/clients
+        try {
+          const channel = new BroadcastChannel('sr_order_sync');
+          channel.postMessage({ type: 'STATUS_UPDATE', orderId, status: newStatus });
+          channel.close();
+        } catch (e) {}
       }
-      return order;
-    }));
+
+      return updated;
+    });
+
+    // Envoi asynchrone à n8n pour mise à jour NocoDB en arrière-plan
+    fetch('https://n8n.srv821341.hstgr.cloud/webhook/update-order-status', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ order_id: orderId, status: newStatus })
+    }).catch(() => {});
 
     // Si la commande passe à "Prête", émettre un son d'alerte
     if (newStatus === 'prete') {

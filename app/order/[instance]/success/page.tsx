@@ -35,9 +35,20 @@ export default function OrderSuccessPage() {
   const tableNumber = searchParams.get('table') || '01';
 
   const [orderData, setOrderData] = useState<any>(null);
-  const [orderStatusIndex, setOrderStatusIndex] = useState(1); // 0: Reçue, 1: En cuisine, 2: Prête, 3: Servie
+  const [orderStatusIndex, setOrderStatusIndex] = useState(0); // 0: Reçue, 1: En cuisine, 2: Prête, 3: Servie
 
-  // Auto-langue & chargement de commande
+  // Convertir le statut texte en index d'étape
+  const getIndexFromStatus = (st: string) => {
+    switch (st) {
+      case 'recue': return 0;
+      case 'en_cuisine': return 1;
+      case 'prete': return 2;
+      case 'servie': return 3;
+      default: return 0;
+    }
+  };
+
+  // Auto-langue & chargement initial de commande
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const userLang = (navigator.language || 'ar').toLowerCase();
@@ -50,17 +61,47 @@ export default function OrderSuccessPage() {
         try {
           const parsed = JSON.parse(saved);
           setOrderData(parsed);
+          if (parsed.status) {
+            setOrderStatusIndex(getIndexFromStatus(parsed.status));
+          }
         } catch (e) {}
       }
-    }
-  }, []);
 
-  // Simulation vivante de l'avancement en cuisine
-  useEffect(() => {
-    const t1 = setTimeout(() => setOrderStatusIndex(1), 3000);
-    const t2 = setTimeout(() => setOrderStatusIndex(2), 12000);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
-  }, []);
+      // Synchronisation en direct avec le Dashboard Cuisine KDS (BroadcastChannel)
+      let channel: BroadcastChannel | null = null;
+      try {
+        channel = new BroadcastChannel('sr_order_sync');
+        channel.onmessage = (event) => {
+          if (event.data?.type === 'STATUS_UPDATE' && event.data?.status) {
+            // Si c'est cette commande ou la commande active
+            if (!event.data.orderId || event.data.orderId === orderId) {
+              setOrderStatusIndex(getIndexFromStatus(event.data.status));
+              setOrderData((prev: any) => prev ? { ...prev, status: event.data.status } : prev);
+            }
+          }
+        };
+      } catch (e) {}
+
+      // Écouter les modifications de localStorage
+      const handleStorage = (e: StorageEvent) => {
+        if (e.key === 'sr_last_order' && e.newValue) {
+          try {
+            const parsed = JSON.parse(e.newValue);
+            if (parsed.status) {
+              setOrderStatusIndex(getIndexFromStatus(parsed.status));
+              setOrderData(parsed);
+            }
+          } catch (err) {}
+        }
+      };
+      window.addEventListener('storage', handleStorage);
+
+      return () => {
+        if (channel) channel.close();
+        window.removeEventListener('storage', handleStorage);
+      };
+    }
+  }, [orderId]);
 
   const t = {
     ar: {
