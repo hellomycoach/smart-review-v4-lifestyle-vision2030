@@ -7,7 +7,7 @@ import {
   Search, ShoppingBag, Plus, Minus, X, Check, Globe, 
   Clock, Flame as CalorieIcon, ChevronRight, ChevronLeft,
   CreditCard, Smartphone, CheckCircle2, AlertCircle, ArrowRight,
-  ShieldCheck, Info, Heart
+  ShieldCheck, Info, Heart, Mail
 } from 'lucide-react';
 import { 
   DEFAULT_CATEGORIES, 
@@ -95,6 +95,7 @@ export default function TableOrderingPage() {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [showCartDrawer, setShowCartDrawer] = useState(false);
   const [customerPhone, setCustomerPhone] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [selectedTip, setSelectedTip] = useState<number>(0.05); // 5% par défaut
   const [paymentMethod, setPaymentMethod] = useState<'apple_pay' | 'card' | 'counter'>('apple_pay');
@@ -111,6 +112,9 @@ export default function TableOrderingPage() {
 
       const savedPhone = localStorage.getItem('user_phone') || '';
       if (savedPhone) setCustomerPhone(savedPhone);
+
+      const savedEmail = localStorage.getItem('user_email') || '';
+      if (savedEmail) setCustomerEmail(savedEmail);
 
       const savedTable = sessionStorage.getItem('sr_table_num');
       if (savedTable && !urlTable) setTableNumber(savedTable);
@@ -195,6 +199,8 @@ export default function TableOrderingPage() {
       cardPay: isQatarLocation ? "نابس (NAPS) / بطاقة بنكية" : "مدى (Mada) / بطاقة بنكية",
       counterPay: "الدفع عند الكاشير",
       phone: "رقم الجوال (لإرسال الفاتورة ونقاط الولاء)",
+      email: "البريد الإلكتروني (لاستلام الفاتورة الإلكترونية والرصيد)",
+      emailPlaceholder: "name@example.com",
       guestName: "اسم العميل (اختياري)",
       tipCustom: "مخصص",
       currency: restaurant.currency === "QAR" ? "ر.ق" : (restaurant.currency === "SAR" ? "ر.س" : "€"),
@@ -233,6 +239,8 @@ export default function TableOrderingPage() {
       cardPay: isQatarLocation ? "Carte Bancaire / NAPS Qatar" : "Carte Bancaire / Mada",
       counterPay: "Règlement en caisse",
       phone: "N° de téléphone (reçu SMS & fidélité)",
+      email: "Email (pour recevoir votre facture & reçu digital)",
+      emailPlaceholder: "nom@exemple.com",
       guestName: "Votre prénom (optionnel)",
       tipCustom: "Autre",
       currency: restaurant.currency === "QAR" ? "QAR" : (restaurant.currency === "SAR" ? "SAR" : "€"),
@@ -271,6 +279,8 @@ export default function TableOrderingPage() {
       cardPay: isQatarLocation ? "Debit / Credit Card (NAPS)" : "Debit / Credit Card (Mada)",
       counterPay: "Pay at Cashier",
       phone: "Phone Number (for digital receipt & points)",
+      email: "Email (for e-invoice & digital receipt)",
+      emailPlaceholder: "name@example.com",
       guestName: "Guest Name (optional)",
       tipCustom: "Custom",
       currency: restaurant.currency === "QAR" ? "QAR" : (restaurant.currency === "SAR" ? "SAR" : "€"),
@@ -408,6 +418,7 @@ export default function TableOrderingPage() {
       restaurant_name: restaurant.name,
       table_number: tableNumber,
       customer_phone: customerPhone,
+      customer_email: customerEmail,
       customer_name: customerName || "Guest",
       items: cart.map(c => ({
         id: c.menuItem.id,
@@ -430,6 +441,7 @@ export default function TableOrderingPage() {
       if (typeof window !== 'undefined') {
         localStorage.setItem('sr_last_order', JSON.stringify(orderPayload));
         if (customerPhone) localStorage.setItem('user_phone', customerPhone);
+        if (customerEmail) localStorage.setItem('user_email', customerEmail);
       }
 
       // Envoi asynchrone au webhook n8n (création NocoDB & impression automatique)
@@ -953,19 +965,35 @@ export default function TableOrderingPage() {
                 </div>
               ))}
 
-              {/* Coordonnées Client pour Reçu et Fidélité */}
-              <div className="p-3.5 bg-[#EFE8DF] rounded-2xl border border-[#D5C4B4] space-y-2 mt-4">
-                <label className="text-xs font-bold text-[#3D352E] flex items-center gap-1.5">
-                  <Smartphone className="w-3.5 h-3.5 text-[#8C6D48]" />
-                  {t.phone}
-                </label>
-                <input
-                  type="tel"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                  placeholder="05XXXXXXXX / +966..."
-                  className="w-full p-2.5 rounded-xl bg-[#FAF8F5] border border-[#D5C4B4] text-xs text-[#2E2722] focus:ring-2 focus:ring-[#B39F8D]"
-                />
+              {/* Coordonnées Client pour Reçu, Facture et Fidélité */}
+              <div className="p-3.5 bg-[#EFE8DF] rounded-2xl border border-[#D5C4B4] space-y-3 mt-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#3D352E] flex items-center gap-1.5">
+                    <Smartphone className="w-3.5 h-3.5 text-[#8C6D48]" />
+                    {t.phone}
+                  </label>
+                  <input
+                    type="tel"
+                    value={customerPhone}
+                    onChange={(e) => setCustomerPhone(e.target.value)}
+                    placeholder="05XXXXXXXX / +974..."
+                    className="w-full p-2.5 rounded-xl bg-[#FAF8F5] border border-[#D5C4B4] text-xs text-[#2E2722] focus:ring-2 focus:ring-[#B39F8D]"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-[#3D352E] flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-[#8C6D48]" />
+                    {t.email}
+                  </label>
+                  <input
+                    type="email"
+                    value={customerEmail}
+                    onChange={(e) => setCustomerEmail(e.target.value)}
+                    placeholder={t.emailPlaceholder}
+                    className="w-full p-2.5 rounded-xl bg-[#FAF8F5] border border-[#D5C4B4] text-xs text-[#2E2722] focus:ring-2 focus:ring-[#B39F8D]"
+                  />
+                </div>
               </div>
 
               {/* Pourboire / Tip Selector */}
