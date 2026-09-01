@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { 
   CheckCircle2, Clock, ChefHat, Sparkles, Gift, CreditCard, 
   ArrowRight, ArrowLeft, RotateCcw, Award, Utensils, Receipt, 
-  Smartphone, Share2, Download, Printer, MessageCircle, X, FileText, QrCode
+  Smartphone, Share2, Download, Printer, MessageCircle, X, FileText, QrCode, Mail, Loader2
 } from 'lucide-react';
 
 export default function OrderSuccessPage() {
@@ -37,6 +37,7 @@ export default function OrderSuccessPage() {
   const [orderData, setOrderData] = useState<any>(null);
   const [orderStatusIndex, setOrderStatusIndex] = useState(0); // 0: Reçue, 1: En cuisine, 2: Prête, 3: Servie
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   // Convertir le statut texte en index d'étape
   const getIndexFromStatus = (st: string) => {
@@ -99,10 +100,10 @@ export default function OrderSuccessPage() {
       } catch (e) {}
 
       // Écouter les modifications de localStorage
-      const handleStorage = (e: StorageEvent) => {
-        if (e.key === 'sr_last_order' && e.newValue) {
+      const handleStorage = (StorageEvent: any) => {
+        if (StorageEvent.key === 'sr_last_order' && StorageEvent.newValue) {
           try {
-            const parsed = JSON.parse(e.newValue);
+            const parsed = JSON.parse(StorageEvent.newValue);
             if (parsed.status) {
               setOrderStatusIndex(getIndexFromStatus(parsed.status));
               setOrderData(parsed);
@@ -119,6 +120,39 @@ export default function OrderSuccessPage() {
       };
     }
   }, [orderId]);
+
+  // Téléchargement réel du PDF via html2canvas & jsPDF
+  const handleDownloadPDF = async () => {
+    const el = document.getElementById('printable-invoice');
+    if (!el) return;
+    setIsGeneratingPDF(true);
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
+      
+      const canvas = await html2canvas(el, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff'
+      });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      const imgWidth = 210;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.save(`Facture_${orderId}.pdf`);
+    } catch (err) {
+      console.error('Erreur génération PDF:', err);
+      window.print();
+    } finally {
+      setIsGeneratingPDF(false);
+    }
+  };
 
   const t = {
     ar: {
@@ -143,7 +177,10 @@ export default function OrderSuccessPage() {
       spinButton: "تدوير عجلة الهدايا",
       loyaltyButton: "عرض بطاقة الولاء الرقمية",
       orderAgain: "طلب أطباق أخرى",
-      downloadInvoice: "تحميل الفاتورة الإلكترونية (PDF)",
+      downloadInvoice: "عرض الفاتورة الرسمية (PDF)",
+      savePDF: "تحميل الفاتورة PDF",
+      printInvoice: "طباعة",
+      closeModal: "العودة لمتابعة الطلب",
       whatsappTrack: "متابعة الطلب عبر واتساب",
       currency: orderData?.currency === "EUR" ? "€" : (orderData?.currency === "SAR" ? "ر.س" : "ر.ق"),
     },
@@ -169,7 +206,10 @@ export default function OrderSuccessPage() {
       spinButton: "Faire tourner la roue cadeau",
       loyaltyButton: "Consulter ma carte fidélité",
       orderAgain: "Commander un autre plat",
-      downloadInvoice: "Télécharger la Facture PDF",
+      downloadInvoice: "Afficher la Facture (PDF)",
+      savePDF: "Télécharger le PDF",
+      printInvoice: "Imprimer",
+      closeModal: "Fermer & Retour au Suivi",
       whatsappTrack: "Recevoir le suivi sur WhatsApp",
       currency: orderData?.currency === "EUR" ? "€" : (orderData?.currency === "SAR" ? "SAR" : "QAR"),
     },
@@ -195,7 +235,10 @@ export default function OrderSuccessPage() {
       spinButton: "Spin the Reward Wheel",
       loyaltyButton: "View Digital Loyalty Card",
       orderAgain: "Order more items",
-      downloadInvoice: "Download PDF Tax Invoice",
+      downloadInvoice: "View Tax Invoice (PDF)",
+      savePDF: "Download PDF",
+      printInvoice: "Print",
+      closeModal: "Close & Back to Tracking",
       whatsappTrack: "Get updates on WhatsApp",
       currency: orderData?.currency === "EUR" ? "€" : (orderData?.currency === "SAR" ? "SAR" : "QAR"),
     }
@@ -317,7 +360,7 @@ export default function OrderSuccessPage() {
               </h3>
               <button
                 onClick={() => setShowInvoiceModal(true)}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#3D352E] hover:bg-[#241E1A] text-[#FAF8F5] font-bold text-xs shadow-sm transition-all active:scale-95"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#3D352E] hover:bg-[#241E1A] text-[#FAF8F5] font-bold text-xs shadow-md transition-all active:scale-95"
               >
                 <FileText className="w-3.5 h-3.5 text-[#C5A880]" />
                 <span>{t.downloadInvoice}</span>
@@ -403,19 +446,26 @@ export default function OrderSuccessPage() {
 
       {/* MODAL FACTURE FISCALE OFFICIELLE PDF A4 */}
       {showInvoiceModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
-          <div className="relative w-full max-w-2xl bg-white text-black rounded-3xl shadow-2xl p-6 md:p-8 space-y-6 my-8 border border-gray-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-3 md:p-6 overflow-y-auto">
+          <div className="relative w-full max-w-2xl bg-white text-black rounded-3xl shadow-2xl p-5 md:p-8 space-y-6 my-auto border border-gray-200">
             
-            {/* Bouton de fermeture */}
-            <button
-              onClick={() => setShowInvoiceModal(false)}
-              className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors print:hidden"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            {/* Header Modal avec bouton Retour au suivi */}
+            <div className="flex items-center justify-between pb-3 border-b border-gray-200 print:hidden">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-gray-800" />
+                <h3 className="font-black text-sm text-gray-900">Document Facture Officiel</h3>
+              </div>
+              <button
+                onClick={() => setShowInvoiceModal(false)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold text-xs transition-colors"
+              >
+                <X className="w-4 h-4" />
+                <span>{t.closeModal}</span>
+              </button>
+            </div>
 
-            {/* DOCUMENT IMPRIMABLE A4 */}
-            <div id="printable-invoice" className="space-y-6 bg-white text-black p-2">
+            {/* DOCUMENT IMPRIMABLE / CAPTURABLE EN PDF */}
+            <div id="printable-invoice" className="space-y-6 bg-white text-black p-4 rounded-2xl border border-gray-100 shadow-sm">
               
               {/* En-tête Facture */}
               <div className="flex flex-wrap items-start justify-between gap-4 border-b-2 border-black pb-4">
@@ -426,7 +476,7 @@ export default function OrderSuccessPage() {
                   <h2 className="text-2xl font-black tracking-tight text-gray-950 mt-1">
                     {orderData?.restaurant_name || formattedUrlName}
                   </h2>
-                  <p className="text-xs text-gray-600 mt-0.5">Doha, Qatar • Tél : +974 4400 0000</p>
+                  <p className="text-xs text-gray-600 mt-0.5">Doha, Qatar • Vision 2030 Smart Review</p>
                 </div>
                 <div className="text-right">
                   <div className="text-xs font-bold text-gray-500">FACTURE N°</div>
@@ -456,9 +506,9 @@ export default function OrderSuccessPage() {
                   </span>
                 </div>
                 <div>
-                  <span className="text-gray-500 block text-[10px] font-bold">STATUT PAIEMENT</span>
+                  <span className="text-gray-500 block text-[10px] font-bold">STATUT</span>
                   <span className="font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-block text-[11px]">
-                    Confirmé / Validé
+                    Validé / Conforme
                   </span>
                 </div>
               </div>
@@ -494,9 +544,9 @@ export default function OrderSuccessPage() {
 
               {/* Totaux & Ventilation Taxes */}
               <div className="flex flex-wrap justify-between items-end gap-4 pt-2 border-t border-gray-200">
-                <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-xl border border-gray-200">
-                  <div className="w-16 h-16 bg-gray-900 text-white flex items-center justify-center rounded-lg p-1">
-                    <QrCode className="w-14 h-14" />
+                <div className="flex items-center gap-3 p-2.5 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="w-14 h-14 bg-gray-900 text-white flex items-center justify-center rounded-lg p-1">
+                    <QrCode className="w-12 h-12" />
                   </div>
                   <div className="text-[10px] text-gray-500 max-w-[160px] leading-tight">
                     Facture certifiée conforme E-Invoicing Qatar & Vision 2030 Smart Review.
@@ -527,21 +577,42 @@ export default function OrderSuccessPage() {
 
             </div>
 
-            {/* Barre d'action Modal (Télécharger / Imprimer) */}
-            <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-gray-200 print:hidden">
+            {/* Barre d'action Modal (Télécharger PDF / Imprimer / Fermer) */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-gray-200 print:hidden">
               <button
                 onClick={() => setShowInvoiceModal(false)}
                 className="px-4 py-2.5 rounded-xl border border-gray-300 hover:bg-gray-100 text-gray-700 font-bold text-xs transition-colors"
               >
-                Fermer
+                {t.closeModal}
               </button>
-              <button
-                onClick={() => typeof window !== 'undefined' && window.print()}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gray-950 hover:bg-gray-800 text-white font-black text-xs shadow-lg transition-transform active:scale-95"
-              >
-                <Printer className="w-4 h-4 text-[#C5A880]" />
-                <span>Imprimer / Télécharger en PDF</span>
-              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => typeof window !== 'undefined' && window.print()}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-gray-300 hover:bg-gray-100 text-gray-800 font-bold text-xs transition-colors"
+                >
+                  <Printer className="w-4 h-4 text-gray-600" />
+                  <span>{t.printInvoice}</span>
+                </button>
+
+                <button
+                  onClick={handleDownloadPDF}
+                  disabled={isGeneratingPDF}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gray-950 hover:bg-gray-800 text-white font-black text-xs shadow-lg transition-transform active:scale-95 disabled:opacity-50"
+                >
+                  {isGeneratingPDF ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-[#C5A880]" />
+                      <span>Génération du PDF...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 text-[#C5A880]" />
+                      <span>{t.savePDF}</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
           </div>
