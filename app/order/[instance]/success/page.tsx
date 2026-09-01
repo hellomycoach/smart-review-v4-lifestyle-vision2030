@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { 
   CheckCircle2, Clock, ChefHat, Sparkles, Gift, CreditCard, 
   ArrowRight, ArrowLeft, RotateCcw, Award, Utensils, Receipt, 
-  Smartphone, Share2, Download, Printer, MessageCircle, X, FileText, QrCode, Mail, Loader2, Check
+  Smartphone, Share2, Download, Printer, MessageCircle, X, FileText, QrCode, Loader2
 } from 'lucide-react';
 
 export default function OrderSuccessPage() {
@@ -31,19 +31,17 @@ export default function OrderSuccessPage() {
     ? rawInstance.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
     : "Lounge & Restaurant";
 
-  const orderId = searchParams.get('orderId') || 'SR-928471';
-  const tableNumber = searchParams.get('table') || '01';
+  const urlOrderId = searchParams.get('orderId') || '';
+  const urlTable = searchParams.get('table') || '';
 
   const [orderData, setOrderData] = useState<any>(null);
   const [orderStatusIndex, setOrderStatusIndex] = useState(0); // 0: Reçue, 1: En cuisine, 2: Prête, 3: Servie
   const [showInvoiceModal, setShowInvoiceModal] = useState(false);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-  
-  // Option Envoi Email
-  const [showEmailInput, setShowEmailInput] = useState(false);
-  const [invoiceEmail, setInvoiceEmail] = useState('');
-  const [isSendingEmail, setIsSendingEmail] = useState(false);
-  const [emailSentSuccess, setEmailSentSuccess] = useState(false);
+
+  // Résolution prioritaire du N° de Commande et de Table (Ordre : Données Réelles API > LocalStorage > URL > Défaut)
+  const displayOrderId = orderData?.order_id || urlOrderId || 'SR-928471';
+  const displayTableNumber = orderData?.table_number || urlTable || '01';
 
   // Convertir le statut texte en index d'étape
   const getIndexFromStatus = (st: string) => {
@@ -68,24 +66,27 @@ export default function OrderSuccessPage() {
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          setOrderData(parsed);
-          if (parsed.status) {
-            setOrderStatusIndex(getIndexFromStatus(parsed.status));
-          }
-          if (parsed.customer_email) {
-            setInvoiceEmail(parsed.customer_email);
+          // Si l'orderId dans l'URL correspond ou si aucun orderId n'est spécifié
+          if (!urlOrderId || parsed.order_id === urlOrderId) {
+            setOrderData(parsed);
+            if (parsed.status) {
+              setOrderStatusIndex(getIndexFromStatus(parsed.status));
+            }
           }
         } catch (e) {}
       }
 
-      // Synchronisation Cloud multi-appareils (Polling toutes les 3 secondes)
+      // Synchronisation Cloud multi-appareils (Polling toutes les 3 secondes avec orderId exact)
+      const targetOrderId = urlOrderId || displayOrderId;
       const checkOrderStatus = async () => {
         try {
-          const res = await fetch(`/api/orders?orderId=${orderId}&t=${Date.now()}`);
+          const res = await fetch(`/api/orders?orderId=${targetOrderId}&t=${Date.now()}`);
           if (!res.ok) return;
           const data = await res.json();
-          if (data.success && data.order && data.order.status) {
-            setOrderStatusIndex(getIndexFromStatus(data.order.status));
+          if (data.success && data.order) {
+            if (data.order.status) {
+              setOrderStatusIndex(getIndexFromStatus(data.order.status));
+            }
             setOrderData((prev: any) => ({ ...prev, ...data.order }));
           }
         } catch (e) {}
@@ -100,7 +101,7 @@ export default function OrderSuccessPage() {
         channel = new BroadcastChannel('sr_order_sync');
         channel.onmessage = (event) => {
           if (event.data?.type === 'STATUS_UPDATE' && event.data?.status) {
-            if (!event.data.orderId || event.data.orderId === orderId) {
+            if (!event.data.orderId || event.data.orderId === targetOrderId) {
               setOrderStatusIndex(getIndexFromStatus(event.data.status));
               setOrderData((prev: any) => prev ? { ...prev, status: event.data.status } : prev);
             }
@@ -128,7 +129,7 @@ export default function OrderSuccessPage() {
         window.removeEventListener('storage', handleStorage);
       };
     }
-  }, [orderId]);
+  }, [urlOrderId]);
 
   // Téléchargement réel et parfait du PDF (sans recadrage mobile)
   const handleDownloadPDF = async () => {
@@ -167,7 +168,7 @@ export default function OrderSuccessPage() {
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
       pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, Math.min(imgHeight, pageHeight));
-      pdf.save(`Facture_${orderId}.pdf`);
+      pdf.save(`Facture_${displayOrderId}.pdf`);
     } catch (err) {
       console.error('Erreur génération PDF:', err);
       window.print();
@@ -176,44 +177,32 @@ export default function OrderSuccessPage() {
     }
   };
 
-  // Envoi de la facture par email
-  const handleSendInvoiceEmail = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!invoiceEmail || !invoiceEmail.includes('@')) return;
-    setIsSendingEmail(true);
-    try {
-      // Simuler l'envoi email confirmé ou webhook
-      await new Promise(r => setTimeout(r, 1200));
-      setEmailSentSuccess(true);
-      setTimeout(() => {
-        setShowEmailInput(false);
-        setEmailSentSuccess(false);
-      }, 3000);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsSendingEmail(false);
-    }
-  };
-
   // Partage natif (Mobile Web Share API)
   const handleShareInvoice = async () => {
+    const shareUrl = typeof window !== 'undefined'
+      ? `${window.location.origin}/order/${rawInstance}/success?orderId=${displayOrderId}&table=${displayTableNumber}`
+      : `https://smart-review-v4-lifestyle-vision2030.jdaproai.com/order/${rawInstance}/success?orderId=${displayOrderId}&table=${displayTableNumber}`;
+
     if (typeof navigator !== 'undefined' && navigator.share) {
       try {
         await navigator.share({
-          title: `Facture #${orderId} - ${orderData?.restaurant_name || formattedUrlName}`,
-          text: `Voici mon reçu de commande #${orderId} pour la Table ${tableNumber} chez ${orderData?.restaurant_name || formattedUrlName}.`,
-          url: window.location.href,
+          title: `Facture #${displayOrderId} - ${orderData?.restaurant_name || formattedUrlName}`,
+          text: `Voici mon reçu de commande #${displayOrderId} pour la Table ${displayTableNumber} chez ${orderData?.restaurant_name || formattedUrlName}.`,
+          url: shareUrl,
         });
       } catch (e) {}
     } else {
-      // Fallback copier le lien
       if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        navigator.clipboard.writeText(window.location.href);
+        navigator.clipboard.writeText(shareUrl);
         alert('Lien du reçu copié dans le presse-papier !');
       }
     }
   };
+
+  // Lien complet de suivi pour WhatsApp (avec orderId et tableNumber exacts)
+  const currentTrackingUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/order/${rawInstance}/success?orderId=${displayOrderId}&table=${displayTableNumber}`
+    : `https://smart-review-v4-lifestyle-vision2030.jdaproai.com/order/${rawInstance}/success?orderId=${displayOrderId}&table=${displayTableNumber}`;
 
   const t = {
     ar: {
@@ -238,10 +227,9 @@ export default function OrderSuccessPage() {
       spinButton: "تدوير عجلة الهدايا",
       loyaltyButton: "عرض بطاقة الولاء الرقمية",
       orderAgain: "طلب أطباق أخرى",
-      downloadInvoice: "عرض خيارات الفاتورة (PDF / إيميل)",
+      downloadInvoice: "عرض الفاتورة الرسمية (PDF)",
       savePDF: "تحميل PDF",
-      sendEmail: "إرسال عبر الإيميل",
-      shareInvoice: "مشاركة",
+      shareInvoice: "مشاركة الفاتورة",
       printInvoice: "طباعة",
       closeModal: "إغلاق والعودة للطلب",
       whatsappTrack: "متابعة الطلب عبر واتساب",
@@ -269,9 +257,8 @@ export default function OrderSuccessPage() {
       spinButton: "Faire tourner la roue cadeau",
       loyaltyButton: "Consulter ma carte fidélité",
       orderAgain: "Commander un autre plat",
-      downloadInvoice: "Options Facture (PDF / Email)",
+      downloadInvoice: "Afficher la Facture (PDF)",
       savePDF: "Télécharger PDF",
-      sendEmail: "Envoyer par Email",
       shareInvoice: "Partager",
       printInvoice: "Imprimer",
       closeModal: "Fermer & Retour au Suivi",
@@ -300,9 +287,8 @@ export default function OrderSuccessPage() {
       spinButton: "Spin the Reward Wheel",
       loyaltyButton: "View Digital Loyalty Card",
       orderAgain: "Order more items",
-      downloadInvoice: "Invoice Options (PDF / Email)",
+      downloadInvoice: "View Tax Invoice (PDF)",
       savePDF: "Download PDF",
-      sendEmail: "Send by Email",
       shareInvoice: "Share",
       printInvoice: "Print",
       closeModal: "Close & Back to Tracking",
@@ -340,11 +326,11 @@ export default function OrderSuccessPage() {
           <div className="grid grid-cols-2 gap-3 p-4 bg-[#F3ECE2] rounded-2xl border border-[#E0D5C7] mb-6">
             <div>
               <div className="text-[11px] text-[#8C7A6B] font-bold">{t.orderNumber}</div>
-              <div className="text-base font-black text-[#3D352E]">{orderId}</div>
+              <div className="text-base font-black text-[#3D352E]">{displayOrderId}</div>
             </div>
             <div>
               <div className="text-[11px] text-[#8C7A6B] font-bold">{t.table}</div>
-              <div className="text-base font-black text-[#8C6D48]">#{tableNumber}</div>
+              <div className="text-base font-black text-[#8C6D48]">#{displayTableNumber}</div>
             </div>
           </div>
 
@@ -469,14 +455,14 @@ export default function OrderSuccessPage() {
               </div>
             </div>
 
-            {/* BOUTON WHATSAPP INBOUND SÉCURISÉ (ANTI-BAN) */}
+            {/* BOUTON WHATSAPP INBOUND SÉCURISÉ (ANTI-BAN) AVEC LIEN COMPLET */}
             <a
               href={`https://wa.me/41779051014?text=${encodeURIComponent(
                 isRTL 
-                  ? `مرحباً ${orderData?.restaurant_name || formattedUrlName}، هذه طلبيتي #${orderId} للطاولة رقم ${tableNumber}`
+                  ? `مرحباً ${orderData?.restaurant_name || formattedUrlName}، هذه طلبيتي #${displayOrderId} للطاولة رقم ${displayTableNumber}\n\n📲 رابط متابعة طلبيتي:\n${currentTrackingUrl}`
                   : (lang === 'fr' 
-                    ? `Bonjour ${orderData?.restaurant_name || formattedUrlName}, voici ma commande #${orderId} pour la table ${tableNumber}`
-                    : `Hello ${orderData?.restaurant_name || formattedUrlName}, here is my order #${orderId} for table ${tableNumber}`)
+                    ? `Bonjour ${orderData?.restaurant_name || formattedUrlName}, voici ma commande #${displayOrderId} pour la table ${displayTableNumber}\n\n📲 Lien de suivi de ma commande :\n${currentTrackingUrl}`
+                    : `Hello ${orderData?.restaurant_name || formattedUrlName}, here is my order #${displayOrderId} for table ${displayTableNumber}\n\n📲 Order tracking link:\n${currentTrackingUrl}`)
               )}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -501,7 +487,7 @@ export default function OrderSuccessPage() {
           )}
 
           <Link
-            href={`/order/${rawInstance}?table=${tableNumber}`}
+            href={`/order/${rawInstance}?table=${displayTableNumber}`}
             className="flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-[#FAF8F5] hover:bg-[#F3ECE2] text-[#3D352E] font-bold text-xs border border-[#E5DAD0] transition-colors"
           >
             <RotateCcw className="w-4 h-4" />
@@ -531,18 +517,15 @@ export default function OrderSuccessPage() {
               </button>
             </div>
 
-            {/* BARRE D'ACTIONS MULTIPLES (TÉLÉCHARGER / EMAIL / PARTAGER / IMPRIMER) */}
-            <div className="p-3 bg-gray-50 rounded-2xl border border-gray-200 space-y-3 print:hidden">
-              <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
-                Options Disponibles :
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {/* BARRE D'ACTIONS ÉPURÉE (TÉLÉCHARGER PDF / PARTAGER / IMPRIMER) */}
+            <div className="p-3 bg-gray-50 rounded-2xl border border-gray-200 space-y-2 print:hidden">
+              <div className="grid grid-cols-3 gap-2">
                 
                 {/* 1. Télécharger PDF */}
                 <button
                   onClick={handleDownloadPDF}
                   disabled={isGeneratingPDF}
-                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-gray-950 hover:bg-gray-800 text-white font-bold text-xs shadow transition-all active:scale-95 disabled:opacity-50"
+                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gray-950 hover:bg-gray-800 text-white font-black text-xs shadow transition-all active:scale-95 disabled:opacity-50"
                 >
                   {isGeneratingPDF ? (
                     <Loader2 className="w-4 h-4 animate-spin text-[#C5A880]" />
@@ -552,68 +535,25 @@ export default function OrderSuccessPage() {
                   <span>{t.savePDF}</span>
                 </button>
 
-                {/* 2. Envoyer par Email */}
-                <button
-                  onClick={() => setShowEmailInput(!showEmailInput)}
-                  className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl font-bold text-xs border transition-all active:scale-95 ${
-                    showEmailInput 
-                      ? 'bg-blue-50 border-blue-300 text-blue-800' 
-                      : 'bg-white hover:bg-gray-100 border-gray-300 text-gray-800'
-                  }`}
-                >
-                  <Mail className="w-4 h-4 text-blue-600" />
-                  <span>{t.sendEmail}</span>
-                </button>
-
-                {/* 3. Partager */}
+                {/* 2. Partager */}
                 <button
                   onClick={handleShareInvoice}
-                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-white hover:bg-gray-100 border border-gray-300 text-gray-800 font-bold text-xs transition-all active:scale-95"
+                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white hover:bg-gray-100 border border-gray-300 text-gray-800 font-bold text-xs transition-all active:scale-95"
                 >
                   <Share2 className="w-4 h-4 text-purple-600" />
                   <span>{t.shareInvoice}</span>
                 </button>
 
-                {/* 4. Imprimer */}
+                {/* 3. Imprimer */}
                 <button
                   onClick={() => typeof window !== 'undefined' && window.print()}
-                  className="flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl bg-white hover:bg-gray-100 border border-gray-300 text-gray-800 font-bold text-xs transition-all active:scale-95"
+                  className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white hover:bg-gray-100 border border-gray-300 text-gray-800 font-bold text-xs transition-all active:scale-95"
                 >
                   <Printer className="w-4 h-4 text-gray-700" />
                   <span>{t.printInvoice}</span>
                 </button>
 
               </div>
-
-              {/* Formulaire Envoi Email dépliant */}
-              {showEmailInput && (
-                <form onSubmit={handleSendInvoiceEmail} className="pt-2 border-t border-gray-200 flex gap-2">
-                  <input
-                    type="email"
-                    required
-                    placeholder="Entrez votre email (ex: client@gmail.com)"
-                    value={invoiceEmail}
-                    onChange={(e) => setInvoiceEmail(e.target.value)}
-                    className="flex-1 px-3 py-2 rounded-xl border border-gray-300 text-xs text-black focus:outline-none focus:ring-2 focus:ring-gray-950"
-                  />
-                  <button
-                    type="submit"
-                    disabled={isSendingEmail || emailSentSuccess}
-                    className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs transition-colors flex items-center gap-1.5"
-                  >
-                    {isSendingEmail ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : emailSentSuccess ? (
-                      <>
-                        <Check className="w-3.5 h-3.5" />
-                        <span>Envoyé !</span>
-                      </>
-                    ) : (
-                      <span>Envoyer</span>
-                    )}
-                  </button>
-                </form>
-              )}
             </div>
 
             {/* DOCUMENT IMPRIMABLE / CAPTURABLE EN PDF (FORMAT FIXE PARFAIT) */}
@@ -632,7 +572,7 @@ export default function OrderSuccessPage() {
                 </div>
                 <div className="text-right">
                   <div className="text-xs font-bold text-gray-500">FACTURE N°</div>
-                  <div className="text-lg font-black font-mono text-gray-900">{orderId}</div>
+                  <div className="text-lg font-black font-mono text-gray-900">{displayOrderId}</div>
                   <div className="text-[11px] text-gray-500 mt-1">
                     {new Date(orderData?.timestamp || Date.now()).toLocaleDateString(lang === 'ar' ? 'ar-QA' : 'fr-FR', {
                       year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -645,7 +585,7 @@ export default function OrderSuccessPage() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-gray-50 rounded-xl text-xs border border-gray-200">
                 <div>
                   <span className="text-gray-500 block text-[10px] font-bold">TABLE</span>
-                  <span className="font-black text-gray-900 text-sm">#{tableNumber}</span>
+                  <span className="font-black text-gray-900 text-sm">#{displayTableNumber}</span>
                 </div>
                 <div>
                   <span className="text-gray-500 block text-[10px] font-bold">CLIENT</span>
