@@ -206,9 +206,7 @@ export default function VirtualLoyaltyCardPageV4() {
           if (resFidelite.ok) {
             const dataFidelite = await resFidelite.json();
             const listFidelite = Array.isArray(dataFidelite) ? dataFidelite : (dataFidelite.list || dataFidelite.data || []);
-            const reversedList = [...listFidelite].reverse();
-
-            const userCard = reversedList.find((c: any) => {
+            const matchingCards = listFidelite.filter((c: any) => {
               const item = getItemData(c);
               const p = item.client_phone?.toString().replace(/[^0-9]/g, '') || "";
               const inst = parseInstanceName(item).toLowerCase();
@@ -216,7 +214,18 @@ export default function VirtualLoyaltyCardPageV4() {
                      (urlInstance ? (inst === urlInstance || inst.includes(urlInstance) || urlInstance.includes(inst)) : true);
             });
 
-            if (userCard) {
+            // Sélectionner la carte ayant le plus de tampons ou la plus récente mise à jour
+            if (matchingCards.length > 0) {
+              const sorted = matchingCards.sort((a: any, b: any) => {
+                const itemA = getItemData(a);
+                const itemB = getItemData(b);
+                const stampsA = Number(itemA.stamps_count) || 0;
+                const stampsB = Number(itemB.stamps_count) || 0;
+                if (stampsB !== stampsA) return stampsB - stampsA;
+                return (itemB.Id || 0) - (itemA.Id || 0);
+              });
+
+              const userCard = sorted[0];
               const item = getItemData(userCard);
               const rawVal = Number(item.stamps_count);
               setStampsCount(isNaN(rawVal) ? 0 : rawVal);

@@ -341,7 +341,10 @@ export default function OrderSuccessPage() {
     }
   }[lang];
 
-  const userPhone = orderData?.customer_phone || (typeof window !== 'undefined' ? localStorage.getItem('user_phone') : '') || '';
+  // Le bouton de fidélité ne s'affiche QUE si un numéro valide a été saisi lors de cette commande
+  const userPhone = (orderData?.customer_phone && String(orderData.customer_phone).trim().length >= 6)
+    ? String(orderData.customer_phone).trim()
+    : '';
 
   return (
     <div 
