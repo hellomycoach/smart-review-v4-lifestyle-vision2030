@@ -177,25 +177,69 @@ export default function OrderSuccessPage() {
     }
   };
 
-  // Partage natif (Mobile Web Share API)
+  // Partage natif du fichier PDF (ou lien direct vers la facture)
   const handleShareInvoice = async () => {
-    const shareUrl = typeof window !== 'undefined'
-      ? `${window.location.origin}/order/${rawInstance}/success?orderId=${displayOrderId}&table=${displayTableNumber}`
-      : `https://smart-review-v4-lifestyle-vision2030.jdaproai.com/order/${rawInstance}/success?orderId=${displayOrderId}&table=${displayTableNumber}`;
+    const invoiceUrl = typeof window !== 'undefined'
+      ? `${window.location.origin}/order/${rawInstance}/invoice?orderId=${displayOrderId}&table=${displayTableNumber}`
+      : `https://smart-review-v4-lifestyle-vision2030.jdaproai.com/order/${rawInstance}/invoice?orderId=${displayOrderId}&table=${displayTableNumber}`;
 
-    if (typeof navigator !== 'undefined' && navigator.share) {
-      try {
+    setIsGeneratingPDF(true);
+    try {
+      const el = document.getElementById('printable-invoice');
+      if (el && typeof navigator !== 'undefined' && (navigator as any).canShare) {
+        const html2canvas = (await import('html2canvas')).default;
+        const { jsPDF } = await import('jspdf');
+        
+        const canvas = await html2canvas(el, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+          windowWidth: 1000,
+          onclone: (clonedDoc) => {
+            const clonedEl = clonedDoc.getElementById('printable-invoice');
+            if (clonedEl) {
+              clonedEl.style.width = '750px';
+              clonedEl.style.padding = '30px';
+              clonedEl.style.margin = '0 auto';
+              clonedEl.style.boxShadow = 'none';
+            }
+          }
+        });
+
+        const imgData = canvas.toDataURL('image/png', 1.0);
+        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+        const imgWidth = 210;
+        const pageHeight = 297;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, Math.min(imgHeight, pageHeight));
+        const pdfBlob = pdf.output('blob');
+        const pdfFile = new File([pdfBlob], `Facture_${displayOrderId}.pdf`, { type: 'application/pdf' });
+
+        if ((navigator as any).canShare({ files: [pdfFile] })) {
+          await navigator.share({
+            files: [pdfFile],
+            title: `Facture #${displayOrderId} - ${orderData?.restaurant_name || formattedUrlName}`,
+            text: `Voici la facture officielle #${displayOrderId} pour la Table ${displayTableNumber}.`
+          });
+          return;
+        }
+      }
+
+      if (typeof navigator !== 'undefined' && navigator.share) {
         await navigator.share({
           title: `Facture #${displayOrderId} - ${orderData?.restaurant_name || formattedUrlName}`,
-          text: `Voici mon reçu de commande #${displayOrderId} pour la Table ${displayTableNumber} chez ${orderData?.restaurant_name || formattedUrlName}.`,
-          url: shareUrl,
+          text: `Consulter ma Facture Fiscale #${displayOrderId} (Table ${displayTableNumber}) :`,
+          url: invoiceUrl,
         });
-      } catch (e) {}
-    } else {
-      if (typeof navigator !== 'undefined' && navigator.clipboard) {
-        navigator.clipboard.writeText(shareUrl);
-        alert('Lien du reçu copié dans le presse-papier !');
+      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        navigator.clipboard.writeText(invoiceUrl);
+        alert('Lien direct de la Facture copié dans le presse-papier !');
       }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
