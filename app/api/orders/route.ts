@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 
 const N8N_CREATE_ORDER_API = "https://n8n.srv821341.hstgr.cloud/webhook/create-table-order";
 const N8N_UPDATE_STATUS_API = "https://n8n.srv821341.hstgr.cloud/webhook/update-order-status";
 
-// Fichier de persistance sur disque pour partager l'état entre tous les workers Node.js
-const DB_FILE = path.join(process.cwd(), '.orders_db.json');
+// Double persistance : dans le répertoire OS (/tmp) qui survit aux git pull / npm run build + dans le projet
+const PRIMARY_DB_FILE = path.join(os.tmpdir(), 'sr_orders_db_v5.json');
+const SECONDARY_DB_FILE = path.join(process.cwd(), '.orders_db.json');
 
 interface StoredOrder {
   order_id: string;
@@ -26,25 +28,41 @@ interface StoredOrder {
   timestamp: string;
 }
 
-// Helpers lecture/écriture persistante
+// Helpers lecture/écriture persistante protégée
 function getStoredOrders(): StoredOrder[] {
+  // 1. Essayer depuis le stockage système /tmp (persistant aux redéploiements)
   try {
-    if (fs.existsSync(DB_FILE)) {
-      const data = fs.readFileSync(DB_FILE, 'utf-8');
-      return JSON.parse(data) || [];
+    if (fs.existsSync(PRIMARY_DB_FILE)) {
+      const data = fs.readFileSync(PRIMARY_DB_FILE, 'utf-8');
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
-  } catch (e) {
-    console.error("Erreur lecture orders_db:", e);
-  }
+  } catch (e) {}
+
+  // 2. Essayer depuis le fichier local projet
+  try {
+    if (fs.existsSync(SECONDARY_DB_FILE)) {
+      const data = fs.readFileSync(SECONDARY_DB_FILE, 'utf-8');
+      const parsed = JSON.parse(data);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (e) {}
+
   return [];
 }
 
 function saveStoredOrders(orders: StoredOrder[]) {
+  const jsonStr = JSON.stringify(orders.slice(0, 200), null, 2);
+  
+  // Écrire dans /tmp (survit à npm run build et git pull)
   try {
-    fs.writeFileSync(DB_FILE, JSON.stringify(orders.slice(0, 100), null, 2), 'utf-8');
-  } catch (e) {
-    console.error("Erreur écriture orders_db:", e);
-  }
+    fs.writeFileSync(PRIMARY_DB_FILE, jsonStr, 'utf-8');
+  } catch (e) {}
+
+  // Écrire dans le projet
+  try {
+    fs.writeFileSync(SECONDARY_DB_FILE, jsonStr, 'utf-8');
+  } catch (e) {}
 }
 
 // GET /api/orders?instance=doha_pilot OU /api/orders?orderId=SR-123456
@@ -55,7 +73,7 @@ export async function GET(request: Request) {
 
   const orders = getStoredOrders();
 
-  // Si on cherche le statut d'une commande précise
+  // Si on cherche le statut d'une commande précise (pour le smartphone client)
   if (orderId) {
     const order = orders.find(o => o.order_id.toLowerCase() === orderId.toLowerCase());
     if (order) {
@@ -64,7 +82,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ success: true, order: { order_id: orderId, status: 'recue' } });
   }
 
-  // Si on cherche les commandes d'une instance pour le KDS
+  // Si on cherche les commandes d'une instance pour l'écran cuisine KDS
   if (instance) {
     const filtered = orders.filter(o => 
       o.instance_name.toLowerCase().includes(instance) || instance.includes(o.instance_name.toLowerCase())
@@ -106,7 +124,7 @@ export async function POST(request: Request) {
     }
     saveStoredOrders(orders);
 
-    // Relais au webhook n8n
+    // Relais au webhook n8n (NocoDB + WhatsApp)
     fetch(N8N_CREATE_ORDER_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -150,7 +168,7 @@ export async function PATCH(request: Request) {
     }
     saveStoredOrders(orders);
 
-    // Relais à n8n
+    // Relais à n8n pour mise à jour NocoDB
     fetch(N8N_UPDATE_STATUS_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
