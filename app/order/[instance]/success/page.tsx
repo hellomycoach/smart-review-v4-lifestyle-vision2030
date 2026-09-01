@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { 
   CheckCircle2, Clock, ChefHat, Sparkles, Gift, CreditCard, 
   ArrowRight, ArrowLeft, RotateCcw, Award, Utensils, Receipt, 
-  Smartphone, Share2
+  Smartphone, Share2, Download, Printer, MessageCircle
 } from 'lucide-react';
 
 export default function OrderSuccessPage() {
@@ -98,10 +98,10 @@ export default function OrderSuccessPage() {
       } catch (e) {}
 
       // Écouter les modifications de localStorage
-      const handleStorage = (e: StorageEvent) => {
-        if (e.key === 'sr_last_order' && e.newValue) {
+      const handleStorage = (StorageEvent: any) => {
+        if (StorageEvent.key === 'sr_last_order' && StorageEvent.newValue) {
           try {
-            const parsed = JSON.parse(e.newValue);
+            const parsed = JSON.parse(StorageEvent.newValue);
             if (parsed.status) {
               setOrderStatusIndex(getIndexFromStatus(parsed.status));
               setOrderData(parsed);
@@ -140,13 +140,15 @@ export default function OrderSuccessPage() {
       spinPromoTitle: "🎁 اربح تحلية أو قهوة مجانية الآن!",
       spinPromoSub: "شاركنا تقييمك السريع على Google وادر عجلة الحظ للفوز بجوائز فورية.",
       spinButton: "تدوير عجلة الهدايا",
-      loyaltyButton: "عرض بطاقة الولاء والنقاط",
-      orderAgain: "طلب المزيد من الأطباق",
+      loyaltyButton: "عرض بطاقة الولاء الرقمية",
+      orderAgain: "طلب أطباق أخرى",
+      downloadInvoice: "تحميل الفاتورة الإلكترونية (PDF)",
+      whatsappTrack: "متابعة الطلب عبر واتساب",
       currency: orderData?.currency === "EUR" ? "€" : (orderData?.currency === "SAR" ? "ر.س" : "ر.ق"),
     },
     fr: {
-      successTitle: "Commande Confirmée avec Succès !",
-      successSub: "Merci pour votre visite. Votre commande est en cours de préparation en cuisine.",
+      successTitle: "Commande Validée avec Succès !",
+      successSub: "Merci pour votre visite. Vos plats sont en cours de préparation en cuisine.",
       orderNumber: "N° Commande",
       table: "Table",
       steps: [
@@ -166,6 +168,8 @@ export default function OrderSuccessPage() {
       spinButton: "Faire tourner la roue cadeau",
       loyaltyButton: "Consulter ma carte fidélité",
       orderAgain: "Commander un autre plat",
+      downloadInvoice: "Télécharger la Facture PDF",
+      whatsappTrack: "Recevoir le suivi sur WhatsApp",
       currency: orderData?.currency === "EUR" ? "€" : (orderData?.currency === "SAR" ? "SAR" : "QAR"),
     },
     en: {
@@ -190,6 +194,8 @@ export default function OrderSuccessPage() {
       spinButton: "Spin the Reward Wheel",
       loyaltyButton: "View Digital Loyalty Card",
       orderAgain: "Order more items",
+      downloadInvoice: "Download PDF Tax Invoice",
+      whatsappTrack: "Get updates on WhatsApp",
       currency: orderData?.currency === "EUR" ? "€" : (orderData?.currency === "SAR" ? "SAR" : "QAR"),
     }
   }[lang];
@@ -300,13 +306,22 @@ export default function OrderSuccessPage() {
           </div>
         </div>
 
-        {/* DÉTAIL DU REÇU DIGITAL */}
+        {/* DÉTAIL DU REÇU DIGITAL & FACTURE ÉLECTRONIQUE */}
         {orderData && orderData.items && (
-          <div className="bg-[#FAF8F5] rounded-3xl p-5 border border-[#E5DAD0] shadow-sm space-y-3">
-            <h3 className="font-bold text-sm text-[#3D352E] flex items-center gap-2">
-              <Receipt className="w-4 h-4 text-[#8C6D48]" />
-              <span>{t.receiptTitle}</span>
-            </h3>
+          <div className="bg-[#FAF8F5] rounded-3xl p-5 border border-[#E5DAD0] shadow-sm space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-[#E5DAD0]">
+              <h3 className="font-bold text-sm text-[#3D352E] flex items-center gap-2">
+                <Receipt className="w-4 h-4 text-[#8C6D48]" />
+                <span>{t.receiptTitle}</span>
+              </h3>
+              <button
+                onClick={() => typeof window !== 'undefined' && window.print()}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F3ECE2] hover:bg-[#EAE0D5] text-[#3D352E] font-bold text-xs border border-[#D5C4B4] transition-colors active:scale-95"
+              >
+                <Printer className="w-3.5 h-3.5 text-[#8C6D48]" />
+                <span>{t.downloadInvoice}</span>
+              </button>
+            </div>
 
             <div className="divide-y divide-[#EFE8DF] text-xs">
               {orderData.items.map((it: any, i: number) => (
@@ -342,6 +357,23 @@ export default function OrderSuccessPage() {
                 <span className="text-base text-[#8C6D48]">{orderData.total_amount?.toFixed(2)} {t.currency}</span>
               </div>
             </div>
+
+            {/* BOUTON WHATSAPP INBOUND SÉCURISÉ (ANTI-BAN) */}
+            <a
+              href={`https://wa.me/41779051014?text=${encodeURIComponent(
+                isRTL 
+                  ? `مرحباً ${orderData?.restaurant_name || formattedUrlName}، هذه طلبيتي #${orderId} للطاولة رقم ${tableNumber}`
+                  : (lang === 'fr' 
+                    ? `Bonjour ${orderData?.restaurant_name || formattedUrlName}, voici ma commande #${orderId} pour la table ${tableNumber}`
+                    : `Hello ${orderData?.restaurant_name || formattedUrlName}, here is my order #${orderId} for table ${tableNumber}`)
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-2xl bg-[#25D366]/10 hover:bg-[#25D366]/20 text-[#128C7E] font-black text-xs border border-[#25D366]/30 transition-all active:scale-98"
+            >
+              <MessageCircle className="w-4 h-4 text-[#25D366]" />
+              <span>{t.whatsappTrack}</span>
+            </a>
           </div>
         )}
 
