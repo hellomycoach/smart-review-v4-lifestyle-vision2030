@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { 
   CheckCircle2, Clock, ChefHat, Sparkles, Gift, CreditCard, 
   ArrowRight, ArrowLeft, RotateCcw, Award, Utensils, Receipt, 
-  Smartphone, Share2, Download, Printer, MessageCircle
+  Smartphone, Share2, Download, Printer, MessageCircle, X, FileText, QrCode
 } from 'lucide-react';
 
 export default function OrderSuccessPage() {
@@ -36,6 +36,7 @@ export default function OrderSuccessPage() {
 
   const [orderData, setOrderData] = useState<any>(null);
   const [orderStatusIndex, setOrderStatusIndex] = useState(0); // 0: Reçue, 1: En cuisine, 2: Prête, 3: Servie
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
 
   // Convertir le statut texte en index d'étape
   const getIndexFromStatus = (st: string) => {
@@ -98,10 +99,10 @@ export default function OrderSuccessPage() {
       } catch (e) {}
 
       // Écouter les modifications de localStorage
-      const handleStorage = (StorageEvent: any) => {
-        if (StorageEvent.key === 'sr_last_order' && StorageEvent.newValue) {
+      const handleStorage = (e: StorageEvent) => {
+        if (e.key === 'sr_last_order' && e.newValue) {
           try {
-            const parsed = JSON.parse(StorageEvent.newValue);
+            const parsed = JSON.parse(e.newValue);
             if (parsed.status) {
               setOrderStatusIndex(getIndexFromStatus(parsed.status));
               setOrderData(parsed);
@@ -254,15 +255,15 @@ export default function OrderSuccessPage() {
                   <div key={idx} className="relative z-10 flex flex-col items-center">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-300 ${
                       isPassed 
-                        ? 'bg-[#3D352E] text-[#FAF8F5] ring-4 ring-[#EAE0D5]' 
-                        : 'bg-[#EAE0D5] text-[#8C7A6B]'
-                    } ${isCurrent ? 'scale-110 shadow-md' : ''}`}>
+                        ? 'bg-[#3D352E] text-[#FAF8F5] ring-4 ring-[#EAE0D5] scale-110 shadow-md' 
+                        : 'bg-[#E0D5C7] text-[#8C7A6B]'
+                    } ${isCurrent ? 'animate-bounce' : ''}`}>
                       {idx === 0 && <Receipt className="w-3.5 h-3.5" />}
-                      {idx === 1 && <ChefHat className="w-3.5 h-3.5" />}
-                      {idx === 2 && <Clock className="w-3.5 h-3.5" />}
-                      {idx === 3 && <Utensils className="w-3.5 h-3.5" />}
+                      {idx === 1 && <ChefHat className="w-3.5 h-3.5 text-[#C5A880]" />}
+                      {idx === 2 && <Clock className="w-3.5 h-3.5 text-[#C5A880]" />}
+                      {idx === 3 && <Utensils className="w-3.5 h-3.5 text-emerald-400" />}
                     </div>
-                    <span className={`text-[10px] font-bold mt-2 ${isPassed ? 'text-[#3D352E]' : 'text-[#8C7A6B]'}`}>
+                    <span className={`text-[11px] font-bold mt-2 ${isPassed ? 'text-[#3D352E]' : 'text-[#A8988B]'}`}>
                       {step.label}
                     </span>
                   </div>
@@ -270,7 +271,7 @@ export default function OrderSuccessPage() {
               })}
             </div>
 
-            <div className="text-xs font-semibold text-[#8C6D48] flex items-center justify-center gap-1.5 pt-2">
+            <div className="text-[11px] font-semibold text-[#8C6D48] flex items-center justify-center gap-1.5 pt-2">
               <Clock className="w-3.5 h-3.5" />
               <span>{t.estimatedTime}</span>
             </div>
@@ -315,10 +316,10 @@ export default function OrderSuccessPage() {
                 <span>{t.receiptTitle}</span>
               </h3>
               <button
-                onClick={() => typeof window !== 'undefined' && window.print()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#F3ECE2] hover:bg-[#EAE0D5] text-[#3D352E] font-bold text-xs border border-[#D5C4B4] transition-colors active:scale-95"
+                onClick={() => setShowInvoiceModal(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#3D352E] hover:bg-[#241E1A] text-[#FAF8F5] font-bold text-xs shadow-sm transition-all active:scale-95"
               >
-                <Printer className="w-3.5 h-3.5 text-[#8C6D48]" />
+                <FileText className="w-3.5 h-3.5 text-[#C5A880]" />
                 <span>{t.downloadInvoice}</span>
               </button>
             </div>
@@ -399,6 +400,177 @@ export default function OrderSuccessPage() {
         </div>
 
       </div>
+
+      {/* MODAL FACTURE FISCALE OFFICIELLE PDF A4 */}
+      {showInvoiceModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="relative w-full max-w-2xl bg-white text-black rounded-3xl shadow-2xl p-6 md:p-8 space-y-6 my-8 border border-gray-200">
+            
+            {/* Bouton de fermeture */}
+            <button
+              onClick={() => setShowInvoiceModal(false)}
+              className="absolute top-4 right-4 p-2 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors print:hidden"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {/* DOCUMENT IMPRIMABLE A4 */}
+            <div id="printable-invoice" className="space-y-6 bg-white text-black p-2">
+              
+              {/* En-tête Facture */}
+              <div className="flex flex-wrap items-start justify-between gap-4 border-b-2 border-black pb-4">
+                <div>
+                  <div className="text-[10px] uppercase tracking-widest text-gray-500 font-black">
+                    Facture Électronique Simplifiée / Simplified Tax Invoice
+                  </div>
+                  <h2 className="text-2xl font-black tracking-tight text-gray-950 mt-1">
+                    {orderData?.restaurant_name || formattedUrlName}
+                  </h2>
+                  <p className="text-xs text-gray-600 mt-0.5">Doha, Qatar • Tél : +974 4400 0000</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-xs font-bold text-gray-500">FACTURE N°</div>
+                  <div className="text-lg font-black font-mono text-gray-900">{orderId}</div>
+                  <div className="text-[11px] text-gray-500 mt-1">
+                    {new Date(orderData?.timestamp || Date.now()).toLocaleDateString(lang === 'ar' ? 'ar-QA' : 'fr-FR', {
+                      year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Infos Client & Table */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-gray-50 rounded-xl text-xs border border-gray-200">
+                <div>
+                  <span className="text-gray-500 block text-[10px] font-bold">TABLE</span>
+                  <span className="font-black text-gray-900 text-sm">#{tableNumber}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block text-[10px] font-bold">CLIENT</span>
+                  <span className="font-bold text-gray-900">{orderData?.customer_name || 'Guest'}</span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block text-[10px] font-bold">MODE DE RÈGLEMENT</span>
+                  <span className="font-bold text-gray-900">
+                    {orderData?.payment_method === 'apple_pay' ? 'Apple Pay' : (orderData?.payment_method === 'card' ? 'Carte Bancaire (NAPS)' : 'Règlement en caisse')}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-500 block text-[10px] font-bold">STATUT PAIEMENT</span>
+                  <span className="font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 inline-block text-[11px]">
+                    Confirmé / Validé
+                  </span>
+                </div>
+              </div>
+
+              {/* Tableau des Articles */}
+              <div className="border border-gray-200 rounded-xl overflow-hidden">
+                <table className="w-full text-xs text-left divide-y divide-gray-200">
+                  <thead className="bg-gray-100 text-gray-700 font-bold uppercase text-[10px]">
+                    <tr>
+                      <th className="p-3">Désignation / Item</th>
+                      <th className="p-3 text-center">Qté</th>
+                      <th className="p-3 text-right">Prix Unit.</th>
+                      <th className="p-3 text-right">Total ({t.currency})</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100 font-medium">
+                    {(orderData?.items || []).map((item: any, idx: number) => (
+                      <tr key={idx} className="hover:bg-gray-50">
+                        <td className="p-3">
+                          <div className="font-bold text-gray-900">{item.name}</div>
+                          {item.options && item.options.length > 0 && (
+                            <div className="text-[10px] text-gray-500">{item.options.join(', ')}</div>
+                          )}
+                        </td>
+                        <td className="p-3 text-center font-bold text-gray-800">{item.quantity}</td>
+                        <td className="p-3 text-right text-gray-600">{(item.price / (item.quantity || 1)).toFixed(2)}</td>
+                        <td className="p-3 text-right font-bold text-gray-900">{item.price?.toFixed(2)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Totaux & Ventilation Taxes */}
+              <div className="flex flex-wrap justify-between items-end gap-4 pt-2 border-t border-gray-200">
+                <div className="flex items-center gap-3 p-2 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="w-16 h-16 bg-gray-900 text-white flex items-center justify-center rounded-lg p-1">
+                    <QrCode className="w-14 h-14" />
+                  </div>
+                  <div className="text-[10px] text-gray-500 max-w-[160px] leading-tight">
+                    Facture certifiée conforme E-Invoicing Qatar & Vision 2030 Smart Review.
+                  </div>
+                </div>
+
+                <div className="w-full sm:w-64 space-y-1.5 text-xs">
+                  <div className="flex justify-between text-gray-600">
+                    <span>Sous-total HT :</span>
+                    <span>{orderData?.subtotal?.toFixed(2)} {t.currency}</span>
+                  </div>
+                  <div className="flex justify-between text-gray-600">
+                    <span>TVA (0% - Qatar) :</span>
+                    <span>0.00 {t.currency}</span>
+                  </div>
+                  {orderData?.tip > 0 && (
+                    <div className="flex justify-between text-gray-600">
+                      <span>Pourboire de service :</span>
+                      <span>+{orderData?.tip?.toFixed(2)} {t.currency}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-base font-black text-gray-950 pt-2 border-t-2 border-black">
+                    <span>TOTAL TTC :</span>
+                    <span>{orderData?.total_amount?.toFixed(2)} {t.currency}</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Barre d'action Modal (Télécharger / Imprimer) */}
+            <div className="flex flex-wrap items-center justify-end gap-3 pt-4 border-t border-gray-200 print:hidden">
+              <button
+                onClick={() => setShowInvoiceModal(false)}
+                className="px-4 py-2.5 rounded-xl border border-gray-300 hover:bg-gray-100 text-gray-700 font-bold text-xs transition-colors"
+              >
+                Fermer
+              </button>
+              <button
+                onClick={() => typeof window !== 'undefined' && window.print()}
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gray-950 hover:bg-gray-800 text-white font-black text-xs shadow-lg transition-transform active:scale-95"
+              >
+                <Printer className="w-4 h-4 text-[#C5A880]" />
+                <span>Imprimer / Télécharger en PDF</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* Style Print pour Document PDF Pro A4 */}
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden;
+          }
+          #printable-invoice, #printable-invoice * {
+            visibility: visible;
+          }
+          #printable-invoice {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+            padding: 30px;
+            background: white !important;
+            color: black !important;
+            box-shadow: none !important;
+            border: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
