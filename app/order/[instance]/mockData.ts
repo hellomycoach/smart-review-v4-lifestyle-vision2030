@@ -26,6 +26,7 @@ export interface MenuItem {
   isSpicy?: boolean;
   isVegetarian?: boolean;
   isGlutenFree?: boolean;
+  isAvailable?: boolean;
   optionGroups?: MenuItemOptionGroup[];
 }
 

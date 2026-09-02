@@ -83,11 +83,33 @@ export default function TableOrderingPage() {
     isOpen: true
   });
 
-  // Menu data dynamique
-  const categories = instanceMenu.categories;
-  const menuItems = instanceMenu.items;
+  // Menu data dynamique synchronisé avec NocoDB
+  const [categories, setCategories] = useState<MenuCategory[]>(instanceMenu.categories);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(instanceMenu.items);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // Synchronisation en direct avec NocoDB
+  useEffect(() => {
+    if (!rawInstance) return;
+    const fetchLiveMenu = async () => {
+      try {
+        const res = await fetch(`/api/menu?instance=${rawInstance}&t=${Date.now()}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (data.items && data.items.length > 0) {
+            setMenuItems(data.items);
+            if (data.categories && data.categories.length > 0) {
+              setCategories(data.categories);
+            }
+          }
+        }
+      } catch (e) {
+        // Fallback transparent
+      }
+    };
+    fetchLiveMenu();
+  }, [rawInstance]);
 
   // Modal Plat / Personnalisation
   const [activeItem, setActiveItem] = useState<MenuItem | null>(null);
@@ -186,6 +208,7 @@ export default function TableOrderingPage() {
       glutenFree: "خالي من الجلوتين",
       calories: "سعرة",
       addToCart: "إضافة للطلب",
+      outOfStock: "غير متوفر حالياً",
       viewCart: "عرض الطلب",
       cartTitle: "تفاصيل طلب الطاولة",
       emptyCart: "سلة الطلبات فارغة حالياً",
@@ -226,6 +249,7 @@ export default function TableOrderingPage() {
       glutenFree: "Sans Gluten",
       calories: "kcal",
       addToCart: "Ajouter à la commande",
+      outOfStock: "Épuisé / Rupture temporaire",
       viewCart: "Voir la commande",
       cartTitle: "Commande de la Table",
       emptyCart: "Votre panier est vide",
@@ -266,6 +290,7 @@ export default function TableOrderingPage() {
       glutenFree: "Gluten Free",
       calories: "kcal",
       addToCart: "Add to Order",
+      outOfStock: "Out of Stock",
       viewCart: "View Order",
       cartTitle: "Table Order Summary",
       emptyCart: "Your order is empty",
@@ -644,89 +669,108 @@ export default function TableOrderingPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {filteredItems.map((item) => (
-              <div 
-                key={item.id}
-                onClick={() => handleOpenItem(item)}
-                className="group relative bg-[#FAF8F5] rounded-3xl p-4 border border-[#E5DAD0] shadow-sm hover:shadow-md hover:border-[#C5A880] transition-all duration-300 cursor-pointer flex flex-col justify-between"
-              >
-                <div className="flex gap-3.5">
-                  {/* Photo du plat */}
-                  <div className="relative w-28 h-28 md:w-32 md:h-32 shrink-0 rounded-2xl overflow-hidden bg-[#E8DDD0] shadow-inner">
-                    <img 
-                      src={item.image} 
-                      alt={item.name[lang]}
-                      className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
-                    />
-                    {item.isChefPick && (
-                      <span className="absolute top-1.5 right-1.5 bg-[#3D352E]/90 backdrop-blur-sm text-[#EFE7DC] text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 shadow">
-                        <Sparkles className="w-2.5 h-2.5 text-[#C5A880]" />
-                        {t.chefPick}
+            {filteredItems.map((item) => {
+              const isOutOfStock = item.isAvailable === false;
+              return (
+                <div 
+                  key={item.id}
+                  onClick={() => !isOutOfStock && handleOpenItem(item)}
+                  className={`group relative rounded-3xl p-4 border transition-all duration-300 flex flex-col justify-between ${
+                    isOutOfStock 
+                      ? 'opacity-65 border-[#E5DAD0] cursor-not-allowed bg-[#F2EAE0]' 
+                      : 'bg-[#FAF8F5] border-[#E5DAD0] shadow-sm hover:shadow-md hover:border-[#C5A880] cursor-pointer'
+                  }`}
+                >
+                  <div className="flex gap-3.5">
+                    {/* Photo du plat */}
+                    <div className="relative w-28 h-28 md:w-32 md:h-32 shrink-0 rounded-2xl overflow-hidden bg-[#E8DDD0] shadow-inner">
+                      <img 
+                        src={item.image} 
+                        alt={item.name[lang]}
+                        className={`w-full h-full object-cover transition-transform duration-500 ${!isOutOfStock ? 'group-hover:scale-108' : 'grayscale-[50%]'}`}
+                      />
+                      {isOutOfStock ? (
+                        <span className="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center text-white text-[11px] font-black px-2 text-center leading-tight">
+                          {t.outOfStock}
+                        </span>
+                      ) : (
+                        item.isChefPick && (
+                          <span className="absolute top-1.5 right-1.5 bg-[#3D352E]/90 backdrop-blur-sm text-[#EFE7DC] text-[10px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 shadow">
+                            <Sparkles className="w-2.5 h-2.5 text-[#C5A880]" />
+                            {t.chefPick}
+                          </span>
+                        )
+                      )}
+                    </div>
+
+                    {/* Infos du plat */}
+                    <div className="flex-1 flex flex-col justify-between">
+                      <div>
+                        <div className="flex items-start justify-between gap-1 mb-1">
+                          <h3 className={`font-bold text-sm md:text-base line-clamp-1 transition-colors ${isOutOfStock ? 'text-[#8C7A6B] line-through' : 'text-[#2E2722] group-hover:text-[#8C6D48]'}`}>
+                            {item.name[lang]}
+                          </h3>
+                        </div>
+                        <p className="text-xs text-[#7A695B] line-clamp-2 leading-relaxed mb-2">
+                          {item.description[lang]}
+                        </p>
+                      </div>
+
+                      {/* Badges diététiques & Calories */}
+                      <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-semibold text-[#8C7A6B]">
+                        {item.calories && (
+                          <span className="flex items-center gap-0.5 bg-[#EFE8DF] px-2 py-0.5 rounded-md">
+                            <CalorieIcon className="w-3 h-3 text-orange-500" />
+                            {item.calories} {t.calories}
+                          </span>
+                        )}
+                        {item.isSpicy && (
+                          <span className="bg-red-50 text-red-700 px-1.5 py-0.5 rounded-md border border-red-200">
+                            🌶️ {t.spicy}
+                          </span>
+                        )}
+                        {item.isVegetarian && (
+                          <span className="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded-md border border-emerald-200">
+                            🌱 {t.veg}
+                          </span>
+                        )}
+                        {item.isGlutenFree && (
+                          <span className="bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-md border border-amber-200">
+                            🌾 {t.glutenFree}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Barre inférieure : Prix & Bouton Ajout */}
+                  <div className="mt-3 pt-2.5 border-t border-[#EFE8DF] flex items-center justify-between">
+                    <div className="flex items-baseline gap-1">
+                      <span className={`text-lg md:text-xl font-black ${isOutOfStock ? 'text-[#8C7A6B]' : 'text-[#2E2722]'}`}>
+                        {item.price}
                       </span>
+                      <span className="text-xs font-bold text-[#8C7A6B]">
+                        {t.currency}
+                      </span>
+                    </div>
+
+                    {isOutOfStock ? (
+                      <span className="px-3 py-1 rounded-full bg-[#E5DAD0] text-[#7A695B] text-[11px] font-bold">
+                        {t.outOfStock}
+                      </span>
+                    ) : (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleOpenItem(item); }}
+                        className="flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-[#EAE0D5] group-hover:bg-[#3D352E] text-[#3D352E] group-hover:text-[#FAF8F5] text-xs font-bold transition-all shadow-sm"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>{t.addToCart}</span>
+                      </button>
                     )}
                   </div>
-
-                  {/* Infos du plat */}
-                  <div className="flex-1 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-start justify-between gap-1 mb-1">
-                        <h3 className="font-bold text-sm md:text-base text-[#2E2722] group-hover:text-[#8C6D48] transition-colors line-clamp-1">
-                          {item.name[lang]}
-                        </h3>
-                      </div>
-                      <p className="text-xs text-[#7A695B] line-clamp-2 leading-relaxed mb-2">
-                        {item.description[lang]}
-                      </p>
-                    </div>
-
-                    {/* Badges diététiques & Calories */}
-                    <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-semibold text-[#8C7A6B]">
-                      {item.calories && (
-                        <span className="flex items-center gap-0.5 bg-[#EFE8DF] px-2 py-0.5 rounded-md">
-                          <CalorieIcon className="w-3 h-3 text-orange-500" />
-                          {item.calories} {t.calories}
-                        </span>
-                      )}
-                      {item.isSpicy && (
-                        <span className="bg-red-50 text-red-700 px-1.5 py-0.5 rounded-md border border-red-200">
-                          🌶️ {t.spicy}
-                        </span>
-                      )}
-                      {item.isVegetarian && (
-                        <span className="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded-md border border-emerald-200">
-                          🌱 {t.veg}
-                        </span>
-                      )}
-                      {item.isGlutenFree && (
-                        <span className="bg-amber-50 text-amber-700 px-1.5 py-0.5 rounded-md border border-amber-200">
-                          🌾 {t.glutenFree}
-                        </span>
-                      )}
-                    </div>
-                  </div>
                 </div>
-
-                {/* Barre inférieure : Prix & Bouton Ajout */}
-                <div className="mt-3 pt-2.5 border-t border-[#EFE8DF] flex items-center justify-between">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-lg md:text-xl font-black text-[#2E2722]">
-                      {item.price}
-                    </span>
-                    <span className="text-xs font-bold text-[#8C7A6B]">
-                      {t.currency}
-                    </span>
-                  </div>
-
-                  <button
-                    onClick={(e) => { e.stopPropagation(); handleOpenItem(item); }}
-                    className="flex items-center gap-1 px-3.5 py-1.5 rounded-full bg-[#EAE0D5] group-hover:bg-[#3D352E] text-[#3D352E] group-hover:text-[#FAF8F5] text-xs font-bold transition-all shadow-sm"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>{t.addToCart}</span>
-                  </button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
