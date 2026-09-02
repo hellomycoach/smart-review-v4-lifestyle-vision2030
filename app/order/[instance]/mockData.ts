@@ -325,11 +325,12 @@ export const DEFAULT_MENU_ITEMS: MenuItem[] = [
 
 // --- CATALOGUE SPÉCIFIQUE BO'S COFFEE MALL OF QATAR (bos_cafe_moq) ---
 export const BOS_CAFE_CATEGORIES: MenuCategory[] = [
-  { id: "all", name: { ar: "الكل", fr: "Tout le menu", en: "All Menu" }, icon: "Coffee" },
+  { id: "all", name: { ar: "الكل (52)", fr: "Tout le menu (52)", en: "All Menu (52)" }, icon: "Coffee" },
   { id: "signatures", name: { ar: "المشروبات التوقيع وبوبا", fr: "Signatures & Boba", en: "Signatures & Boba" }, icon: "Sparkles" },
-  { id: "hot_iced", name: { ar: "قهوة ساخنة ومثلجة", fr: "Cafés Chauds & Glacés", en: "Hot & Iced Coffee" }, icon: "Flame" },
-  { id: "froccino", name: { ar: "فروتشينو فرابيه", fr: "Froccinos & Frappés", en: "Froccinos & Frappes" }, icon: "Cake" },
-  { id: "mojitos", name: { ar: "مشروبات الموهيتو", fr: "Mojitos Frais", en: "Mojito Drinks" }, icon: "Utensils" },
+  { id: "espresso", name: { ar: "اسبريسو", fr: "Espresso Bar", en: "Espresso Bar" }, icon: "Flame" },
+  { id: "hot_iced", name: { ar: "قهوة ساخنة ومثلجة", fr: "Cafés Chauds & Glacés", en: "Hot & Iced Coffee" }, icon: "Coffee" },
+  { id: "froccino", name: { ar: "فروتشينو وفريز", fr: "Froccinos & Freezes", en: "Froccinos & Freezes" }, icon: "Cake" },
+  { id: "mojitos", name: { ar: "موهيتو وشاي مثلج", fr: "Mojitos & Thés Glacés", en: "Mojitos & Iced Tea" }, icon: "Utensils" },
   { id: "combos", name: { ar: "وجبات اقتصادية وعروض", fr: "Formules & Combos", en: "Value Meals & Combos" }, icon: "UtensilsCrossed" }
 ];
 
