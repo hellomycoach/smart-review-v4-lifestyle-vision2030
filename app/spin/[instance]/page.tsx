@@ -416,9 +416,22 @@ export default function LuxuryRestaurantPortalV4() {
   return (
     <div 
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
-      className="min-h-screen bg-[#120B09] text-zinc-100 font-['Cairo',sans-serif] relative flex flex-col justify-between p-4 sm:p-6 overflow-x-hidden selection:bg-[#C8102E] selection:text-white"
+      className="min-h-screen bg-[#FAF8F5] text-[#2B1810] font-['Cairo',sans-serif] relative flex flex-col justify-between p-4 sm:p-6 overflow-x-hidden selection:bg-[#C8102E] selection:text-white"
     >
-      <div className="fixed top-[-10%] right-[-10%] w-96 h-96 bg-[#C8102E]/20 rounded-full blur-[160px] pointer-events-none" />
+      {/* PHOTO DE FOND AMBIANCE (COVER IMAGE NOCODB) AVEC GRADIENT SOFT */}
+      {restaurantData.cover_image && (
+        <div className="absolute top-0 inset-x-0 h-[480px] z-0 overflow-hidden opacity-25 pointer-events-none">
+          <img 
+            src={restaurantData.cover_image} 
+            alt="Cover" 
+            className="w-full h-full object-cover filter blur-[2px] scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#FAF8F5]/60 to-[#FAF8F5]"></div>
+        </div>
+      )}
+
+      {/* HALOS CHAUDS CARAMEL & CRIMSON */}
+      <div className="fixed top-[-10%] right-[-10%] w-96 h-96 bg-[#C8102E]/10 rounded-full blur-[160px] pointer-events-none" />
       <div className="fixed bottom-[-10%] left-[-10%] w-96 h-96 bg-[#D4A373]/15 rounded-full blur-[160px] pointer-events-none" />
 
       <div className="max-w-xl mx-auto w-full space-y-6 relative z-10 my-auto">
@@ -426,48 +439,53 @@ export default function LuxuryRestaurantPortalV4() {
         {/* HEADER */}
         <header className="flex justify-between items-center pt-2 px-1">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-6 h-6 text-[#E63946]" />
-            <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-[#E63946]">
+            <ShieldCheck className="w-6 h-6 text-[#C8102E]" />
+            <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-[#C8102E]">
               {t.portalTitle}
             </span>
           </div>
 
           <button
             onClick={toggleLanguage}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#1E1512] border border-[#C8102E]/40 text-xs sm:text-sm font-black text-[#FAF8F5] hover:text-[#E63946] backdrop-blur-xl transition-all shadow-md"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 border border-[#E8DDD0] text-xs sm:text-sm font-black text-[#2B1810] hover:text-[#C8102E] hover:border-[#C8102E] backdrop-blur-xl transition-all shadow-sm"
           >
-            <Globe className="w-4 h-4 text-[#E63946]" />
+            <Globe className="w-4 h-4 text-[#C8102E]" />
             {lang === 'ar' ? 'Français' : lang === 'fr' ? 'English' : 'العربية'}
           </button>
         </header>
 
-        {/* HERO BANNER RESTAURANT DYNAMIQUE */}
+        {/* HERO BANNER RESTAURANT (THÈME CLAIR LUXE) */}
         <div className="relative group">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-[#C8102E] via-[#D4A373] to-[#C8102E] rounded-[28px] blur-sm opacity-70"></div>
-          <div className="relative bg-[#1E1512] border-2 border-[#C8102E]/40 rounded-[26px] p-6 text-center space-y-2 shadow-2xl">
-            <p className="text-xs sm:text-sm font-bold text-[#D4A373] uppercase tracking-widest">{t.subTitle}</p>
-            <h1 className="text-3xl sm:text-4xl font-black text-[#FAF8F5]">{restaurantData.restaurant_name || formattedUrlName}</h1>
-            {restaurantData.city && <p className="text-xs sm:text-sm text-[#A8988B] font-bold">{restaurantData.city} • {restaurantData.country || 'Qatar'}</p>}
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-[#C8102E]/30 via-[#D4A373]/40 to-[#C8102E]/30 rounded-[28px] blur-sm opacity-70"></div>
+          <div className="relative bg-white/95 border border-[#E8DDD0] rounded-[26px] p-6 text-center space-y-2 shadow-[0_10px_30px_rgba(43,24,16,0.06)] backdrop-blur-md">
+            {restaurantData.logo_url && (
+              <div className="w-16 h-16 mx-auto rounded-full overflow-hidden p-1 bg-white shadow-md ring-2 ring-[#C8102E]/20 mb-2">
+                <img src={restaurantData.logo_url} alt="Logo" className="w-full h-full object-cover rounded-full" />
+              </div>
+            )}
+            <p className="text-xs sm:text-sm font-bold text-[#C8102E] uppercase tracking-widest">{t.subTitle}</p>
+            <h1 className="text-3xl sm:text-4xl font-black text-[#2B1810]">{restaurantData.restaurant_name || formattedUrlName}</h1>
+            {restaurantData.city && <p className="text-xs sm:text-sm text-[#7A695B] font-bold">{restaurantData.city} • {restaurantData.country || 'Qatar'}</p>}
           </div>
         </div>
 
-        {/* ROUE DE LA FORTUNE 3D */}
-        <div className="bg-[#1E1512] border-2 border-[#C8102E]/40 p-6 sm:p-8 rounded-[26px] text-center space-y-5 shadow-2xl relative overflow-hidden">
+        {/* ROUE DE LA FORTUNE 3D CLAIRE ET GOURMANDE */}
+        <div className="bg-white/95 border border-[#E8DDD0] p-6 sm:p-8 rounded-[26px] text-center space-y-5 shadow-[0_15px_40px_rgba(43,24,16,0.08)] relative overflow-hidden backdrop-blur-md">
           <div className="space-y-2">
-            <div className="inline-flex p-3 bg-[#C8102E]/15 border border-[#C8102E]/30 text-[#E63946] rounded-2xl mb-1">
+            <div className="inline-flex p-3 bg-[#C8102E]/10 border border-[#C8102E]/20 text-[#C8102E] rounded-2xl mb-1 shadow-inner">
               <Trophy className="w-8 h-8" />
             </div>
-            <h2 className="text-2xl font-black text-[#FAF8F5]">{t.spinCardTitle}</h2>
-            <p className="text-sm text-[#D4C3B3] font-bold leading-relaxed">{t.spinCardDesc}</p>
+            <h2 className="text-2xl font-black text-[#2B1810]">{t.spinCardTitle}</h2>
+            <p className="text-sm text-[#7A695B] font-bold leading-relaxed">{t.spinCardDesc}</p>
           </div>
 
           <div className="relative w-64 h-64 aspect-square mx-auto my-3 shrink-0">
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20 text-[#E63946] text-2xl drop-shadow-md">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20 text-[#C8102E] text-2xl drop-shadow-md">
               ▼
             </div>
             
             <div 
-              className="w-full h-full rounded-full border-4 border-amber-400 shadow-[0_0_35px_rgba(245,158,11,0.5)] overflow-hidden origin-center"
+              className="w-full h-full rounded-full border-4 border-[#C8102E] shadow-[0_0_35px_rgba(200,16,46,0.25)] overflow-hidden origin-center bg-white"
               style={{ 
                 transform: `rotate(${rotationDegree}deg)`,
                 transition: mustSpin ? 'transform 4.5s cubic-bezier(0.15, 0.9, 0.2, 1)' : 'none'
@@ -497,11 +515,11 @@ export default function LuxuryRestaurantPortalV4() {
             </div>
 
             {/* Moyeu central avec Logo du restaurant */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#14161F] border-2 border-amber-400 shadow-xl flex items-center justify-center overflow-hidden z-10 p-1">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-white border-2 border-[#C8102E] shadow-xl flex items-center justify-center overflow-hidden z-10 p-1">
               {restaurantData.logo_url ? (
                 <img src={restaurantData.logo_url} alt="Logo" className="w-full h-full object-cover rounded-full" />
               ) : (
-                <Sparkles className="w-6 h-6 text-amber-400" />
+                <Sparkles className="w-6 h-6 text-[#C8102E]" />
               )}
             </div>
           </div>
@@ -509,79 +527,79 @@ export default function LuxuryRestaurantPortalV4() {
           <button 
             onClick={handleSpinWheel}
             disabled={mustSpin}
-            className="w-full bg-gradient-to-r from-[#C8102E] via-[#E63946] to-[#A31D24] text-white font-black text-base py-4 rounded-2xl transition shadow-[0_10px_25px_rgba(200,16,46,0.4)] hover:brightness-110 active:scale-95 flex items-center justify-center gap-2 border border-red-400/30"
+            className="w-full bg-gradient-to-r from-[#C8102E] via-[#E63946] to-[#A31D24] text-white font-black text-base py-4 rounded-2xl transition shadow-[0_10px_25px_rgba(200,16,46,0.35)] hover:brightness-105 active:scale-95 flex items-center justify-center gap-2 border border-red-300/30"
           >
             {mustSpin ? <RefreshCw className="w-6 h-6 animate-spin" /> : t.spinBtnAction}
           </button>
         </div>
 
-        {/* 3 MODULES DE SERVICES DIRECTS */}
+        {/* 3 MODULES DE SERVICES DIRECTS (THÈME CLAIR ÉLÉGANT) */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {/* 1. COMMANDE & MENU DIGITAL */}
           <a 
             href={`/order/${rawInstance}?table=01`}
-            className="bg-[#1E1512] border border-[#3D251E] p-4 rounded-2xl space-y-2 hover:border-[#C8102E] transition text-start block shadow-lg group"
+            className="bg-white/95 border border-[#E8DDD0] p-4 rounded-2xl space-y-2 hover:border-[#C8102E] hover:shadow-md transition text-start block shadow-sm group"
           >
-            <div className="p-2.5 w-fit rounded-xl bg-[#C8102E]/20 text-[#E63946] border border-[#C8102E]/40 group-hover:scale-110 transition-transform">
+            <div className="p-2.5 w-fit rounded-xl bg-[#C8102E]/10 text-[#C8102E] border border-[#C8102E]/20 group-hover:scale-110 transition-transform">
               <Utensils className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-sm font-black text-[#FAF8F5] group-hover:text-[#E63946] transition">{t.menuCardTitle}</h3>
-              <p className="text-xs text-[#A8988B] mt-1 leading-snug">{t.menuCardDesc}</p>
+              <h3 className="text-sm font-black text-[#2B1810] group-hover:text-[#C8102E] transition">{t.menuCardTitle}</h3>
+              <p className="text-xs text-[#7A695B] mt-1 leading-snug">{t.menuCardDesc}</p>
             </div>
           </a>
 
           {/* 2. WI-FI RAPIDE */}
           <button 
             onClick={() => setActiveModal('wifi')}
-            className="bg-[#1E1512] border border-[#3D251E] p-4 rounded-2xl space-y-2 hover:border-emerald-500/60 transition text-start shadow-lg group"
+            className="bg-white/95 border border-[#E8DDD0] p-4 rounded-2xl space-y-2 hover:border-emerald-500 hover:shadow-md transition text-start shadow-sm group"
           >
-            <div className="p-2.5 w-fit rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 group-hover:scale-110 transition-transform">
+            <div className="p-2.5 w-fit rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 group-hover:scale-110 transition-transform">
               <Wifi className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-sm font-black text-[#FAF8F5] group-hover:text-emerald-400 transition">{t.wifiCardTitle}</h3>
-              <p className="text-xs text-[#A8988B] mt-1 leading-snug">{t.wifiCardDesc}</p>
+              <h3 className="text-sm font-black text-[#2B1810] group-hover:text-emerald-700 transition">{t.wifiCardTitle}</h3>
+              <p className="text-xs text-[#7A695B] mt-1 leading-snug">{t.wifiCardDesc}</p>
             </div>
           </button>
 
           {/* 3. CARTE DE FIDÉLITÉ VIP */}
           <a 
             href={`/card/33767803233?instance=${rawInstance}`}
-            className="bg-[#1E1512] border border-[#3D251E] p-4 rounded-2xl space-y-2 hover:border-[#D4A373] transition text-start block shadow-lg group"
+            className="bg-white/95 border border-[#E8DDD0] p-4 rounded-2xl space-y-2 hover:border-[#D4A373] hover:shadow-md transition text-start block shadow-sm group"
           >
-            <div className="p-2.5 w-fit rounded-xl bg-[#D4A373]/20 text-[#D4A373] border border-[#D4A373]/40 group-hover:scale-110 transition-transform">
+            <div className="p-2.5 w-fit rounded-xl bg-amber-50 text-amber-700 border border-amber-200 group-hover:scale-110 transition-transform">
               <Award className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-sm font-black text-[#FAF8F5] group-hover:text-[#D4A373] transition">Carte Fidélité VIP</h3>
-              <p className="text-xs text-[#A8988B] mt-1 leading-snug">Cumulez 10 tampons et gagnez votre boisson</p>
+              <h3 className="text-sm font-black text-[#2B1810] group-hover:text-amber-800 transition">Carte Fidélité VIP</h3>
+              <p className="text-xs text-[#7A695B] mt-1 leading-snug">Cumulez 10 tampons et gagnez votre boisson</p>
             </div>
           </a>
         </div>
 
         {/* POP-UP VICTOIRE */}
         {showWinnerModal && (
-          <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 flex items-center justify-center p-4">
-            <div className="bg-[#14161F] border-2 border-amber-400 rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-6 relative shadow-[0_0_50px_rgba(245,158,11,0.5)]">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div className="bg-white border border-[#E8DDD0] rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-6 relative shadow-2xl">
               <button 
                 onClick={() => setShowWinnerModal(false)}
-                className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white"
+                className="absolute top-4 right-4 p-2 text-[#7A695B] hover:text-[#2B1810]"
               >
                 <X className="w-6 h-6" />
               </button>
 
-              <div className="bg-amber-500/10 border-2 border-amber-400 p-6 rounded-3xl space-y-4 shadow-xl">
-                <Gift className="w-14 h-14 text-amber-400 mx-auto animate-bounce" />
+              <div className="bg-[#FAF8F5] border border-[#E8DDD0] p-6 rounded-3xl space-y-4 shadow-sm">
+                <Gift className="w-14 h-14 text-[#C8102E] mx-auto animate-bounce" />
                 
                 <div className="space-y-2">
-                  <p className="text-sm font-black text-amber-300 uppercase tracking-wider">{t.spinCongratsTitle}</p>
-                  <h3 className="text-3xl sm:text-4xl font-black text-amber-400 drop-shadow-md">
+                  <p className="text-sm font-black text-[#C8102E] uppercase tracking-wider">{t.spinCongratsTitle}</p>
+                  <h3 className="text-3xl sm:text-4xl font-black text-[#2B1810]">
                     {restaurantData.reward_offer}
                   </h3>
                 </div>
 
-                <p className="text-sm sm:text-base text-zinc-200 font-bold leading-relaxed">
+                <p className="text-sm sm:text-base text-[#7A695B] font-bold leading-relaxed">
                   {t.spinCongratsDesc}
                 </p>
 
@@ -589,16 +607,16 @@ export default function LuxuryRestaurantPortalV4() {
                   href={restaurantData.linked_evolution ? `https://wa.me/${restaurantData.linked_evolution}` : "#"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-zinc-950 font-black text-base sm:text-lg py-4 px-6 rounded-2xl transition shadow-[0_0_25px_rgba(16,185,129,0.4)] flex items-center justify-center gap-3 transform active:scale-95 border border-emerald-300/40"
+                  className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-black text-base sm:text-lg py-4 px-6 rounded-2xl transition shadow-[0_8px_20px_rgba(16,185,129,0.35)] flex items-center justify-center gap-3 transform active:scale-95 border border-emerald-400/40"
                 >
-                  <Mic className="w-6 h-6 text-zinc-950 shrink-0" />
+                  <Mic className="w-6 h-6 text-white shrink-0" />
                   <span>{t.sendReviewWhatsapp}</span>
                 </a>
 
-                <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/10 text-xs font-black text-zinc-200">
-                  <div className="bg-zinc-950 p-2.5 rounded-xl border border-zinc-800">{t.step1}</div>
-                  <div className="bg-zinc-950 p-2.5 rounded-xl border border-amber-500/30 text-amber-400">{t.step2}</div>
-                  <div className="bg-zinc-950 p-2.5 rounded-xl border border-emerald-500/30 text-emerald-400">{t.step3}</div>
+                <div className="grid grid-cols-3 gap-2 pt-3 border-t border-[#EAE0D5] text-xs font-black text-[#7A695B]">
+                  <div className="bg-white p-2.5 rounded-xl border border-[#EAE0D5]">{t.step1}</div>
+                  <div className="bg-white p-2.5 rounded-xl border border-[#C8102E]/30 text-[#C8102E]">{t.step2}</div>
+                  <div className="bg-white p-2.5 rounded-xl border border-emerald-500/30 text-emerald-600">{t.step3}</div>
                 </div>
               </div>
             </div>
@@ -607,47 +625,48 @@ export default function LuxuryRestaurantPortalV4() {
 
         {/* MODAL WIFI */}
         {activeModal === 'wifi' && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-            <div className="bg-[#14161F] border-2 border-amber-500/40 rounded-3xl p-6 max-w-md w-full space-y-4 relative shadow-2xl">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div className="bg-white border border-[#E8DDD0] rounded-3xl p-6 max-w-md w-full space-y-4 relative shadow-2xl text-[#2B1810]">
               <button 
                 onClick={() => setActiveModal(null)}
-                className="absolute top-4 right-4 p-2 text-zinc-400 hover:text-white"
+                className="absolute top-4 right-4 p-2 text-[#7A695B] hover:text-[#2B1810]"
               >
                 <X className="w-5 h-5" />
               </button>
 
               <div className="text-center space-y-1 pt-2">
-                <Wifi className="w-10 h-10 text-blue-400 mx-auto" />
-                <h3 className="text-xl font-black text-white">{t.wifiCardTitle}</h3>
+                <Wifi className="w-10 h-10 text-emerald-600 mx-auto" />
+                <h3 className="text-xl font-black text-[#2B1810]">{t.wifiCardTitle}</h3>
               </div>
 
               {!wifiSuccess ? (
                 <form onSubmit={handleWifiSubmit} className="space-y-4">
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-400">{t.wifiInputLabel}</label>
+                    <label className="text-xs font-bold text-[#7A695B]">{t.wifiInputLabel}</label>
                     <input 
                       type="tel"
                       required
                       dir="ltr"
-                      placeholder="966 50 000 0000"
+                      placeholder="974 50 000 000"
                       value={wifiPhone}
                       onChange={(e) => setWifiPhone(e.target.value)}
-                      className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-white font-mono focus:outline-none focus:border-amber-500"
+                      className="w-full bg-[#FAF8F5] border border-[#EAE0D5] rounded-xl p-3.5 text-center text-lg font-bold text-[#2B1810] placeholder-[#A8988B] focus:border-[#C8102E] focus:outline-none"
                     />
                   </div>
+
                   <button 
-                    type="submit"
+                    type="submit" 
                     disabled={wifiLoading}
-                    className="w-full bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-xs py-3.5 rounded-xl transition flex items-center justify-center gap-2"
+                    className="w-full bg-[#C8102E] hover:bg-[#A31D24] text-white font-black text-sm py-3.5 rounded-xl transition shadow-md flex items-center justify-center gap-2"
                   >
-                    {wifiLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : t.wifiBtnSubmit}
+                    {wifiLoading ? <RefreshCw className="w-5 h-5 animate-spin" /> : t.wifiBtnSubmit}
                   </button>
                 </form>
               ) : (
-                <div className="bg-blue-500/10 border border-blue-500/30 p-4 rounded-2xl text-center space-y-2">
-                  <p className="text-xs font-bold text-zinc-300">{t.wifiPassSuccess}</p>
-                  <p className="text-2xl font-mono font-black text-amber-400 tracking-wider">
-                    {restaurantData.wifi_password}
+                <div className="bg-[#FAF8F5] border border-emerald-200 p-4 rounded-2xl text-center space-y-2">
+                  <p className="text-xs font-bold text-emerald-700">{t.wifiPassSuccess}</p>
+                  <p className="text-2xl font-mono font-black text-[#2B1810] tracking-wider select-all">
+                    {restaurantData.wifi_password || "BosCoffee@2026"}
                   </p>
                 </div>
               )}
