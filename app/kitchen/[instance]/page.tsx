@@ -5,7 +5,8 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { 
   ChefHat, Clock, CheckCircle2, AlertCircle, Volume2, VolumeX, 
   RefreshCw, Utensils, ArrowRight, ShieldCheck, Flame, Bell, 
-  Smartphone, Filter, Search, Check, Play, Sparkles
+  Smartphone, Filter, Search, Check, Play, Sparkles, Lock, Unlock,
+  KeyRound, Delete, LogOut
 } from 'lucide-react';
 
 export type OrderStatus = 'recue' | 'en_cuisine' | 'prete' | 'servie';
@@ -41,7 +42,16 @@ export default function KitchenDisplaySystemPage() {
   const params = useParams();
   const searchParams = useSearchParams();
 
+  // Langue
   const [lang, setLang] = useState<'fr' | 'ar' | 'en'>('fr');
+  
+  // Authentification sécurisée
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [enteredPin, setEnteredPin] = useState<string>('');
+  const [pinError, setPinError] = useState<string>('');
+  const [isAuthenticating, setIsAuthenticating] = useState<boolean>(false);
+
+  // Données commandes KDS
   const [orders, setOrders] = useState<KitchenOrder[]>([]);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [filterTable, setFilterTable] = useState('');
@@ -49,12 +59,91 @@ export default function KitchenDisplaySystemPage() {
   const [nowTime, setNowTime] = useState(Date.now());
 
   const paramInst = typeof params?.instance === 'string' ? params.instance : (searchParams.get('instance') || '');
-  const rawInstance = paramInst.trim().toLowerCase() || 'doha_pilot';
+  const rawInstance = paramInst.trim().toLowerCase() || 'bos_cafe_moq';
   const restaurantName = rawInstance
     ? rawInstance.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
     : "Kitchen Display";
 
-  // Bip sonore pour nouvelle commande (Web Audio API natif, sans fichier externe)
+  // 1. Vérification de la session auth au chargement
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch(`/api/auth/kitchen?instance=${rawInstance}&t=${Date.now()}`);
+        const data = await res.json();
+        setIsAuthenticated(!!data.authenticated);
+      } catch (e) {
+        setIsAuthenticated(false);
+      }
+    };
+    checkAuth();
+  }, [rawInstance]);
+
+  // Validation du Code PIN côté serveur
+  const handlePinSubmit = async (pinValue?: string) => {
+    const pin = pinValue || enteredPin;
+    if (!pin || pin.length < 4 || isAuthenticating) return;
+    
+    setIsAuthenticating(true);
+    setPinError('');
+
+    try {
+      const res = await fetch('/api/auth/kitchen', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ instance: rawInstance, pin })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setIsAuthenticated(true);
+        setEnteredPin('');
+      } else {
+        setPinError(data.message || (lang === 'ar' ? 'رمز الدخول غير صحيح' : 'Code PIN incorrect'));
+        setEnteredPin('');
+      }
+    } catch (e) {
+      setPinError(lang === 'ar' ? 'خطأ في الاتصال بالخادم' : 'Erreur de connexion');
+      setEnteredPin('');
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
+  // Clavier physique (support touches 0-9, Backspace, Entrée)
+  useEffect(() => {
+    if (isAuthenticated) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key >= '0' && e.key <= '9') {
+        if (enteredPin.length < 6) {
+          const next = enteredPin + e.key;
+          setEnteredPin(next);
+          if (next.length === 4) {
+            handlePinSubmit(next);
+          }
+        }
+      } else if (e.key === 'Backspace') {
+        setEnteredPin(prev => prev.slice(0, -1));
+        setPinError('');
+      } else if (e.key === 'Enter') {
+        handlePinSubmit();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [enteredPin, isAuthenticated]);
+
+  // Verrouillage du KDS
+  const handleLock = async () => {
+    try {
+      await fetch(`/api/auth/kitchen?instance=${rawInstance}`, { method: 'DELETE' });
+      setIsAuthenticated(false);
+      setEnteredPin('');
+    } catch (e) {}
+  };
+
+  // Bip sonore pour nouvelle commande (Web Audio API natif)
   const playChimeSound = () => {
     if (!soundEnabled || typeof window === 'undefined') return;
     try {
@@ -77,13 +166,13 @@ export default function KitchenDisplaySystemPage() {
       
       osc.start();
       osc.stop(ctx.currentTime + 0.6);
-    } catch (e) {
-      console.log("Audio non disponible", e);
-    }
+    } catch (e) {}
   };
 
-  // Synchronisation Cloud en temps réel avec /api/orders (Polling 3s)
+  // Synchronisation Cloud en temps réel avec /api/orders (Polling 3s quand authentifié)
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     let lastOrderIds = new Set<string>();
 
     const fetchServerOrders = async () => {
@@ -92,7 +181,6 @@ export default function KitchenDisplaySystemPage() {
         if (!res.ok) return;
         const data = await res.json();
         if (data.success && Array.isArray(data.orders)) {
-          // Détecter si une nouvelle commande est arrivée pour sonner le bip
           const newOrders = data.orders as KitchenOrder[];
           if (lastOrderIds.size > 0 && newOrders.length > lastOrderIds.size) {
             const hasNew = newOrders.some(o => !lastOrderIds.has(o.order_id));
@@ -108,9 +196,9 @@ export default function KitchenDisplaySystemPage() {
     const interval = setInterval(fetchServerOrders, 3000);
 
     return () => clearInterval(interval);
-  }, [rawInstance, soundEnabled]);
+  }, [rawInstance, soundEnabled, isAuthenticated]);
 
-  // Horloge temps réel pour le chrono de préparation
+  // Horloge temps réel pour le chrono
   useEffect(() => {
     const timer = setInterval(() => setNowTime(Date.now()), 10000);
     return () => clearInterval(timer);
@@ -118,33 +206,29 @@ export default function KitchenDisplaySystemPage() {
 
   // Calcul du temps écoulé en minutes
   const getElapsedMinutes = (timestamp: string) => {
-    const diff = nowTime - new Date(timestamp).getTime();
-    return Math.max(1, Math.floor(diff / 60000));
+    if (!timestamp) return 0;
+    const orderDate = new Date(timestamp).getTime();
+    if (isNaN(orderDate)) return 0;
+    const diffMs = nowTime - orderDate;
+    return Math.max(0, Math.floor(diffMs / (1000 * 60)));
   };
 
-  // Changement de statut d'une commande (1-clic) avec synchronisation Cloud et signal client
+  // Transition de statut commande
   const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
-    // Mise à jour optimiste immédiate sur l'écran
-    setOrders(prev => prev.map(order => {
-      if (order.order_id === orderId) {
-        return { ...order, status: newStatus };
-      }
-      return order;
-    }));
+    setOrders(prev => prev.map(o => o.order_id === orderId ? { ...o, status: newStatus } : o));
 
-    if (newStatus === 'prete') {
-      playChimeSound();
-    }
-
-    // Mise à jour sur le serveur API (qui synchronisera le smartphone du client)
     try {
       await fetch('/api/orders', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order_id: orderId, status: newStatus, instance_name: rawInstance })
+        body: JSON.stringify({
+          order_id: orderId,
+          status: newStatus,
+          instance: rawInstance
+        })
       });
-    } catch (e) {
-      console.log('Erreur PATCH /api/orders:', e);
+    } catch (err) {
+      console.error("Échec mise à jour statut serveur:", err);
     }
   };
 
@@ -157,11 +241,10 @@ export default function KitchenDisplaySystemPage() {
       if (activeTab !== 'all' && o.status !== activeTab) {
         return false;
       }
-      return o.status !== 'servie'; // Masquer les terminées de la vue active
+      return o.status !== 'servie';
     });
   }, [orders, filterTable, activeTab]);
 
-  // Décompte par statut
   const countRecues = orders.filter(o => o.status === 'recue').length;
   const countEnCuisine = orders.filter(o => o.status === 'en_cuisine').length;
   const countPretes = orders.filter(o => o.status === 'prete').length;
@@ -189,7 +272,14 @@ export default function KitchenDisplaySystemPage() {
       emptyKitchenSub: "Les nouvelles commandes des tables apparaîtront ici automatiquement",
       filterTablePlaceholder: "Filtrer par table...",
       soundOn: "Son activé",
-      soundOff: "Son coupé"
+      soundOff: "Son coupé",
+      lockScreenTitle: "Accès Écran Cuisine KDS",
+      lockScreenSub: "Veuillez saisir le code PIN de l'établissement pour accéder aux commandes en direct.",
+      enterPin: "Saisissez votre code PIN",
+      clearPin: "Effacer",
+      validatePin: "Déverrouiller",
+      lockKds: "Verrouiller",
+      defaultPinHint: "PIN configuré dans NocoDB"
     },
     ar: {
       kdsTitle: "شاشة المطبخ KDS",
@@ -213,7 +303,14 @@ export default function KitchenDisplaySystemPage() {
       emptyKitchenSub: "ستظهر طلبات الطاولات الجديدة هنا تلقائياً مع تنبيه صوتي",
       filterTablePlaceholder: "بحث برقم الطاولة...",
       soundOn: "الصوت مفعل",
-      soundOff: "الصوت مكتوم"
+      soundOff: "الصوت مكتوم",
+      lockScreenTitle: "دخول شاشة المطبخ KDS",
+      lockScreenSub: "يرجى إدخال الرمز السري للوصول إلى إدارة الطلبات الحية.",
+      enterPin: "أدخل الرمز السري",
+      clearPin: "مسح",
+      validatePin: "دخول",
+      lockKds: "قفل الشاشة",
+      defaultPinHint: "الرمز محدد في لوحة التحكم NocoDB"
     },
     en: {
       kdsTitle: "Kitchen Display KDS",
@@ -237,10 +334,175 @@ export default function KitchenDisplaySystemPage() {
       emptyKitchenSub: "New table orders will pop up here with instant audio chime",
       filterTablePlaceholder: "Filter table #...",
       soundOn: "Sound On",
-      soundOff: "Muted"
+      soundOff: "Muted",
+      lockScreenTitle: "Kitchen KDS Access",
+      lockScreenSub: "Enter establishment security PIN to view real-time live orders.",
+      enterPin: "Enter Secret PIN",
+      clearPin: "Clear",
+      validatePin: "Unlock KDS",
+      lockKds: "Lock",
+      defaultPinHint: "PIN managed via NocoDB"
     }
   }[lang];
 
+  // -------------------------------------------------------------
+  // ÉCRAN DE VERROUILLAGE SÉCURISÉ (PIN KEYPAD LOCK SCREEN)
+  // -------------------------------------------------------------
+  if (isAuthenticated === null) {
+    return (
+      <div className="min-h-screen bg-[#14100E] flex items-center justify-center p-4">
+        <div className="w-12 h-12 border-4 border-[#C5A880] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated === false) {
+    return (
+      <div 
+        dir={lang === 'ar' ? 'rtl' : 'ltr'}
+        className="min-h-screen bg-gradient-to-b from-[#1E1916] via-[#14100E] to-[#0D0A08] text-[#FAF8F5] flex flex-col justify-between p-4 md:p-8"
+        style={{ fontFamily: "'Cairo', system-ui, -apple-system, sans-serif" }}
+      >
+        {/* Header avec sélecteur de langue */}
+        <div className="flex justify-between items-center max-w-md mx-auto w-full">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-[#3D352E] flex items-center justify-center text-[#C5A880]">
+              <Lock className="w-4 h-4" />
+            </div>
+            <span className="text-xs font-bold text-[#A8988B] tracking-wider uppercase">
+              Smart Review KDS Guard
+            </span>
+          </div>
+
+          <div className="flex bg-[#2E2722] p-0.5 rounded-full border border-[#4A3D34]">
+            {(['fr', 'ar', 'en'] as const).map(l => (
+              <button
+                key={l}
+                onClick={() => setLang(l)}
+                className={`px-2.5 py-1 text-xs font-bold rounded-full transition-all ${lang === l ? 'bg-[#C5A880] text-[#1E1916]' : 'text-[#A8988B] hover:text-white'}`}
+              >
+                {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Boîtier Clavier PIN Central */}
+        <div className="max-w-sm mx-auto w-full bg-[#241E1A]/90 backdrop-blur-xl border border-[#3D352E] rounded-3xl p-6 md:p-8 shadow-2xl text-center my-auto">
+          {/* Logo / Badge Chef */}
+          <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#3D352E] to-[#5C4D41] mx-auto flex items-center justify-center mb-4 shadow-lg ring-4 ring-[#C5A880]/20">
+            <ChefHat className="w-8 h-8 text-[#C5A880]" />
+          </div>
+
+          <h2 className="text-xl md:text-2xl font-black text-[#FAF8F5] mb-1">
+            {restaurantName}
+          </h2>
+          <p className="text-xs text-[#A8988B] leading-relaxed mb-6">
+            {t.lockScreenSub}
+          </p>
+
+          {/* Indicateurs de points PIN */}
+          <div className="flex justify-center items-center gap-3 mb-6">
+            {[0, 1, 2, 3].map(idx => (
+              <div 
+                key={idx}
+                className={`w-4 h-4 rounded-full transition-all duration-300 ${
+                  enteredPin.length > idx 
+                    ? 'bg-[#C5A880] scale-125 shadow-[0_0_12px_rgba(197,168,128,0.8)]' 
+                    : 'bg-[#3D352E] border border-[#5C4D41]'
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* Message d'erreur */}
+          {pinError && (
+            <div className="mb-4 py-2 px-3 bg-red-950/60 border border-red-800 text-red-300 text-xs font-bold rounded-xl animate-shake flex items-center justify-center gap-2">
+              <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
+              <span>{pinError}</span>
+            </div>
+          )}
+
+          {/* Pavé Numérique Tactile (1 à 9, 0, Effacer, Valider) */}
+          <div className="grid grid-cols-3 gap-3 mb-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+              <button
+                key={num}
+                onClick={() => {
+                  if (enteredPin.length < 6) {
+                    const next = enteredPin + num;
+                    setEnteredPin(next);
+                    setPinError('');
+                    if (next.length === 4) handlePinSubmit(next);
+                  }
+                }}
+                className="h-14 rounded-2xl bg-[#2E2722] hover:bg-[#3D352E] active:scale-95 text-xl font-bold text-[#FAF8F5] border border-[#3D352E] transition-all shadow-sm flex items-center justify-center hover:border-[#C5A880]/50"
+              >
+                {num}
+              </button>
+            ))}
+
+            {/* Bouton Effacer */}
+            <button
+              onClick={() => { setEnteredPin(''); setPinError(''); }}
+              className="h-14 rounded-2xl bg-[#2A231F] hover:bg-[#382E28] active:scale-95 text-xs font-bold text-[#A8988B] border border-[#3D352E] transition-all flex items-center justify-center"
+            >
+              {t.clearPin}
+            </button>
+
+            {/* Bouton 0 */}
+            <button
+              onClick={() => {
+                if (enteredPin.length < 6) {
+                  const next = enteredPin + '0';
+                  setEnteredPin(next);
+                  setPinError('');
+                  if (next.length === 4) handlePinSubmit(next);
+                }
+              }}
+              className="h-14 rounded-2xl bg-[#2E2722] hover:bg-[#3D352E] active:scale-95 text-xl font-bold text-[#FAF8F5] border border-[#3D352E] transition-all flex items-center justify-center hover:border-[#C5A880]/50"
+            >
+              0
+            </button>
+
+            {/* Bouton Backspace */}
+            <button
+              onClick={() => {
+                setEnteredPin(prev => prev.slice(0, -1));
+                setPinError('');
+              }}
+              className="h-14 rounded-2xl bg-[#2A231F] hover:bg-[#382E28] active:scale-95 text-[#A8988B] border border-[#3D352E] transition-all flex items-center justify-center"
+            >
+              <Delete className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Bouton Validation */}
+          <button
+            onClick={() => handlePinSubmit()}
+            disabled={enteredPin.length < 4 || isAuthenticating}
+            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#C5A880] to-[#DFCDBC] text-[#1E1916] font-black text-sm transition-all shadow-lg hover:brightness-105 active:scale-98 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {isAuthenticating ? (
+              <RefreshCw className="w-4 h-4 animate-spin" />
+            ) : (
+              <KeyRound className="w-4 h-4" />
+            )}
+            <span>{t.validatePin}</span>
+          </button>
+        </div>
+
+        {/* Footer info */}
+        <div className="text-center text-[11px] text-[#7A695B] max-w-xs mx-auto">
+          <span>🔒 {t.defaultPinHint}</span>
+        </div>
+      </div>
+    );
+  }
+
+  // -------------------------------------------------------------
+  // ÉCRAN KDS PRINCIPAL (LORSQUE DÉVERROUILLÉ)
+  // -------------------------------------------------------------
   return (
     <div 
       dir={lang === 'ar' ? 'rtl' : 'ltr'} 
@@ -248,267 +510,298 @@ export default function KitchenDisplaySystemPage() {
       style={{ fontFamily: "'Cairo', system-ui, -apple-system, sans-serif" }}
     >
       {/* HEADER KDS SUPÉRIEUR */}
-      <header className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#3D352E]">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#C5A880] to-[#8C6D48] text-[#241E1A] flex items-center justify-center font-black text-xl shadow-lg">
-            <ChefHat className="w-7 h-7" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl md:text-2xl font-black text-[#FAF8F5]">
-                {restaurantName}
-              </h1>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                {t.live}
-              </span>
+      <header className="bg-[#2B231D] rounded-3xl p-4 border border-[#3D332A] shadow-xl mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          
+          {/* Logo & Titre Restaurant */}
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#D4AF37] to-[#8C6D48] text-[#1E1916] flex items-center justify-center shadow-lg">
+              <ChefHat className="w-7 h-7" />
             </div>
-            <p className="text-xs text-[#A8988B]">{t.kdsTitle} • {orders.length} commandes enregistrées</p>
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl md:text-2xl font-black text-[#FAF8F5] tracking-wide">
+                  {restaurantName}
+                </h1>
+                <span className="flex items-center gap-1 bg-red-950/80 text-red-300 border border-red-700/60 px-2 py-0.5 rounded-full text-[10px] font-black uppercase animate-pulse">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-400"></span>
+                  {t.live}
+                </span>
+              </div>
+              <p className="text-xs text-[#A8988B]">
+                {t.kdsTitle} • {orders.length} {t.order}(s) au total
+              </p>
+            </div>
+          </div>
+
+          {/* Contrôles : Recherche Table, Son, Langue, Verrouillage */}
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Filtre par numéro de table */}
+            <div className="relative">
+              <Search className="w-4 h-4 text-[#8C7A6B] absolute left-3 top-1/2 -translate-y-1/2 rtl:left-auto rtl:right-3" />
+              <input
+                type="text"
+                value={filterTable}
+                onChange={(e) => setFilterTable(e.target.value)}
+                placeholder={t.filterTablePlaceholder}
+                className="w-32 md:w-40 py-2 pl-9 pr-3 rtl:pr-9 rtl:pl-3 bg-[#1A1411] border border-[#42362C] rounded-2xl text-xs text-[#FAF8F5] placeholder-[#7A695B] focus:outline-none focus:border-[#C5A880]"
+              />
+            </div>
+
+            {/* Bouton Son */}
+            <button
+              onClick={() => setSoundEnabled(!soundEnabled)}
+              title={soundEnabled ? t.soundOn : t.soundOff}
+              className={`p-2.5 rounded-2xl border transition-all ${
+                soundEnabled 
+                  ? 'bg-[#3D332A] text-[#C5A880] border-[#5A4B3E] hover:bg-[#4D4034]' 
+                  : 'bg-[#1A1411] text-[#7A695B] border-[#332A22]'
+              }`}
+            >
+              {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            </button>
+
+            {/* Sélecteur de langue */}
+            <div className="flex bg-[#1A1411] p-0.5 rounded-2xl border border-[#3A2F27]">
+              {(['fr', 'ar', 'en'] as const).map((l) => (
+                <button
+                  key={l}
+                  onClick={() => setLang(l)}
+                  className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all ${
+                    lang === l 
+                      ? 'bg-[#C5A880] text-[#1E1916] shadow-sm font-black' 
+                      : 'text-[#8C7A6B] hover:text-[#FAF8F5]'
+                  }`}
+                >
+                  {l.toUpperCase()}
+                </button>
+              ))}
+            </div>
+
+            {/* Bouton Verrouiller / Déconnexion */}
+            <button
+              onClick={handleLock}
+              title={t.lockKds}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-[#3D2622] hover:bg-[#522F2A] text-red-300 border border-red-900/60 text-xs font-bold transition-all shadow-sm"
+            >
+              <Lock className="w-3.5 h-3.5 text-red-400" />
+              <span className="hidden sm:inline">{t.lockKds}</span>
+            </button>
           </div>
         </div>
 
-        {/* Contrôles Header (Son, Filtres, Langue) */}
-        <div className="flex items-center gap-3 flex-wrap">
-          {/* Champ recherche table */}
-          <div className="relative">
-            <input 
-              type="text"
-              value={filterTable}
-              onChange={(e) => setFilterTable(e.target.value)}
-              placeholder={t.filterTablePlaceholder}
-              className="px-3 py-1.5 rounded-xl bg-[#2A231E] border border-[#4A3D34] text-xs text-[#FAF8F5] focus:outline-none focus:border-[#C5A880] w-32 md:w-40"
-            />
-          </div>
-
-          {/* Bouton Son */}
+        {/* Onglets de Statut KDS */}
+        <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-[#3D332A]">
           <button
-            onClick={() => {
-              setSoundEnabled(!soundEnabled);
-              if (!soundEnabled) playChimeSound();
-            }}
-            className={`p-2 rounded-xl text-xs font-bold border transition-colors flex items-center gap-1.5 ${
-              soundEnabled 
-                ? 'bg-[#3D352E] text-[#C5A880] border-[#C5A880]/40' 
-                : 'bg-[#2A231E] text-gray-500 border-[#3D352E]'
+            onClick={() => setActiveTab('all')}
+            className={`py-2.5 px-3 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+              activeTab === 'all' 
+                ? 'bg-[#FAF8F5] text-[#1E1916] shadow-md font-black' 
+                : 'bg-[#1A1411] text-[#A8988B] hover:bg-[#241C17] border border-[#332A22]'
             }`}
           >
-            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+            <span>{t.all}</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-[#C5A880]/30 text-current text-[10px] font-black">
+              {orders.filter(o => o.status !== 'servie').length}
+            </span>
           </button>
 
-          {/* Langue */}
-          <div className="flex bg-[#2A231E] p-0.5 rounded-xl border border-[#4A3D34]">
-            {(['fr', 'ar', 'en'] as const).map(l => (
-              <button
-                key={l}
-                onClick={() => setLang(l)}
-                className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all ${
-                  lang === l ? 'bg-[#C5A880] text-[#241E1A]' : 'text-[#A8988B] hover:text-white'
-                }`}
-              >
-                {l.toUpperCase()}
-              </button>
-            ))}
-          </div>
+          <button
+            onClick={() => setActiveTab('recue')}
+            className={`py-2.5 px-3 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+              activeTab === 'recue' 
+                ? 'bg-amber-500 text-black shadow-md font-black' 
+                : 'bg-[#1A1411] text-amber-400/80 hover:bg-[#241C17] border border-amber-900/40'
+            }`}
+          >
+            <span>{t.recue}</span>
+            {countRecues > 0 && (
+              <span className="px-1.5 py-0.2 rounded-full bg-amber-950 text-amber-200 text-[10px] font-black animate-bounce">
+                {countRecues}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveTab('en_cuisine')}
+            className={`py-2.5 px-3 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+              activeTab === 'en_cuisine' 
+                ? 'bg-blue-500 text-white shadow-md font-black' 
+                : 'bg-[#1A1411] text-blue-400/80 hover:bg-[#241C17] border border-blue-900/40'
+            }`}
+          >
+            <span>{t.en_cuisine}</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-blue-950 text-blue-200 text-[10px] font-black">
+              {countEnCuisine}
+            </span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('prete')}
+            className={`py-2.5 px-3 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 ${
+              activeTab === 'prete' 
+                ? 'bg-emerald-500 text-white shadow-md font-black' 
+                : 'bg-[#1A1411] text-emerald-400/80 hover:bg-[#241C17] border border-emerald-900/40'
+            }`}
+          >
+            <span>{t.prete}</span>
+            <span className="px-1.5 py-0.2 rounded-full bg-emerald-950 text-emerald-200 text-[10px] font-black">
+              {countPretes}
+            </span>
+          </button>
         </div>
       </header>
 
-      {/* BARRE D'ONGLETS / STATUTS RAPIDES */}
-      <div className="flex gap-2 overflow-x-auto py-4 scrollbar-none">
-        <button
-          onClick={() => setActiveTab('all')}
-          className={`px-4 py-2 rounded-2xl text-xs font-black transition-all flex items-center gap-2 ${
-            activeTab === 'all' 
-              ? 'bg-[#C5A880] text-[#241E1A] shadow-md' 
-              : 'bg-[#2A231E] text-[#A8988B] hover:bg-[#3D352E]'
-          }`}
-        >
-          <span>{t.all}</span>
-          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-black/20">{filteredOrders.length}</span>
-        </button>
+      {/* GRILLE DES COMMANDES EN CUISINE (TICKETS DE CUISINE) */}
+      <main>
+        {filteredOrders.length === 0 ? (
+          <div className="text-center py-24 bg-[#261E19]/80 rounded-3xl border border-[#3D332A] p-8 max-w-lg mx-auto">
+            <Utensils className="w-16 h-16 text-[#6B5A4E] mx-auto mb-4 opacity-50" />
+            <h3 className="text-xl font-bold text-[#FAF8F5] mb-2">{t.emptyKitchen}</h3>
+            <p className="text-xs text-[#A8988B] leading-relaxed">{t.emptyKitchenSub}</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredOrders.map((order) => {
+              const elapsed = getElapsedMinutes(order.timestamp);
+              const isUrgent = elapsed >= 15 && order.status !== 'prete';
 
-        <button
-          onClick={() => setActiveTab('recue')}
-          className={`px-4 py-2 rounded-2xl text-xs font-black transition-all flex items-center gap-2 ${
-            activeTab === 'recue' 
-              ? 'bg-amber-500 text-black shadow-md' 
-              : 'bg-[#2A231E] text-amber-400/80 hover:bg-[#3D352E]'
-          }`}
-        >
-          <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-          <span>{t.recue}</span>
-          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-black/20">{countRecues}</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('en_cuisine')}
-          className={`px-4 py-2 rounded-2xl text-xs font-black transition-all flex items-center gap-2 ${
-            activeTab === 'en_cuisine' 
-              ? 'bg-blue-500 text-white shadow-md' 
-              : 'bg-[#2A231E] text-blue-400/80 hover:bg-[#3D352E]'
-          }`}
-        >
-          <ChefHat className="w-3.5 h-3.5" />
-          <span>{t.en_cuisine}</span>
-          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-black/20">{countEnCuisine}</span>
-        </button>
-
-        <button
-          onClick={() => setActiveTab('prete')}
-          className={`px-4 py-2 rounded-2xl text-xs font-black transition-all flex items-center gap-2 ${
-            activeTab === 'prete' 
-              ? 'bg-emerald-500 text-black shadow-md' 
-              : 'bg-[#2A231E] text-emerald-400/80 hover:bg-[#3D352E]'
-          }`}
-        >
-          <Bell className="w-3.5 h-3.5" />
-          <span>{t.prete}</span>
-          <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-black/20">{countPretes}</span>
-        </button>
-      </div>
-
-      {/* GRILLE DES BONS DE COMMANDE (TICKETS CUISINE) */}
-      {filteredOrders.length === 0 ? (
-        <div className="text-center py-24 bg-[#2A231E]/60 rounded-3xl border border-[#3D352E] p-8 mt-4">
-          <Utensils className="w-16 h-16 text-[#8C6D48] mx-auto mb-4 opacity-50" />
-          <h3 className="text-xl font-bold text-[#FAF8F5] mb-1">{t.emptyKitchen}</h3>
-          <p className="text-sm text-[#A8988B]">{t.emptyKitchenSub}</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-2">
-          {filteredOrders.map((order) => {
-            const elapsed = getElapsedMinutes(order.timestamp);
-            const isLate = elapsed >= 15;
-
-            // Couleurs de badge par statut
-            let statusColor = "bg-amber-500/20 text-amber-400 border-amber-500/30";
-            let statusLabel = t.recue;
-            if (order.status === 'en_cuisine') {
-              statusColor = "bg-blue-500/20 text-blue-400 border-blue-500/30";
-              statusLabel = t.en_cuisine;
-            } else if (order.status === 'prete') {
-              statusColor = "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
-              statusLabel = t.prete;
-            }
-
-            return (
-              <div 
-                key={order.order_id}
-                className={`bg-[#2A231E] rounded-3xl p-4 border flex flex-col justify-between shadow-xl transition-all ${
-                  isLate ? 'border-red-500/60 ring-2 ring-red-500/30' : 'border-[#3D352E]'
-                } ${order.status === 'prete' ? 'border-emerald-500/60' : ''}`}
-              >
-                {/* Header Ticket (Table, ID, Chrono) */}
-                <div>
-                  <div className="flex items-start justify-between gap-2 pb-3 border-b border-[#3D352E]">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-2xl font-black text-[#C5A880] tracking-tight">
-                          {t.table} {order.table_number}
-                        </span>
-                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border ${statusColor}`}>
-                          {statusLabel}
-                        </span>
+              return (
+                <div 
+                  key={order.order_id}
+                  className={`bg-[#2B231D] rounded-3xl border shadow-xl flex flex-col justify-between overflow-hidden transition-all ${
+                    order.status === 'recue' 
+                      ? 'border-amber-500/80 ring-2 ring-amber-500/30' 
+                      : (order.status === 'en_cuisine' 
+                          ? 'border-blue-500/80' 
+                          : 'border-emerald-500/80')
+                  } ${isUrgent ? 'animate-pulse' : ''}`}
+                >
+                  {/* Tête de Ticket */}
+                  <div className={`p-4 border-b flex items-center justify-between ${
+                    order.status === 'recue' 
+                      ? 'bg-amber-950/40 border-amber-800/40' 
+                      : (order.status === 'en_cuisine' 
+                          ? 'bg-blue-950/40 border-blue-800/40' 
+                          : 'bg-emerald-950/40 border-emerald-800/40')
+                  }`}>
+                    {/* Numéro de table */}
+                    <div className="flex items-center gap-2">
+                      <div className="w-10 h-10 rounded-2xl bg-[#1E1916] text-[#FAF8F5] flex items-center justify-center font-black text-lg border border-[#4A3D34] shadow-inner">
+                        {order.table_number}
                       </div>
-                      <div className="text-xs text-[#A8988B] mt-0.5">
-                        #{order.order_id} • {order.customer_name || "Guest"}
+                      <div>
+                        <span className="text-[10px] uppercase tracking-wider text-[#A8988B] font-bold">
+                          {t.table}
+                        </span>
+                        <div className="text-xs font-mono text-[#D4C3B3] font-bold">
+                          #{order.order_id.slice(-6)}
+                        </div>
                       </div>
                     </div>
 
                     {/* Chronomètre écoulé */}
-                    <div className={`px-2.5 py-1 rounded-xl text-xs font-black flex items-center gap-1 ${
-                      isLate ? 'bg-red-500/20 text-red-400 animate-pulse' : 'bg-[#1E1916] text-[#A8988B]'
+                    <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black ${
+                      isUrgent 
+                        ? 'bg-red-500 text-white animate-bounce' 
+                        : 'bg-[#1E1916] text-[#C5A880] border border-[#4A3D34]'
                     }`}>
                       <Clock className="w-3.5 h-3.5" />
                       <span>{elapsed} {t.elapsed}</span>
                     </div>
                   </div>
 
-                  {/* Statut Paiement (Apple Pay vs Règlement Caisse) */}
-                  <div className="mt-2.5">
-                    {order.payment_method === 'counter' ? (
-                      <div className="px-3 py-1.5 rounded-xl bg-red-950/60 border border-red-800 text-red-300 text-[11px] font-black flex items-center justify-between">
-                        <span>{t.payAtCounter}</span>
-                        <span>{order.total_amount} {order.currency}</span>
-                      </div>
-                    ) : (
-                      <div className="px-3 py-1 rounded-xl bg-[#1E1916] border border-[#3D352E] text-emerald-400 text-[10px] font-bold flex items-center justify-between">
-                        <span>{order.payment_method === 'apple_pay' ? t.paidApple : t.paidCard}</span>
-                        <span>{order.total_amount} {order.currency}</span>
-                      </div>
+                  {/* Corps du Ticket : Liste des Plats & Instructions */}
+                  <div className="p-4 space-y-3 flex-1 bg-[#241E1A]/60">
+                    <div className="space-y-2.5">
+                      {order.items.map((item, idx) => (
+                        <div key={idx} className="bg-[#1E1916]/80 p-3 rounded-2xl border border-[#3D332A]">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-start gap-2">
+                              <span className="w-6 h-6 rounded-lg bg-[#C5A880] text-[#1E1916] font-black text-xs flex items-center justify-center shrink-0">
+                                {item.quantity}x
+                              </span>
+                              <span className="font-bold text-sm text-[#FAF8F5] leading-snug">
+                                {item.name}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Options personnalisées */}
+                          {item.options && item.options.length > 0 && (
+                            <div className="mt-1.5 pl-8 rtl:pl-0 rtl:pr-8 flex flex-wrap gap-1">
+                              {item.options.map((opt, oIdx) => (
+                                <span key={oIdx} className="text-[10px] font-semibold bg-[#2E2722] text-[#D4C3B3] px-2 py-0.5 rounded-md border border-[#423830]">
+                                  + {opt}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          {/* Note spéciale cuisine */}
+                          {item.special_instructions && (
+                            <div className="mt-2 text-[11px] bg-red-950/40 border border-red-900/60 text-red-200 p-1.5 rounded-lg flex items-start gap-1 font-semibold">
+                              <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0 mt-0.5" />
+                              <span>{item.special_instructions}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Mode de Paiement */}
+                    <div className="pt-2 border-t border-[#3D332A] flex items-center justify-between text-[11px]">
+                      <span className="text-[#A8988B] font-semibold">
+                        {order.payment_method === 'apple_pay' && t.paidApple}
+                        {order.payment_method === 'card' && t.paidCard}
+                        {order.payment_method === 'counter' && (
+                          <span className="text-amber-400 font-bold">{t.payAtCounter}</span>
+                        )}
+                      </span>
+                      <span className="font-mono font-bold text-[#FAF8F5]">
+                        {order.total_amount} {order.currency || 'QAR'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Boutons d'Action (Passer les étapes en 1 clic) */}
+                  <div className="p-3 bg-[#1E1916] border-t border-[#3D332A] space-y-1.5">
+                    {order.status === 'recue' && (
+                      <button
+                        onClick={() => handleUpdateStatus(order.order_id, 'en_cuisine')}
+                        className="w-full py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-all shadow-md active:scale-98 flex items-center justify-center gap-1.5"
+                      >
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span>{t.startCooking}</span>
+                      </button>
+                    )}
+
+                    {order.status === 'en_cuisine' && (
+                      <button
+                        onClick={() => handleUpdateStatus(order.order_id, 'prete')}
+                        className="w-full py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all shadow-md active:scale-98 flex items-center justify-center gap-1.5"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>{t.markReady}</span>
+                      </button>
+                    )}
+
+                    {order.status === 'prete' && (
+                      <button
+                        onClick={() => handleUpdateStatus(order.order_id, 'servie')}
+                        className="w-full py-2.5 rounded-2xl bg-[#3D352E] hover:bg-[#4D423A] text-[#FAF8F5] font-bold text-xs transition-all shadow-md active:scale-98 flex items-center justify-center gap-1.5 border border-[#5A4B3E]"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-[#C5A880]" />
+                        <span>{t.markServed}</span>
+                      </button>
                     )}
                   </div>
-
-                  {/* Liste des plats à préparer */}
-                  <div className="py-3 space-y-2.5 divide-y divide-[#3D352E]/60 text-xs">
-                    {order.items.map((it, idx) => (
-                      <div key={idx} className="pt-2 first:pt-0">
-                        <div className="flex items-start gap-2">
-                          <span className="w-6 h-6 rounded-lg bg-[#C5A880] text-[#1E1916] flex items-center justify-center font-black text-xs shrink-0">
-                            {it.quantity}x
-                          </span>
-                          <div className="flex-1">
-                            <span className="font-bold text-sm text-[#FAF8F5] leading-snug">
-                              {it.name}
-                            </span>
-
-                            {/* Options de cuisson / suppléments */}
-                            {it.options && it.options.length > 0 && (
-                              <div className="text-[11px] text-[#A8988B] mt-0.5 space-y-0.5">
-                                {it.options.map((opt, oIdx) => (
-                                  <div key={oIdx} className="text-[#DFCDBF]">↳ {opt}</div>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Consignes spéciales de cuisine */}
-                            {it.special_instructions && (
-                              <div className="mt-1 p-1.5 rounded-lg bg-amber-950/40 border border-amber-800/40 text-amber-300 text-[11px] font-semibold">
-                                ⚠️ {it.special_instructions}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
                 </div>
-
-                {/* BOUTONS D'ACTIONS TACTILES (Progression du Statut) */}
-                <div className="pt-3 border-t border-[#3D352E] space-y-2">
-                  {order.status === 'recue' && (
-                    <button
-                      onClick={() => handleUpdateStatus(order.order_id, 'en_cuisine')}
-                      className="w-full py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs shadow-lg transition-transform active:scale-98 flex items-center justify-center gap-2"
-                    >
-                      <span>{t.startCooking}</span>
-                    </button>
-                  )}
-
-                  {order.status === 'en_cuisine' && (
-                    <button
-                      onClick={() => handleUpdateStatus(order.order_id, 'prete')}
-                      className="w-full py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-lg transition-transform active:scale-98 flex items-center justify-center gap-2"
-                    >
-                      <span>{t.markReady}</span>
-                    </button>
-                  )}
-
-                  {order.status === 'prete' && (
-                    <button
-                      onClick={() => handleUpdateStatus(order.order_id, 'servie')}
-                      className="w-full py-3 rounded-2xl bg-[#3D352E] hover:bg-[#4A3D34] text-[#FAF8F5] font-black text-xs border border-[#C5A880]/50 shadow-md transition-transform active:scale-98 flex items-center justify-center gap-2"
-                    >
-                      <Check className="w-4 h-4 text-[#C5A880]" />
-                      <span>{t.markServed}</span>
-                    </button>
-                  )}
-                </div>
-
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
+      </main>
     </div>
   );
 }
