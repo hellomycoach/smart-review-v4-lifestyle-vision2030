@@ -369,7 +369,7 @@ export default function LuxuryRestaurantPortalV4() {
       step2: "2. Vocal ou texto 🎙️",
       step3: "3. Votre Cadeau 🎁",
       loadingText: "Chargement du Portail VIP...",
-      poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
+      poweredBy: `Smart Review AI • ${restaurantData.city || 'Doha'}, ${restaurantData.country || 'Qatar'} 🇶🇦`
     },
     en: {
       portalTitle: "VIP HOSPITALITY PASS",
@@ -403,7 +403,7 @@ export default function LuxuryRestaurantPortalV4() {
       step2: "2. Voice or text 🎙️",
       step3: "3. Claim reward 🎁",
       loadingText: "Loading VIP Portal...",
-      poweredBy: "Smart Review AI v4.0 • Saudi F&B Vision 2030"
+      poweredBy: `Smart Review AI • ${restaurantData.city || 'Doha'}, ${restaurantData.country || 'Qatar'} 🇶🇦`
     }
   }[lang];
 
@@ -416,53 +416,53 @@ export default function LuxuryRestaurantPortalV4() {
   return (
     <div 
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
-      className="min-h-screen bg-[#090A0F] text-zinc-100 font-['Cairo',sans-serif] relative flex flex-col justify-between p-4 sm:p-6 overflow-x-hidden selection:bg-amber-500 selection:text-black"
+      className="min-h-screen bg-[#120B09] text-zinc-100 font-['Cairo',sans-serif] relative flex flex-col justify-between p-4 sm:p-6 overflow-x-hidden selection:bg-[#C8102E] selection:text-white"
     >
-      <div className="fixed top-[-10%] right-[-10%] w-96 h-96 bg-amber-500/10 rounded-full blur-[160px] pointer-events-none" />
-      <div className="fixed bottom-[-10%] left-[-10%] w-96 h-96 bg-emerald-500/10 rounded-full blur-[160px] pointer-events-none" />
+      <div className="fixed top-[-10%] right-[-10%] w-96 h-96 bg-[#C8102E]/20 rounded-full blur-[160px] pointer-events-none" />
+      <div className="fixed bottom-[-10%] left-[-10%] w-96 h-96 bg-[#D4A373]/15 rounded-full blur-[160px] pointer-events-none" />
 
       <div className="max-w-xl mx-auto w-full space-y-6 relative z-10 my-auto">
         
         {/* HEADER */}
         <header className="flex justify-between items-center pt-2 px-1">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-6 h-6 text-amber-400" />
-            <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-amber-400">
+            <ShieldCheck className="w-6 h-6 text-[#E63946]" />
+            <span className="text-xs sm:text-sm font-black uppercase tracking-widest text-[#E63946]">
               {t.portalTitle}
             </span>
           </div>
 
           <button
             onClick={toggleLanguage}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/90 border border-amber-500/30 text-xs sm:text-sm font-black text-zinc-200 hover:text-amber-400 backdrop-blur-xl transition-all shadow-md"
+            className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#1E1512] border border-[#C8102E]/40 text-xs sm:text-sm font-black text-[#FAF8F5] hover:text-[#E63946] backdrop-blur-xl transition-all shadow-md"
           >
-            <Globe className="w-4 h-4 text-amber-400" />
+            <Globe className="w-4 h-4 text-[#E63946]" />
             {lang === 'ar' ? 'Français' : lang === 'fr' ? 'English' : 'العربية'}
           </button>
         </header>
 
         {/* HERO BANNER RESTAURANT DYNAMIQUE */}
         <div className="relative group">
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-amber-500 via-amber-300 to-emerald-500 rounded-[28px] blur-sm opacity-70"></div>
-          <div className="relative bg-[#14161F] border-2 border-amber-400/40 rounded-[26px] p-6 text-center space-y-2 shadow-2xl">
-            <p className="text-xs sm:text-sm font-bold text-amber-400 uppercase tracking-widest">{t.subTitle}</p>
-            <h1 className="text-3xl sm:text-4xl font-black text-white">{restaurantData.restaurant_name || formattedUrlName}</h1>
-            {restaurantData.city && <p className="text-xs sm:text-sm text-zinc-400 font-bold">{restaurantData.city}</p>}
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-[#C8102E] via-[#D4A373] to-[#C8102E] rounded-[28px] blur-sm opacity-70"></div>
+          <div className="relative bg-[#1E1512] border-2 border-[#C8102E]/40 rounded-[26px] p-6 text-center space-y-2 shadow-2xl">
+            <p className="text-xs sm:text-sm font-bold text-[#D4A373] uppercase tracking-widest">{t.subTitle}</p>
+            <h1 className="text-3xl sm:text-4xl font-black text-[#FAF8F5]">{restaurantData.restaurant_name || formattedUrlName}</h1>
+            {restaurantData.city && <p className="text-xs sm:text-sm text-[#A8988B] font-bold">{restaurantData.city} • {restaurantData.country || 'Qatar'}</p>}
           </div>
         </div>
 
         {/* ROUE DE LA FORTUNE 3D */}
-        <div className="bg-[#14161F] border-2 border-amber-500/40 p-6 sm:p-8 rounded-[26px] text-center space-y-5 shadow-2xl relative overflow-hidden">
+        <div className="bg-[#1E1512] border-2 border-[#C8102E]/40 p-6 sm:p-8 rounded-[26px] text-center space-y-5 shadow-2xl relative overflow-hidden">
           <div className="space-y-2">
-            <div className="inline-flex p-3 bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-2xl mb-1">
+            <div className="inline-flex p-3 bg-[#C8102E]/15 border border-[#C8102E]/30 text-[#E63946] rounded-2xl mb-1">
               <Trophy className="w-8 h-8" />
             </div>
-            <h2 className="text-2xl font-black text-white">{t.spinCardTitle}</h2>
-            <p className="text-sm text-zinc-300 font-bold leading-relaxed">{t.spinCardDesc}</p>
+            <h2 className="text-2xl font-black text-[#FAF8F5]">{t.spinCardTitle}</h2>
+            <p className="text-sm text-[#D4C3B3] font-bold leading-relaxed">{t.spinCardDesc}</p>
           </div>
 
           <div className="relative w-64 h-64 aspect-square mx-auto my-3 shrink-0">
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20 text-amber-400 text-2xl drop-shadow-md">
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20 text-[#E63946] text-2xl drop-shadow-md">
               ▼
             </div>
             
@@ -475,23 +475,23 @@ export default function LuxuryRestaurantPortalV4() {
             >
               <svg viewBox="0 0 100 100" className="w-full h-full">
                 <g transform="translate(50,50)">
-                  <path d="M0,0 L50,0 A50,50 0 0,1 25,43.3 Z" fill="#D4AF37" />
-                  <text x="25" y="15" fill="#000" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(30, 25, 15)">☕ OFFRE</text>
+                  <path d="M0,0 L50,0 A50,50 0 0,1 25,43.3 Z" fill="#C8102E" />
+                  <text x="25" y="15" fill="#FFFFFF" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(30, 25, 15)">☕ OFFRE</text>
 
-                  <path d="M0,0 L25,43.3 A50,50 0 0,1 -25,43.3 Z" fill="#14161F" />
-                  <text x="0" y="28" fill="#D4AF37" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(90, 0, 28)">🎁 CADEAU</text>
+                  <path d="M0,0 L25,43.3 A50,50 0 0,1 -25,43.3 Z" fill="#241712" />
+                  <text x="0" y="28" fill="#D4A373" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(90, 0, 28)">🎁 CADEAU</text>
 
-                  <path d="M0,0 L-25,43.3 A50,50 0 0,1 -50,0 Z" fill="#10B981" />
-                  <text x="-25" y="15" fill="#000" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(150, -25, 15)">⭐ WIN</text>
+                  <path d="M0,0 L-25,43.3 A50,50 0 0,1 -50,0 Z" fill="#D4A373" />
+                  <text x="-25" y="15" fill="#1A110D" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(150, -25, 15)">⭐ WIN</text>
 
-                  <path d="M0,0 L-50,0 A50,50 0 0,1 -25,-43.3 Z" fill="#D4AF37" />
-                  <text x="-25" y="-12" fill="#000" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(210, -25, -12)">🍰 CADEAU</text>
+                  <path d="M0,0 L-50,0 A50,50 0 0,1 -25,-43.3 Z" fill="#C8102E" />
+                  <text x="-25" y="-12" fill="#FFFFFF" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(210, -25, -12)">🍰 DESSERT</text>
 
-                  <path d="M0,0 L-25,-43.3 A50,50 0 0,1 25,-43.3 Z" fill="#14161F" />
-                  <text x="0" y="-26" fill="#10B981" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(270, 0, -26)">🥤 SURPRISE</text>
+                  <path d="M0,0 L-25,-43.3 A50,50 0 0,1 25,-43.3 Z" fill="#241712" />
+                  <text x="0" y="-26" fill="#D4A373" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(270, 0, -26)">🥤 BOBA</text>
 
-                  <path d="M0,0 L25,-43.3 A50,50 0 0,1 50,0 Z" fill="#10B981" />
-                  <text x="25" y="-12" fill="#000" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(330, 25, -12)">🏆 GAGNANT</text>
+                  <path d="M0,0 L25,-43.3 A50,50 0 0,1 50,0 Z" fill="#D4A373" />
+                  <text x="25" y="-12" fill="#1A110D" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(330, 25, -12)">🏆 GAGNANT</text>
                 </g>
               </svg>
             </div>
@@ -509,49 +509,53 @@ export default function LuxuryRestaurantPortalV4() {
           <button 
             onClick={handleSpinWheel}
             disabled={mustSpin}
-            className="w-full bg-gradient-to-r from-amber-500 via-amber-400 to-amber-600 text-zinc-950 font-black text-base py-4 rounded-2xl transition shadow-xl hover:opacity-95 active:scale-95 flex items-center justify-center gap-2"
+            className="w-full bg-gradient-to-r from-[#C8102E] via-[#E63946] to-[#A31D24] text-white font-black text-base py-4 rounded-2xl transition shadow-[0_10px_25px_rgba(200,16,46,0.4)] hover:brightness-110 active:scale-95 flex items-center justify-center gap-2 border border-red-400/30"
           >
             {mustSpin ? <RefreshCw className="w-6 h-6 animate-spin" /> : t.spinBtnAction}
           </button>
         </div>
 
-        {/* MODULES V4 */}
+        {/* 3 MODULES DE SERVICES DIRECTS */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <button 
-            onClick={() => setActiveModal('food_ai')}
-            className="bg-[#14161F] border border-emerald-500/40 p-4 rounded-2xl space-y-2 hover:border-emerald-400 transition text-start relative overflow-hidden"
+          {/* 1. COMMANDE & MENU DIGITAL */}
+          <a 
+            href={`/order/${rawInstance}?table=01`}
+            className="bg-[#1E1512] border border-[#3D251E] p-4 rounded-2xl space-y-2 hover:border-[#C8102E] transition text-start block shadow-lg group"
           >
-            <div className="flex items-center justify-between">
-              <HeartPulse className="w-7 h-7 text-emerald-400" />
-              <span className="text-[10px] font-black bg-emerald-500 text-zinc-950 px-2 py-0.5 rounded">v4.0</span>
+            <div className="p-2.5 w-fit rounded-xl bg-[#C8102E]/20 text-[#E63946] border border-[#C8102E]/40 group-hover:scale-110 transition-transform">
+              <Utensils className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="text-sm font-black text-white">{t.aiCardTitle}</h3>
-              <p className="text-xs text-zinc-300 mt-1 leading-snug">{t.aiCardDesc}</p>
+              <h3 className="text-sm font-black text-[#FAF8F5] group-hover:text-[#E63946] transition">{t.menuCardTitle}</h3>
+              <p className="text-xs text-[#A8988B] mt-1 leading-snug">{t.menuCardDesc}</p>
             </div>
-          </button>
+          </a>
 
+          {/* 2. WI-FI RAPIDE */}
           <button 
             onClick={() => setActiveModal('wifi')}
-            className="bg-[#14161F] border border-white/10 p-4 rounded-2xl space-y-2 hover:border-white/20 transition text-start"
+            className="bg-[#1E1512] border border-[#3D251E] p-4 rounded-2xl space-y-2 hover:border-emerald-500/60 transition text-start shadow-lg group"
           >
-            <Wifi className="w-7 h-7 text-blue-400" />
+            <div className="p-2.5 w-fit rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 group-hover:scale-110 transition-transform">
+              <Wifi className="w-6 h-6" />
+            </div>
             <div>
-              <h3 className="text-sm font-black text-white">{t.wifiCardTitle}</h3>
-              <p className="text-xs text-zinc-300 mt-1 leading-snug">{t.wifiCardDesc}</p>
+              <h3 className="text-sm font-black text-[#FAF8F5] group-hover:text-emerald-400 transition">{t.wifiCardTitle}</h3>
+              <p className="text-xs text-[#A8988B] mt-1 leading-snug">{t.wifiCardDesc}</p>
             </div>
           </button>
 
+          {/* 3. CARTE DE FIDÉLITÉ VIP */}
           <a 
-            href={restaurantData.menu_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-[#14161F] border border-white/10 p-4 rounded-2xl space-y-2 hover:border-white/20 transition text-start block"
+            href={`/card/33767803233?instance=${rawInstance}`}
+            className="bg-[#1E1512] border border-[#3D251E] p-4 rounded-2xl space-y-2 hover:border-[#D4A373] transition text-start block shadow-lg group"
           >
-            <Utensils className="w-7 h-7 text-purple-400" />
+            <div className="p-2.5 w-fit rounded-xl bg-[#D4A373]/20 text-[#D4A373] border border-[#D4A373]/40 group-hover:scale-110 transition-transform">
+              <Award className="w-6 h-6" />
+            </div>
             <div>
-              <h3 className="text-sm font-black text-white">{t.menuCardTitle}</h3>
-              <p className="text-xs text-zinc-300 mt-1 leading-snug">{t.menuCardDesc}</p>
+              <h3 className="text-sm font-black text-[#FAF8F5] group-hover:text-[#D4A373] transition">Carte Fidélité VIP</h3>
+              <p className="text-xs text-[#A8988B] mt-1 leading-snug">Cumulez 10 tampons et gagnez votre boisson</p>
             </div>
           </a>
         </div>
