@@ -1,0 +1,455 @@
+[
+  {
+    "id": "sig-cortado",
+    "categoryId": "signatures",
+    "name": {
+      "ar": "كلاسيك كورتادو",
+      "fr": "Cortado Classique",
+      "en": "Classic Cortado"
+    },
+    "description": {
+      "ar": "إسبريسو غني ممزوج بكمية متساوية من الحليب المبخر بقوام حريري مخملي.",
+      "fr": "Espresso intense adouci d'une égale quantité de lait chaud soyeux.",
+      "en": "Rich espresso cut with an equal amount of warm silky steamed milk."
+    },
+    "price": 13,
+    "calories": 110,
+    "prepTime": "3-5 min",
+    "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80",
+    "isChefPick": true,
+    "isPopular": true
+  },
+  {
+    "id": "sig-flat-white",
+    "categoryId": "signatures",
+    "name": {
+      "ar": "فلات وايت",
+      "fr": "Flat White Signature",
+      "en": "Signature Flat White"
+    },
+    "description": {
+      "ar": "مزيج متوازن ومميز من الدبل ريستريتو وحليب مايكروفوم فائق النعومة.",
+      "fr": "Double ristretto velouté surmonté d'une fine micro-mousse de lait.",
+      "en": "Double ristretto blend expertly poured with velvety micro-foam milk."
+    },
+    "price": 17,
+    "calories": 130,
+    "prepTime": "4-6 min",
+    "image": "https://images.unsplash.com/photo-1577968897966-3d4325b36b61?auto=format&fit=crop&w=800&q=80",
+    "isChefPick": true,
+    "isPopular": true
+  },
+  {
+    "id": "sig-tiger-boba",
+    "categoryId": "signatures",
+    "name": {
+      "ar": "شاي بوبا تايجر",
+      "fr": "Thé Boba Tiger Signature",
+      "en": "Tiger Boba Tea"
+    },
+    "description": {
+      "ar": "حبيبات البوبا الطازجة مع خطوط السكر البني والحليب الغني والثلج المنعش.",
+      "fr": "Perles de tapioca au sucre brun caramélisé, lait frais et thé signature.",
+      "en": "Fresh chewy tapioca boba pearls with brown sugar tiger stripes and fresh milk."
+    },
+    "price": 25,
+    "calories": 340,
+    "prepTime": "4-6 min",
+    "image": "https://images.unsplash.com/photo-1558857563-b371033873b8?auto=format&fit=crop&w=800&q=80",
+    "isChefPick": true,
+    "isPopular": true
+  },
+  {
+    "id": "sig-matcha-boba",
+    "categoryId": "signatures",
+    "name": {
+      "ar": "شاي بوبا ماتشا",
+      "fr": "Thé Boba Matcha Japonais",
+      "en": "Matcha Boba Tea"
+    },
+    "description": {
+      "ar": "ماتشا ياباني فاخر مع حليب طازج وحبيبات البوبا اللذيذة.",
+      "fr": "Matcha vert d'exception, perles boba et lait onctueux.",
+      "en": "Premium Japanese green matcha with fresh milk and sweet boba pearls."
+    },
+    "price": 25,
+    "calories": 290,
+    "prepTime": "4-6 min",
+    "image": "https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=800&q=80",
+    "isChefPick": false,
+    "isPopular": true
+  },
+  {
+    "id": "sig-thai-boba",
+    "categoryId": "signatures",
+    "name": {
+      "ar": "شاي بوبا التايلندي",
+      "fr": "Thé Boba Thaïlandais",
+      "en": "Thai Boba Tea"
+    },
+    "description": {
+      "ar": "شاي تايلندي أصيل بنكهة مميزة ولون عنبري جذاب مع حبوب البوبا.",
+      "fr": "Thé noir thaïlandais épicé et parfumé aux perles de boba.",
+      "en": "Authentic spiced Thai brewed tea with condensed milk and tapioca pearls."
+    },
+    "price": 25,
+    "calories": 310,
+    "prepTime": "4-6 min",
+    "image": "https://images.unsplash.com/photo-1558857563-b371033873b8?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "id": "sig-cold-white-brew",
+    "categoryId": "signatures",
+    "name": {
+      "ar": "الشراب الأبيض البارد (Cold White Brew)",
+      "fr": "Cold White Brew Infusé à Froid",
+      "en": "Cold White Brew"
+    },
+    "description": {
+      "ar": "قهوة منقوعة على البارد لمدة 18 ساعة مع لمسة كريمية حليبية منعشة.",
+      "fr": "Café extrait à froid pendant 18 heures avec touche de crème onctueuse.",
+      "en": "18-hour cold steeped coffee blend with sweet creamy milk layer."
+    },
+    "price": 22,
+    "calories": 180,
+    "prepTime": "2-3 min",
+    "image": "https://images.unsplash.com/photo-1517701550927-30cf4ba1dba5?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "id": "hot-spanish-latte",
+    "categoryId": "hot_iced",
+    "name": {
+      "ar": "سبانيش لاتيه (Spanish Latte)",
+      "fr": "Spanish Latte Gourmet",
+      "en": "Spanish Latte"
+    },
+    "description": {
+      "ar": "إسبريسو مكثف مع الحليب الطازج والحليب المكثف المحلى الفاخر.",
+      "fr": "Espresso intense, lait doux et filet de lait concentré sucré.",
+      "en": "Rich espresso balanced with textured milk and sweet condensed milk."
+    },
+    "price": 21,
+    "calories": 260,
+    "prepTime": "3-5 min",
+    "image": "https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=800&q=80",
+    "isPopular": true,
+    "optionGroups": [
+      {
+        "id": "size",
+        "name": { "ar": "الحجم", "fr": "Taille", "en": "Size" },
+        "required": true,
+        "options": [
+          { "id": "small", "name": { "ar": "صغير (Small)", "fr": "Small", "en": "Small" }, "price": 0 },
+          { "id": "medium", "name": { "ar": "وسط (Medium)", "fr": "Medium", "en": "Medium" }, "price": 2 },
+          { "id": "large", "name": { "ar": "كبير (Large)", "fr": "Large", "en": "Large" }, "price": 4 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hot-saffron-latte",
+    "categoryId": "hot_iced",
+    "name": {
+      "ar": "زعفران لاتيه (Saffron Latte)",
+      "fr": "Latte au Safran Royal",
+      "en": "Saffron Latte"
+    },
+    "description": {
+      "ar": "لاتيه فاخر مفعم بنكهة خيوط الزعفران الطبيعي العطري ورغوة الحليب المخملية.",
+      "fr": "Latte aromatique infusé aux véritables pistils de safran et mousse délicate.",
+      "en": "Exquisite latte infused with aromatic royal saffron threads and velvet foam."
+    },
+    "price": 20,
+    "calories": 240,
+    "prepTime": "4-5 min",
+    "image": "https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=800&q=80",
+    "optionGroups": [
+      {
+        "id": "size",
+        "name": { "ar": "الحجم", "fr": "Taille", "en": "Size" },
+        "required": true,
+        "options": [
+          { "id": "small", "name": { "ar": "صغير (Small)", "fr": "Small", "en": "Small" }, "price": 0 },
+          { "id": "medium", "name": { "ar": "وسط (Medium)", "fr": "Medium", "en": "Medium" }, "price": 2 },
+          { "id": "large", "name": { "ar": "كبير (Large)", "fr": "Large", "en": "Large" }, "price": 4 }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hot-rose-latte",
+    "categoryId": "hot_iced",
+    "name": {
+      "ar": "روز لاتيه (Rose Latte)",
+      "fr": "Latte aux Pétales de Rose",
+      "en": "Rose Latte"
+    },
+    "description": {
+      "ar": "نكهة الورد الطبيعي الرقيقة مع الإسبريسو والحليب الطازج الدافئ.",
+      "fr": "Infusion subtile d'eau de rose, espresso et nuage de lait.",
+      "en": "Delicate rose blossom extract paired with smooth espresso and steamed milk."
+    },
+    "price": 20,
+    "calories": 230,
+    "prepTime": "4-5 min",
+    "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "id": "hot-salted-caramel",
+    "categoryId": "hot_iced",
+    "name": {
+      "ar": "مملح كراميل لاتيه (Salted Caramel Latte)",
+      "fr": "Latte Caramel Beurre Salé",
+      "en": "Salted Caramel Latte"
+    },
+    "description": {
+      "ar": "توازن مثالي بين حلاوة الكراميل ولمسة الملح الخفيفة والإسبريسو الغني.",
+      "fr": "Alliance gourmande de caramel fondu, pointe de sel marin et café corsé.",
+      "en": "Warm espresso blended with rich buttery caramel and a sea salt pinch."
+    },
+    "price": 20,
+    "calories": 270,
+    "prepTime": "3-5 min",
+    "image": "https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "id": "hot-french-vanilla",
+    "categoryId": "hot_iced",
+    "name": {
+      "ar": "لاتيه بنكهة الفانيليا الفرنسية",
+      "fr": "Latte Vanille Bourbon Française",
+      "en": "French Vanilla Latte"
+    },
+    "description": {
+      "ar": "نكهة الفانيليا الفرنسية الكلاسيكية مع الإسبريسو والحليب الكريمي.",
+      "fr": "Délicieuse vanille française aromatique, espresso et lait chaud.",
+      "en": "Classic aromatic French vanilla bean syrup with espresso and steamed milk."
+    },
+    "price": 20,
+    "calories": 250,
+    "prepTime": "3-5 min",
+    "image": "https://images.unsplash.com/photo-1577968897966-3d4325b36b61?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "id": "hot-cappuccino",
+    "categoryId": "hot_iced",
+    "name": {
+      "ar": "كابتشينو كلاسيك",
+      "fr": "Cappuccino Mousseux",
+      "en": "Classic Cappuccino"
+    },
+    "description": {
+      "ar": "طبقات متساوية من الإسبريسو والحليب ورغوة الحليب الكثيفة الذهبية.",
+      "fr": "Espresso intense surmonté d'une épaisse et généreuse mousse de lait.",
+      "en": "Traditional balanced recipe with espresso, hot milk, and thick milk foam."
+    },
+    "price": 15,
+    "calories": 140,
+    "prepTime": "3-4 min",
+    "image": "https://images.unsplash.com/photo-1534778101976-62847782c213?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "id": "hot-cafe-latte",
+    "categoryId": "hot_iced",
+    "name": {
+      "ar": "كافيه لاتيه",
+      "fr": "Café Latte Onctueux",
+      "en": "Café Latte"
+    },
+    "description": {
+      "ar": "إسبريسو ناعم مع كمية وافرة من الحليب الساخن المبخر.",
+      "fr": "Grand café au lait velouté et mousse fine.",
+      "en": "Smooth espresso with steamed milk and a light foam layer on top."
+    },
+    "price": 15,
+    "calories": 150,
+    "prepTime": "3-4 min",
+    "image": "https://images.unsplash.com/photo-1541167760496-1628856ab772?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "id": "hot-cafe-mocha",
+    "categoryId": "hot_iced",
+    "name": {
+      "ar": "كافيه موكا بالشوكولاتة",
+      "fr": "Café Mocha Chocolat Noir",
+      "en": "Café Mocha"
+    },
+    "description": {
+      "ar": "إسبريسو مع صلصة الشوكولاتة الفاخرة والحليب المبخر.",
+      "fr": "Mélange gourmand de chocolat riche, espresso et lait chaud.",
+      "en": "Rich chocolate sauce blended with espresso shots and textured milk."
+    },
+    "price": 17,
+    "calories": 290,
+    "prepTime": "3-5 min",
+    "image": "https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "id": "froc-lotus-biscoff",
+    "categoryId": "froccino",
+    "name": {
+      "ar": "فروتشينو بسكوت اللوتس (Lotus Biscoff)",
+      "fr": "Froccino Éclats de Lotus Biscoff",
+      "en": "Froccino Lotus Biscoff"
+    },
+    "description": {
+      "ar": "مشروب مثلج مفروم مع زبدة بسكوت اللوتس الشهيرة والكريمة المخفوقة.",
+      "fr": "Boisson frappée onctueuse au goût inimitable de spéculoos Lotus et chantilly.",
+      "en": "Blended iced frappe swirled with authentic Lotus Biscoff spread and whipped cream."
+    },
+    "price": 20,
+    "calories": 420,
+    "prepTime": "4-6 min",
+    "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=800&q=80",
+    "isChefPick": true,
+    "isPopular": true
+  },
+  {
+    "id": "froc-cookies-cream",
+    "categoryId": "froccino",
+    "name": {
+      "ar": "فروتشينو كوكيز وكريم",
+      "fr": "Froccino Cookies & Cream",
+      "en": "Froccino Cookies & Cream"
+    },
+    "description": {
+      "ar": "قطع كوكيز الشوكولاتة المقرمشة ممزوجة مع الحليب والكريمة المخفوقة.",
+      "fr": "Morceaux croustillants de biscuits oreo et crème glacée onctueuse.",
+      "en": "Crunchy chocolate cookie bits blended with sweet cream and chocolate drizzle."
+    },
+    "price": 20,
+    "calories": 410,
+    "prepTime": "4-6 min",
+    "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "id": "froc-white-choc-mocha",
+    "categoryId": "froccino",
+    "name": {
+      "ar": "فروتشينو موكا الشوكولاتة البيضاء",
+      "fr": "Froccino Chocolat Blanc & Café",
+      "en": "Froccino White Chocolate Mocha"
+    },
+    "description": {
+      "ar": "قهوة مثلجة ممزوجة بالشوكولاتة البيضاء الذائبة ورذاذ الكريمة.",
+      "fr": "Frappé café gourmand au chocolat blanc crémeux et topping chantilly.",
+      "en": "Creamy blended espresso with white chocolate syrup and whipped cream."
+    },
+    "price": 20,
+    "calories": 390,
+    "prepTime": "4-6 min",
+    "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "id": "froc-coffee-jelly",
+    "categoryId": "froccino",
+    "name": {
+      "ar": "فروتشينو جلي القهوة (Coffee Jelly)",
+      "fr": "Froccino Café & Gelée de Café",
+      "en": "Froccino Coffee Jelly"
+    },
+    "description": {
+      "ar": "فرابيه قهوة منعش مع قطع جيلي القهوة الغنية بقوام ممتع ومميز.",
+      "fr": "Frappé glacé parsemé de cubes fondants de gelée de café artisanal.",
+      "en": "Signature iced blended coffee with layers of handcrafted coffee jelly cubes."
+    },
+    "price": 20,
+    "calories": 350,
+    "prepTime": "4-6 min",
+    "image": "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "id": "mojito-passion",
+    "categoryId": "mojitos",
+    "name": {
+      "ar": "موهيتو باشون فروت منعش",
+      "fr": "Mojito Fruit de la Passion Frais",
+      "en": "Passion Fruit Mojito"
+    },
+    "description": {
+      "ar": "باشون فروت طبيعي مع النعناع الطازج والليمون والمياه الفوارة المنعشة.",
+      "fr": "Fruit de la passion acidulé, feuilles de menthe pilées, citron vert et soda pétillant.",
+      "en": "Sparkling mocktail with tangy passion fruit pulp, crushed fresh mint, and lime."
+    },
+    "price": 19,
+    "calories": 140,
+    "prepTime": "3-4 min",
+    "image": "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80",
+    "isPopular": true
+  },
+  {
+    "id": "mojito-blue-lagoon",
+    "categoryId": "mojitos",
+    "name": {
+      "ar": "موهيتو بلو لاجون (Blue Lagoon)",
+      "fr": "Mojito Blue Lagoon Azur",
+      "en": "Blue Lagoon Mojito"
+    },
+    "description": {
+      "ar": "مشروب منعش بلون المحيط الأزرق مع لمسات الحمضيات والنعناع والثلج.",
+      "fr": "Cocktail pétillant bleu lagon aux agrumes, menthe fraîche et glaçons.",
+      "en": "Refreshing oceanic blue citrus mocktail with fresh lime, mint, and crushed ice."
+    },
+    "price": 19,
+    "calories": 135,
+    "prepTime": "3-4 min",
+    "image": "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "id": "mojito-strawberry",
+    "categoryId": "mojitos",
+    "name": {
+      "ar": "موهيتو فراولة طبيعية",
+      "fr": "Mojito Fraise Écrasée",
+      "en": "Fresh Strawberry Mojito"
+    },
+    "description": {
+      "ar": "فراولة طازجة مهروسة مع النعناع والليمون والمياه الفوارة.",
+      "fr": "Morceaux de fraises juteuses, menthe fraîche et fines bulles pétillantes.",
+      "en": "Crushed ripe strawberries mixed with crisp mint, lime juice, and soda."
+    },
+    "price": 19,
+    "calories": 145,
+    "prepTime": "3-4 min",
+    "image": "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?auto=format&fit=crop&w=800&q=80"
+  },
+  {
+    "id": "combo-value-meal",
+    "categoryId": "combos",
+    "name": {
+      "ar": "وجبة اقتصادية Value Meal (مشروب + كرواسون)",
+      "fr": "Formule Value Meal (Boisson + Croissant)",
+      "en": "Value Meal Combo (1 Drink + 1 Pastry)"
+    },
+    "description": {
+      "ar": "اختر مشروبك المفضل الصغير (أمريكانو، لاتيه، كابتشينو، موهيتو) مع كرواسون زبدة فرنسي أو شوكولاتة طازج.",
+      "fr": "1 boisson chaude ou froide au choix (Latte, Cappuccino, Americano, Mojito) + 1 viennoiserie fraîche.",
+      "en": "Choice of 1 small hot or iced drink (Latte, Cappuccino, Americano, Mojito) paired with a fresh bakery pastry."
+    },
+    "price": 20,
+    "calories": 480,
+    "prepTime": "3-5 min",
+    "image": "https://images.unsplash.com/photo-1555507036-ab1f4038808a?auto=format&fit=crop&w=800&q=80",
+    "isChefPick": true,
+    "isPopular": true
+  },
+  {
+    "id": "combo-cake-coffee",
+    "categoryId": "combos",
+    "name": {
+      "ar": "عرض الكعكة والقهوة (قطعة كيك + أمريكانو كبير)",
+      "fr": "Formule Cake & Coffee (Gâteau + Grand Café)",
+      "en": "Cake & Large Coffee Combo"
+    },
+    "description": {
+      "ar": "قطعة كيك فاخرة من اختيارك مع كوب أمريكانو كبير أو قهوة سادة محضرة طازجة.",
+      "fr": "Une part de gâteau pâtissier au choix accompagnée d'un grand café Americano.",
+      "en": "1 artisanal cake slice paired with a large freshly brewed Americano or black coffee."
+    },
+    "price": 25,
+    "calories": 520,
+    "prepTime": "3-5 min",
+    "image": "https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80",
+    "isChefPick": true
+  }
+]

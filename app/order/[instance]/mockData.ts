@@ -322,3 +322,48 @@ export const DEFAULT_MENU_ITEMS: MenuItem[] = [
     image: "https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?auto=format&fit=crop&w=800&q=80",
   }
 ];
+
+// --- CATALOGUE SPÉCIFIQUE BO'S COFFEE MALL OF QATAR (bos_cafe_moq) ---
+export const BOS_CAFE_CATEGORIES: MenuCategory[] = [
+  { id: "all", name: { ar: "الكل", fr: "Tout le menu", en: "All Menu" }, icon: "Coffee" },
+  { id: "signatures", name: { ar: "المشروبات التوقيع وبوبا", fr: "Signatures & Boba", en: "Signatures & Boba" }, icon: "Sparkles" },
+  { id: "hot_iced", name: { ar: "قهوة ساخنة ومثلجة", fr: "Cafés Chauds & Glacés", en: "Hot & Iced Coffee" }, icon: "Flame" },
+  { id: "froccino", name: { ar: "فروتشينو فرابيه", fr: "Froccinos & Frappés", en: "Froccinos & Frappes" }, icon: "Cake" },
+  { id: "mojitos", name: { ar: "مشروبات الموهيتو", fr: "Mojitos Frais", en: "Mojito Drinks" }, icon: "Utensils" },
+  { id: "combos", name: { ar: "وجبات اقتصادية وعروض", fr: "Formules & Combos", en: "Value Meals & Combos" }, icon: "UtensilsCrossed" }
+];
+
+import bosCafeMenuJson from './data/menus/bos_cafe_moq.json';
+
+export function getMenuForInstance(instanceName: string) {
+  const clean = (instanceName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (clean.includes('bos') || clean.includes('moq') || clean.includes('bocafe')) {
+    return {
+      categories: BOS_CAFE_CATEGORIES,
+      items: bosCafeMenuJson as MenuItem[],
+      restaurantInfo: {
+        name: "Bo's Coffee - Mall of Qatar",
+        city: "Doha",
+        country: "Qatar",
+        currency: "QAR",
+        taxRate: 0.0,
+        totalTables: 25,
+        coverImage: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1200&q=80"
+      }
+    };
+  }
+
+  return {
+    categories: DEFAULT_CATEGORIES,
+    items: DEFAULT_MENU_ITEMS,
+    restaurantInfo: {
+      name: "Lusail Courtyard Café",
+      city: "Doha",
+      country: "Qatar",
+      currency: "QAR",
+      taxRate: 0.0,
+      totalTables: 20,
+      coverImage: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80"
+    }
+  };
+}

@@ -14,7 +14,8 @@ import {
   DEFAULT_MENU_ITEMS, 
   MenuItem, 
   MenuCategory,
-  MenuItemOption
+  MenuItemOption,
+  getMenuForInstance
 } from './mockData';
 
 const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants";
@@ -57,8 +58,11 @@ export default function TableOrderingPage() {
     }
   }
 
+  // Chargement dynamique du catalogue selon l'instance (ex: bos_cafe_moq ou doha_pilot)
+  const instanceMenu = useMemo(() => getMenuForInstance(rawInstance), [rawInstance]);
+
   const formattedUrlName = rawInstance
-    ? rawInstance.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+    ? (instanceMenu.restaurantInfo.name || rawInstance.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '))
     : "Lounge & Restaurant";
 
   // Table
@@ -67,21 +71,21 @@ export default function TableOrderingPage() {
   const [showTableModal, setShowTableModal] = useState(false);
   const [tempTableInput, setTempTableInput] = useState(tableNumber);
 
-  // Restaurant data (Par défaut configuré pour le Qatar 🇶🇦 : Doha, QAR, TVA 0%)
+  // Restaurant data
   const [restaurant, setRestaurant] = useState<any>({
-    name: formattedUrlName,
-    city: "Doha",
-    country: "Qatar",
-    currency: "QAR",
-    taxRate: 0.0, // 0% TVA au Qatar
-    totalTables: 20, // Nombre total de tables par défaut
-    coverImage: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=80",
+    name: instanceMenu.restaurantInfo.name || formattedUrlName,
+    city: instanceMenu.restaurantInfo.city || "Doha",
+    country: instanceMenu.restaurantInfo.country || "Qatar",
+    currency: instanceMenu.restaurantInfo.currency || "QAR",
+    taxRate: instanceMenu.restaurantInfo.taxRate,
+    totalTables: instanceMenu.restaurantInfo.totalTables || 20,
+    coverImage: instanceMenu.restaurantInfo.coverImage,
     isOpen: true
   });
 
-  // Menu data
-  const [categories] = useState<MenuCategory[]>(DEFAULT_CATEGORIES);
-  const [menuItems] = useState<MenuItem[]>(DEFAULT_MENU_ITEMS);
+  // Menu data dynamique
+  const categories = instanceMenu.categories;
+  const menuItems = instanceMenu.items;
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
