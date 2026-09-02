@@ -160,10 +160,13 @@ export default function LuxuryRestaurantPortalV4() {
           setRestaurantData({
             restaurant_name: item.restaurant_name || formattedUrlName,
             city: item.city || "",
-            reward_offer: item.reward_offer || item.loyalty_reward || "1 hot drink",
+            reward_offer: item.reward_offer || item.loyalty_reward || "1 Café ou Cookie",
             wifi_password: item.wifi_password || "",
             menu_url: item.menu_url || "#",
             linked_evolution: botPhone,
+            logo_url: item.logo_url || "",
+            cover_image: item.cover_image || "",
+            primary_color: item.primary_color || "#C5A880",
             found: true
           });
         } else {
@@ -491,6 +494,15 @@ export default function LuxuryRestaurantPortalV4() {
                   <text x="25" y="-12" fill="#000" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(330, 25, -12)">🏆 GAGNANT</text>
                 </g>
               </svg>
+            </div>
+
+            {/* Moyeu central avec Logo du restaurant */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-[#14161F] border-2 border-amber-400 shadow-xl flex items-center justify-center overflow-hidden z-10 p-1">
+              {restaurantData.logo_url ? (
+                <img src={restaurantData.logo_url} alt="Logo" className="w-full h-full object-cover rounded-full" />
+              ) : (
+                <Sparkles className="w-6 h-6 text-amber-400" />
+              )}
             </div>
           </div>
 

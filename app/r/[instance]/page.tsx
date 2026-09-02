@@ -1,16 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { 
   Gift, Mic, Sparkles, BookOpen, Instagram, Wifi, Dices, 
-  ChevronLeft, ChevronRight, Globe, MessageCircle, RefreshCw 
+  ChevronLeft, ChevronRight, Globe, MessageCircle, RefreshCw,
+  CreditCard, Utensils, Star, ExternalLink, CheckCircle2
 } from 'lucide-react';
 
-// Passerelle V2 NocoDB
-const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants-v2";
+const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants";
 
-// Extraction propre des menus déroulants NocoDB
 const parseInstanceName = (raw: any): string => {
   if (!raw) return "";
   if (typeof raw === 'string') return raw.trim();
@@ -29,11 +29,27 @@ const parseInstanceName = (raw: any): string => {
 
 export default function DynamicRestaurantPortal() {
   const params = useParams();
-  const [lang, setLang] = useState<'ar' | 'en'>('ar');
+  const router = useRouter();
+  
+  const [lang, setLang] = useState<'ar' | 'fr' | 'en'>('ar');
   const [loading, setLoading] = useState(true);
-  const [restaurantData, setRestaurantData] = useState<any>(null);
+  const [showWifiModal, setShowWifiModal] = useState(false);
+  
+  const [restaurantData, setRestaurantData] = useState<any>({
+    restaurant_name: "Restaurant",
+    city: "Doha",
+    country: "Qatar",
+    currency: "QAR",
+    reward_offer: "هدية مجانية 🎁",
+    loyalty_reward: "1 Froccino VIP offert 🎁",
+    manager_whatsapp: "",
+    wifi_password: "WiFi@2026",
+    logo_url: "",
+    cover_image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1200&q=80",
+    primary_color: "#C5A880"
+  });
 
-  // 1. Détection universelle de l'instance depuis l'URL (Android & Apple)
+  // Détection universelle de l'instance
   const rawInstance = params?.instance;
   let currentInstance = "";
   if (typeof window !== 'undefined') {
@@ -45,46 +61,59 @@ export default function DynamicRestaurantPortal() {
     }
   }
   if (!currentInstance) {
-    currentInstance = (typeof rawInstance === 'string' ? rawInstance : (Array.isArray(rawInstance) ? rawInstance[0] : "")).trim().toLowerCase();
+    currentInstance = (typeof rawInstance === 'string' ? rawInstance : (Array.isArray(rawInstance) ? rawInstance[0] : "")).trim().toLowerCase() || 'bos_cafe_moq';
   }
 
+  // Auto-détection de langue
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const userLang = (navigator.language || 'ar').toLowerCase();
+      if (userLang.startsWith('fr')) setLang('fr');
+      else if (userLang.startsWith('en')) setLang('en');
+      else setLang('ar');
+    }
+  }, []);
+
+  // Chargement des données et de la charte graphique depuis NocoDB
   useEffect(() => {
     const loadRestaurant = async () => {
       setLoading(true);
       const target = currentInstance.trim().toLowerCase();
 
       try {
-        const res = await fetch(N8N_RESTAURANTS_API);
+        const res = await fetch(`${N8N_RESTAURANTS_API}?t=${Date.now()}`);
         if (res.ok) {
           const data = await res.json();
           const list = Array.isArray(data) ? data : (data.list || []);
           
-          // Recherche exacte dans NocoDB Table Restaurants
           const matched = list.find((r: any) => {
             const rowInst = parseInstanceName(r.instance_name).toLowerCase();
             return rowInst === target || rowInst.includes(target) || target.includes(rowInst);
           });
 
           if (matched) {
-            // INJECTION DES DONNÉES 100% RÉELLES DE NOCODB
             setRestaurantData({
-              restaurant_name: matched.restaurant_name || "Restaurant",
-              city: matched.city || "الرياض",
-              reward_offer: matched.reward_offer || "هدية مجانية 🎁",
-              manager_whatsapp: matched.manager_whatsapp?.toString().replace(/[^0-9]/g, '') || ""
+              restaurant_name: matched.restaurant_name || "Bo's Coffee",
+              city: matched.city || "Doha",
+              country: matched.country || "Qatar",
+              currency: matched.currency || "QAR",
+              reward_offer: matched.reward_offer || "1 Café ou Cookie offert ☕",
+              loyalty_reward: matched.loyalty_reward || "1 Froccino VIP offert 🎁",
+              manager_whatsapp: matched.manager_whatsapp?.toString().replace(/[^0-9]/g, '') || "33767803233",
+              wifi_password: matched.wifi_password || "BosCoffee@2026",
+              logo_url: matched.logo_url || "",
+              cover_image: matched.cover_image || "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1200&q=80",
+              primary_color: matched.primary_color || "#C5A880"
             });
           } else {
-            // Secours dynamique formaté à partir de l'URL si l'instance n'est pas trouvée
             const formattedName = target
               ? target.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
               : "Restaurant";
 
-            setRestaurantData({
-              restaurant_name: formattedName,
-              city: "الرياض",
-              reward_offer: "هدية مجانية 🎁",
-              manager_whatsapp: ""
-            });
+            setRestaurantData((prev: any) => ({
+              ...prev,
+              restaurant_name: formattedName
+            }));
           }
         }
       } catch (err) {
@@ -97,235 +126,363 @@ export default function DynamicRestaurantPortal() {
     loadRestaurant();
   }, [currentInstance]);
 
-  // URL WhatsApp direct générée depuis le numéro NocoDB du gérant
-  const cleanPhone = restaurantData?.manager_whatsapp || "";
-  const whatsappUrl = cleanPhone ? `https://wa.me/${cleanPhone}` : "#";
+  // Message pré-rempli WhatsApp pour l'avis Google
+  const cleanPhone = restaurantData?.manager_whatsapp || "33767803233";
+  const defaultReviewMessage = lang === 'ar'
+    ? `مرحباً ${restaurantData.restaurant_name}، أود مشاركة تجربتي وتقييمي للحصول على ${restaurantData.reward_offer}`
+    : (lang === 'fr'
+        ? `Bonjour ${restaurantData.restaurant_name}, je souhaite partager mon avis et profiter de mon offre : ${restaurantData.reward_offer}`
+        : `Hello ${restaurantData.restaurant_name}, I would like to review my experience and claim my offer: ${restaurantData.reward_offer}`);
+
+  const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(defaultReviewMessage)}`;
+
+  const isRTL = lang === 'ar';
 
   const t = {
     ar: {
       welcome: "مرحباً بكم في",
-      branch: `فرع ${restaurantData?.city || 'الرياض'} • Branch`,
-      heroTitle: `احصل على (${restaurantData?.reward_offer || 'هدية مجانية'}) مجاناً! 🎁`,
+      branch: `فرع ${restaurantData?.city || 'الدوحة'} • Branch`,
+      heroBadge: "هدية ضيافة فورية 🎁",
+      heroTitle: `احصل على (${restaurantData?.reward_offer || 'هدية مجانية'}) الآن!`,
       heroSubtitle: "اضغط على الزر الأخضر وسجل ملاحظة صوتية مدتها 5 ثوانٍ على واتساب لاستلام هديتك فوراً في الكاشير!",
-      ctaBtn: "إرسال التقييم الصوتي عبر واتساب",
-      voiceInstruction: "🎙️ اضغط على زر المايك في واتساب وسجل فويس 5 ثوانٍ",
-      step1: "1. انقر للفتح",
-      step2: "2. سجل فويس 5s 🎙️",
+      ctaBtn: "إرسال التقييم واستلام الهدية",
+      voiceInstruction: "🎙️ اضغط مطولاً على زر المايك في واتساب وسجل 5 ثوانٍ",
+      step1: "1. انقر للفتح 📲",
+      step2: "2. سجل 5s صوت 🎙️",
       step3: "3. استلم هديتك 🎁",
-      menuTitle: "قائمة الطعام والمشروبات",
-      menuSub: "تصفح المنيو الرقمي الإلكتروني",
-      instaTitle: "تابعنا على إنستغرام",
-      instaSub: "شارك لحظاتك وسنشاركها في ستوري",
+      orderMenuTitle: "قائمة الطعام والطلب للطاولة",
+      orderMenuSub: "تصفح 52 صنفاً واطلب مباشرة لطاولتك",
+      spinTitle: "عجلة الحظ VIP (Spin & Win)",
+      spinSub: "أدر العجلة واربح تحلية أو قهوة مجانية",
+      loyaltyTitle: "بطاقة الولاء الرقمية VIP",
+      loyaltySub: "اجمع 10 نقاط واحصل على مشروبك المجاني",
       wifiTitle: "الاتصال بالواي فاي المجاني",
-      wifiSub: "انقر للاتصال بشبكة الإنترنت فوراً",
-      spinTitle: "عجلة الحظ (Spin & Win)",
-      spinSub: "قريباً... العب واكسب جوائز فورية",
-      poweredBy: "Powered by Smart Review AI 🚀"
+      wifiSub: "انقر للحصول على كلمة المرور والاتصال",
+      wifiModalTitle: "شبكة الواي فاي للضيوف",
+      wifiNetwork: "اسم الشبكة (SSID)",
+      wifiPass: "كلمة المرور",
+      wifiCopy: "نسخ كلمة المرور",
+      copied: "تم النسخ بنجاح!",
+      close: "إغلاق",
+      poweredBy: "تجربة ضيافة ذكية برعاية Smart Review AI 🚀"
+    },
+    fr: {
+      welcome: "Bienvenue chez",
+      branch: `Établissement ${restaurantData?.city || 'Doha'}`,
+      heroBadge: "Offre de Bienvenue VIP 🎁",
+      heroTitle: `Votre (${restaurantData?.reward_offer || 'Cadeau'}) Offert !`,
+      heroSubtitle: "Cliquez ci-dessous, enregistrez un message vocal de 5 secondes sur WhatsApp et recevez votre récompense immédiatement en caisse !",
+      ctaBtn: "Donner mon Avis sur WhatsApp",
+      voiceInstruction: "🎙️ Maintenez l'icône micro sur WhatsApp et parlez 5 secondes",
+      step1: "1. Ouvrir WhatsApp 📲",
+      step2: "2. Vocal de 5 sec 🎙️",
+      step3: "3. Cadeau en Caisse 🎁",
+      orderMenuTitle: "Menu Digital & Commande à Table",
+      orderMenuSub: "Consultez la carte complète et commandez en direct",
+      spinTitle: "Roue des Récompenses (Spin & Win)",
+      spinSub: "Tentez votre chance et gagnez des surprises VIP",
+      loyaltyTitle: "Carte de Fidélité Digitale",
+      loyaltySub: "Cumulez vos tampons et débloquez vos boissons offertes",
+      wifiTitle: "Wi-Fi Haut Débit Gratuit",
+      wifiSub: "Cliquez pour afficher le mot de passe réseau",
+      wifiModalTitle: "Connexion Wi-Fi Client",
+      wifiNetwork: "Réseau Wi-Fi",
+      wifiPass: "Mot de passe",
+      wifiCopy: "Copier le mot de passe",
+      copied: "Copié dans le presse-papier !",
+      close: "Fermer",
+      poweredBy: "Propulsé par Smart Review AI 🚀"
     },
     en: {
       welcome: "Welcome to",
-      branch: `${restaurantData?.city || 'Riyadh'} Branch`,
-      heroTitle: `Get Your Free (${restaurantData?.reward_offer || 'Gift'}) Now! 🎁`,
-      heroSubtitle: "Click the green button below, hold the microphone on WhatsApp, and send a 5-second voice note to claim your reward!",
-      ctaBtn: "Send Voice Review on WhatsApp",
-      voiceInstruction: "🎙️ Hold the mic icon in WhatsApp to record 5 seconds",
-      step1: "1. Tap Open",
-      step2: "2. Record 5s Voice 🎙️",
-      step3: "3. Claim Gift 🎁",
-      menuTitle: "Food & Drinks Menu",
-      menuSub: "Browse our interactive digital menu",
-      instaTitle: "Follow Us on Instagram",
-      instaSub: "Tag us in your photos to get featured",
-      wifiTitle: "Free High-Speed Wi-Fi",
-      wifiSub: "Click to connect instantly",
+      branch: `${restaurantData?.city || 'Doha'} Branch`,
+      heroBadge: "Instant Welcome Reward 🎁",
+      heroTitle: `Claim Your Free (${restaurantData?.reward_offer || 'Gift'})!`,
+      heroSubtitle: "Click below, hold the microphone on WhatsApp, and send a 5-second voice review to claim your treat instantly at the counter!",
+      ctaBtn: "Send WhatsApp Voice Review",
+      voiceInstruction: "🎙️ Hold the mic icon on WhatsApp and record 5 seconds",
+      step1: "1. Open WhatsApp 📲",
+      step2: "2. 5s Voice Note 🎙️",
+      step3: "3. Claim Treat 🎁",
+      orderMenuTitle: "Digital Menu & Table Ordering",
+      orderMenuSub: "Explore our full catalog and order right to your table",
       spinTitle: "Spin & Win (Wheel of Fortune)",
-      spinSub: "Coming soon... Play and win instant prizes",
+      spinSub: "Spin the wheel for desserts, drinks & surprises",
+      loyaltyTitle: "Digital VIP Loyalty Card",
+      loyaltySub: "Collect 10 stamps and earn your free reward",
+      wifiTitle: "Free Guest Wi-Fi",
+      wifiSub: "Click to get the network password",
+      wifiModalTitle: "Guest Wi-Fi Network",
+      wifiNetwork: "Network Name (SSID)",
+      wifiPass: "Password",
+      wifiCopy: "Copy Password",
+      copied: "Copied to clipboard!",
+      close: "Close",
       poweredBy: "Powered by Smart Review AI 🚀"
     }
   }[lang];
 
-  // ÉCRAN DE CHARGEMENT ELEGANT AVANT LA RÉPONSE DE NOCODB
-  if (loading || !restaurantData) {
+  const [copiedWifi, setCopiedWifi] = useState(false);
+  const handleCopyWifi = () => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(restaurantData.wifi_password || "BosCoffee@2026");
+      setCopiedWifi(true);
+      setTimeout(() => setCopiedWifi(false), 2500);
+    }
+  };
+
+  if (loading) {
     return (
-      <div dir="rtl" className="min-h-screen bg-zinc-950 flex items-center justify-center p-4 font-['Cairo']">
-        <div className="text-center space-y-4">
-          <RefreshCw className="w-10 h-10 text-amber-500 animate-spin mx-auto" />
-          <p className="text-sm font-bold text-zinc-400">جاري تحميل البيانات... / Loading portal...</p>
-        </div>
+      <div className="min-h-screen bg-[#14100E] flex items-center justify-center p-4">
+        <div className="w-12 h-12 border-4 border-[#C5A880] border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
+  const primaryColor = restaurantData.primary_color || "#C5A880";
+
   return (
     <div 
-      dir={lang === 'ar' ? 'rtl' : 'ltr'}
-      className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-zinc-900 via-slate-950 to-black text-zinc-100 font-['Cairo',sans-serif] relative flex flex-col justify-between p-4 sm:p-8 overflow-hidden"
+      dir={isRTL ? 'rtl' : 'ltr'}
+      className="min-h-screen bg-gradient-to-b from-[#1A1411] via-[#120D0B] to-[#0A0706] text-[#FAF8F5] font-sans relative flex flex-col justify-between p-4 sm:p-6 overflow-hidden"
+      style={{ fontFamily: "'Cairo', system-ui, -apple-system, sans-serif" }}
     >
-      {/* EFFETS LUMINEUX DÉGRADÉS */}
-      <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-gradient-to-r from-amber-500/20 to-purple-600/20 rounded-full blur-[130px] pointer-events-none animate-pulse"></div>
-      <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 rounded-full blur-[130px] pointer-events-none"></div>
+      {/* PHOTO DE FOND BRANDÉE AVEC OVERLAY SOMBRE */}
+      <div className="absolute inset-0 z-0 opacity-20 pointer-events-none">
+        <img 
+          src={restaurantData.cover_image} 
+          alt={restaurantData.restaurant_name}
+          className="w-full h-full object-cover filter blur-[2px] scale-105"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1A1411]/90 via-[#120D0B]/95 to-[#0A0706]"></div>
+      </div>
 
-      <div className="max-w-md mx-auto w-full space-y-7 relative z-10">
+      <div className="max-w-md mx-auto w-full space-y-6 relative z-10">
         
-        {/* HEADER & BOUTON LANGUE */}
+        {/* HEADER : LOGO & BOUTON LANGUE */}
         <header className="flex justify-between items-center pt-2">
           <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span>
-            <span className="text-xs font-black text-emerald-400 bg-emerald-500/10 px-3.5 py-1 rounded-full border border-emerald-500/30 backdrop-blur-md">
-              NFC Active
+            <div className="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></div>
+            <span className="text-xs font-black text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/30 backdrop-blur-md">
+              NFC & QR Active
             </span>
           </div>
 
-          <button
-            onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-            className="flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/90 border border-white/15 text-xs font-black text-zinc-200 backdrop-blur-xl hover:border-amber-400 transition shadow-lg"
-          >
-            <Globe className="w-4 h-4 text-amber-400" />
-            {lang === 'ar' ? 'English' : 'العربية'}
-          </button>
+          <div className="flex bg-[#2B231D]/80 backdrop-blur-md p-0.5 rounded-full border border-[#4A3D34]">
+            {(['ar', 'fr', 'en'] as const).map(l => (
+              <button
+                key={l}
+                onClick={() => setLang(l)}
+                className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${
+                  lang === l 
+                    ? 'bg-[#C5A880] text-[#1E1916] font-black shadow-md' 
+                    : 'text-[#A8988B] hover:text-white'
+                }`}
+              >
+                {l.toUpperCase()}
+              </button>
+            ))}
+          </div>
         </header>
 
-        {/* BRANDING RESTAURANT EN GRANDES POLICES */}
-        <div className="text-center space-y-2 pt-2">
-          <p className="text-xs text-amber-400 font-black uppercase tracking-widest">{t.welcome}</p>
-          <h1 className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500 tracking-tight leading-tight">
+        {/* IDENTITÉ DU RESTAURANT */}
+        <div className="text-center space-y-2 pt-1">
+          {restaurantData.logo_url && (
+            <div className="w-20 h-20 mx-auto rounded-full overflow-hidden p-1 bg-gradient-to-tr from-[#C5A880] to-[#EAE0D5] shadow-xl ring-4 ring-[#C5A880]/20 mb-3">
+              <img 
+                src={restaurantData.logo_url} 
+                alt="Logo"
+                className="w-full h-full object-cover rounded-full"
+              />
+            </div>
+          )}
+          <p className="text-xs text-[#C5A880] font-black uppercase tracking-widest">{t.welcome}</p>
+          <h1 className="text-3xl sm:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FAF8F5] via-[#DFCDBC] to-[#C5A880] tracking-tight leading-tight">
             {restaurantData.restaurant_name}
           </h1>
-          <p className="text-xs text-zinc-400 font-bold">{t.branch}</p>
+          <p className="text-xs text-[#A8988B] font-bold">{t.branch}</p>
         </div>
 
-        {/* HERO CARD GLASSMORPHISM VIBRANTE */}
+        {/* HERO CARD GLASSMORPHISM : AVIS GOOGLE & CADEAU */}
         <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-amber-500 via-emerald-500 to-teal-500 rounded-3xl blur-md opacity-75 group-hover:opacity-100 transition duration-1000 animate-pulse"></div>
+          <div className="absolute -inset-1 bg-gradient-to-r from-[#C5A880] via-[#25D366] to-[#C5A880] rounded-3xl blur-md opacity-50 group-hover:opacity-80 transition duration-1000 animate-pulse"></div>
           
-          <div className="relative bg-zinc-900/90 border border-white/15 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 text-center space-y-6 shadow-2xl">
+          <div className="relative bg-[#241E1A]/95 border border-[#4A3D34] backdrop-blur-2xl rounded-3xl p-6 sm:p-7 text-center space-y-5 shadow-2xl">
             
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500/20 to-amber-500/10 border border-amber-500/40 text-amber-300 px-4 py-1.5 rounded-full text-xs font-black shadow-inner">
-              <Sparkles className="w-4 h-4 text-amber-400 animate-spin" />
-              <span>عرض خاص • Special Offer</span>
+            <div className="inline-flex items-center gap-2 bg-[#C5A880]/15 border border-[#C5A880]/40 text-[#DFCDBC] px-4 py-1.5 rounded-full text-xs font-black shadow-inner">
+              <Sparkles className="w-4 h-4 text-[#C5A880] animate-spin" />
+              <span>{t.heroBadge}</span>
             </div>
 
-            <div className="space-y-3">
-              <h2 className="text-2xl sm:text-3xl font-black text-white leading-tight">
+            <div className="space-y-2">
+              <h2 className="text-xl sm:text-2xl font-black text-[#FAF8F5] leading-tight">
                 {t.heroTitle}
               </h2>
-              <p className="text-sm text-zinc-300 leading-relaxed font-semibold">
+              <p className="text-xs text-[#D4C3B3] leading-relaxed font-semibold">
                 {t.heroSubtitle}
               </p>
             </div>
 
-            {/* LE GROS BOUTON WHATSAPP VERT (#25D366) VIBRANT */}
-            <div className="space-y-3 pt-2">
+            {/* LE GROS BOUTON WHATSAPP AVIS VOCAL */}
+            <div className="space-y-3 pt-1">
               <a
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-[#25D366] via-emerald-500 to-[#128C7E] hover:scale-[1.02] text-white font-black text-lg sm:text-xl py-5 px-6 rounded-2xl shadow-[0_10px_30px_rgba(37,211,102,0.4)] transition-all duration-300 transform active:scale-95 border border-emerald-400/40"
+                className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-[#25D366] via-emerald-500 to-[#128C7E] hover:scale-[1.02] text-white font-black text-base sm:text-lg py-4 px-6 rounded-2xl shadow-[0_10px_30px_rgba(37,211,102,0.4)] transition-all duration-300 transform active:scale-98 border border-emerald-400/40"
               >
-                <MessageCircle className="w-7 h-7 fill-white text-emerald-800" />
+                <MessageCircle className="w-6 h-6 fill-white text-emerald-800" />
                 <span>{t.ctaBtn}</span>
-                <Mic className="w-6 h-6 animate-bounce" />
+                <Mic className="w-5 h-5 animate-bounce" />
               </a>
 
-              <p className="text-xs text-emerald-300 font-bold bg-emerald-950/60 py-2 px-3 rounded-xl border border-emerald-500/30">
+              <p className="text-[11px] text-emerald-300 font-bold bg-emerald-950/60 py-2 px-3 rounded-xl border border-emerald-500/30">
                 {t.voiceInstruction}
               </p>
             </div>
 
-            {/* 3 Étapes Visuelles LISIBLES */}
-            <div className="grid grid-cols-3 gap-2 pt-4 border-t border-white/10 text-xs text-zinc-300 font-bold">
-              <div className="p-1.5 bg-zinc-950/50 rounded-xl border border-white/5">{t.step1}</div>
-              <div className="p-1.5 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-400">{t.step2}</div>
-              <div className="p-1.5 bg-emerald-500/10 rounded-xl border border-emerald-500/20 text-emerald-400">{t.step3}</div>
+            {/* 3 Étapes Visuelles */}
+            <div className="grid grid-cols-3 gap-2 pt-3 border-t border-[#3D332A] text-[11px] text-[#A8988B] font-bold">
+              <div className="p-1.5 bg-[#1E1916] rounded-xl border border-[#3D332A]">{t.step1}</div>
+              <div className="p-1.5 bg-[#C5A880]/15 rounded-xl border border-[#C5A880]/30 text-[#DFCDBC]">{t.step2}</div>
+              <div className="p-1.5 bg-emerald-500/15 rounded-xl border border-emerald-500/30 text-emerald-300">{t.step3}</div>
             </div>
 
           </div>
         </div>
 
-        {/* LIENS SECONDAIRES */}
-        <div className="space-y-3.5 pt-2">
+        {/* GRILLE DES SERVICES DU RESTAURANT */}
+        <div className="space-y-3 pt-1">
           
-          {/* MENU DIGITAL */}
-          <a
-            href="https://google.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between bg-zinc-900/80 border border-white/10 backdrop-blur-xl p-5 rounded-2xl shadow-lg hover:border-amber-400/50 hover:bg-zinc-800/80 transition group"
+          {/* 1. COMMANDE DIGITALE À TABLE */}
+          <Link
+            href={`/order/${currentInstance}?table=01`}
+            className="flex items-center justify-between bg-[#241E1A]/90 border border-[#3D332A] backdrop-blur-xl p-4.5 rounded-2xl shadow-lg hover:border-[#C5A880] hover:bg-[#2E2722] transition-all group"
           >
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-amber-500/15 text-amber-400 rounded-xl border border-amber-500/30">
-                <BookOpen className="w-6 h-6" />
+            <div className="flex items-center gap-3.5">
+              <div className="p-3 bg-[#C5A880]/20 text-[#DFCDBC] rounded-xl border border-[#C5A880]/40 group-hover:scale-110 transition-transform">
+                <Utensils className="w-6 h-6 text-[#C5A880]" />
               </div>
               <div className="text-start">
-                <p className="font-bold text-base sm:text-lg text-white group-hover:text-amber-400 transition">{t.menuTitle}</p>
-                <p className="text-xs text-zinc-400 font-medium">{t.menuSub}</p>
+                <p className="font-bold text-sm sm:text-base text-[#FAF8F5] group-hover:text-[#DFCDBC] transition">
+                  {t.orderMenuTitle}
+                </p>
+                <p className="text-xs text-[#A8988B] font-medium">{t.orderMenuSub}</p>
               </div>
             </div>
-            {lang === 'ar' ? <ChevronLeft className="w-5 h-5 text-zinc-500" /> : <ChevronRight className="w-5 h-5 text-zinc-500" />}
-          </a>
+            {isRTL ? <ChevronLeft className="w-5 h-5 text-[#7A695B]" /> : <ChevronRight className="w-5 h-5 text-[#7A695B]" />}
+          </Link>
 
-          {/* INSTAGRAM */}
-          <a
-            href="https://instagram.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-between bg-zinc-900/80 border border-white/10 backdrop-blur-xl p-5 rounded-2xl shadow-lg hover:border-pink-400/50 hover:bg-zinc-800/80 transition group"
+          {/* 2. ROUE DES CADEAUX VIP */}
+          <Link
+            href={`/spin/${currentInstance}`}
+            className="flex items-center justify-between bg-[#241E1A]/90 border border-[#3D332A] backdrop-blur-xl p-4.5 rounded-2xl shadow-lg hover:border-purple-400/60 hover:bg-[#2E2722] transition-all group"
           >
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-pink-500/15 text-pink-400 rounded-xl border border-pink-500/30">
-                <Instagram className="w-6 h-6" />
-              </div>
-              <div className="text-start">
-                <p className="font-bold text-base sm:text-lg text-white group-hover:text-pink-400 transition">{t.instaTitle}</p>
-                <p className="text-xs text-zinc-400 font-medium">{t.instaSub}</p>
-              </div>
-            </div>
-            {lang === 'ar' ? <ChevronLeft className="w-5 h-5 text-zinc-500" /> : <ChevronRight className="w-5 h-5 text-zinc-500" />}
-          </a>
-
-          {/* WI-FI */}
-          <a
-            href="#wifi"
-            className="flex items-center justify-between bg-zinc-900/80 border border-white/10 backdrop-blur-xl p-5 rounded-2xl shadow-lg hover:border-emerald-400/50 hover:bg-zinc-800/80 transition group"
-          >
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-emerald-500/15 text-emerald-400 rounded-xl border border-emerald-500/30">
-                <Wifi className="w-6 h-6" />
-              </div>
-              <div className="text-start">
-                <p className="font-bold text-base sm:text-lg text-white group-hover:text-emerald-400 transition">{t.wifiTitle}</p>
-                <p className="text-xs text-zinc-400 font-medium">{t.wifiSub}</p>
-              </div>
-            </div>
-            {lang === 'ar' ? <ChevronLeft className="w-5 h-5 text-zinc-500" /> : <ChevronRight className="w-5 h-5 text-zinc-500" />}
-          </a>
-
-          {/* SPIN & WIN PREVIEW */}
-          <div className="flex items-center justify-between bg-zinc-900/40 border border-white/5 backdrop-blur-md p-5 rounded-2xl relative overflow-hidden">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20">
-                <Dices className="w-6 h-6" />
+            <div className="flex items-center gap-3.5">
+              <div className="p-3 bg-purple-500/20 text-purple-300 rounded-xl border border-purple-500/40 group-hover:scale-110 transition-transform">
+                <Dices className="w-6 h-6 text-purple-400" />
               </div>
               <div className="text-start">
                 <div className="flex items-center gap-2">
-                  <p className="font-bold text-base sm:text-lg text-zinc-300">{t.spinTitle}</p>
-                  <span className="text-[10px] bg-purple-500/20 text-purple-300 font-black px-2.5 py-0.5 rounded-full border border-purple-500/30">v2.0 Soon</span>
+                  <p className="font-bold text-sm sm:text-base text-[#FAF8F5] group-hover:text-purple-300 transition">
+                    {t.spinTitle}
+                  </p>
+                  <span className="text-[10px] bg-purple-500/20 text-purple-300 font-black px-2 py-0.2 rounded-full border border-purple-500/30">VIP</span>
                 </div>
-                <p className="text-xs text-zinc-500">{t.spinSub}</p>
+                <p className="text-xs text-[#A8988B] font-medium">{t.spinSub}</p>
               </div>
             </div>
-          </div>
+            {isRTL ? <ChevronLeft className="w-5 h-5 text-[#7A695B]" /> : <ChevronRight className="w-5 h-5 text-[#7A695B]" />}
+          </Link>
+
+          {/* 3. CARTE DE FIDÉLITÉ DIGITALE */}
+          <Link
+            href={`/card/33767803233?instance=${currentInstance}`}
+            className="flex items-center justify-between bg-[#241E1A]/90 border border-[#3D332A] backdrop-blur-xl p-4.5 rounded-2xl shadow-lg hover:border-amber-400/60 hover:bg-[#2E2722] transition-all group"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="p-3 bg-amber-500/20 text-amber-300 rounded-xl border border-amber-500/40 group-hover:scale-110 transition-transform">
+                <CreditCard className="w-6 h-6 text-amber-400" />
+              </div>
+              <div className="text-start">
+                <p className="font-bold text-sm sm:text-base text-[#FAF8F5] group-hover:text-amber-300 transition">
+                  {t.loyaltyTitle}
+                </p>
+                <p className="text-xs text-[#A8988B] font-medium">{t.loyaltySub}</p>
+              </div>
+            </div>
+            {isRTL ? <ChevronLeft className="w-5 h-5 text-[#7A695B]" /> : <ChevronRight className="w-5 h-5 text-[#7A695B]" />}
+          </Link>
+
+          {/* 4. MODALE WI-FI */}
+          <button
+            onClick={() => setShowWifiModal(true)}
+            className="w-full flex items-center justify-between bg-[#241E1A]/90 border border-[#3D332A] backdrop-blur-xl p-4.5 rounded-2xl shadow-lg hover:border-emerald-400/60 hover:bg-[#2E2722] transition-all group text-start"
+          >
+            <div className="flex items-center gap-3.5">
+              <div className="p-3 bg-emerald-500/20 text-emerald-300 rounded-xl border border-emerald-500/40 group-hover:scale-110 transition-transform">
+                <Wifi className="w-6 h-6 text-emerald-400" />
+              </div>
+              <div>
+                <p className="font-bold text-sm sm:text-base text-[#FAF8F5] group-hover:text-emerald-300 transition">
+                  {t.wifiTitle}
+                </p>
+                <p className="text-xs text-[#A8988B] font-medium">{t.wifiSub}</p>
+              </div>
+            </div>
+            {isRTL ? <ChevronLeft className="w-5 h-5 text-[#7A695B]" /> : <ChevronRight className="w-5 h-5 text-[#7A695B]" />}
+          </button>
 
         </div>
 
         {/* FOOTER */}
-        <footer className="pt-6 pb-2 text-center">
-          <p className="text-xs text-zinc-500 font-bold tracking-wider">
+        <footer className="pt-4 pb-2 text-center">
+          <p className="text-[11px] text-[#7A695B] font-bold tracking-wider">
             {t.poweredBy}
           </p>
         </footer>
 
       </div>
+
+      {/* MODALE WI-FI */}
+      {showWifiModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-[#241E1A] border border-[#3D332A] rounded-3xl p-6 max-w-sm w-full text-center space-y-4 shadow-2xl">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 flex items-center justify-center mx-auto shadow-inner">
+              <Wifi className="w-7 h-7" />
+            </div>
+
+            <h3 className="text-lg font-black text-[#FAF8F5]">{t.wifiModalTitle}</h3>
+
+            <div className="bg-[#1E1916] rounded-2xl p-3 border border-[#3D332A] text-start space-y-2 text-xs">
+              <div>
+                <span className="text-[#A8988B] font-bold block text-[10px] uppercase">{t.wifiNetwork}</span>
+                <span className="text-[#FAF8F5] font-bold font-mono text-sm">{restaurantData.restaurant_name} Guest</span>
+              </div>
+              <div className="pt-2 border-t border-[#2E2722]">
+                <span className="text-[#A8988B] font-bold block text-[10px] uppercase">{t.wifiPass}</span>
+                <span className="text-[#C5A880] font-black font-mono text-base">{restaurantData.wifi_password}</span>
+              </div>
+            </div>
+
+            <button
+              onClick={handleCopyWifi}
+              className="w-full py-3 rounded-2xl bg-[#C5A880] hover:bg-[#DFCDBC] text-[#1E1916] font-black text-xs transition-all shadow-md active:scale-98 flex items-center justify-center gap-1.5"
+            >
+              {copiedWifi ? <CheckCircle2 className="w-4 h-4 text-emerald-900" /> : <Wifi className="w-4 h-4" />}
+              <span>{copiedWifi ? t.copied : t.wifiCopy}</span>
+            </button>
+
+            <button
+              onClick={() => setShowWifiModal(false)}
+              className="w-full py-2 text-xs text-[#A8988B] hover:text-white font-bold transition-colors"
+            >
+              {t.close}
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
