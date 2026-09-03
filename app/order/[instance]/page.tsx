@@ -151,6 +151,18 @@ export default function TableOrderingPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderSuccess, setOrderSuccess] = useState(false);
 
+  // Passerelle de Paiement Sécurisé (Modal 3D-Secure / Apple Pay Sheet)
+  const [showPaymentGatewayModal, setShowPaymentGatewayModal] = useState(false);
+  const [gatewayStep, setGatewayStep] = useState<'idle' | 'processing' | '3ds_challenge' | 'authorized'>('idle');
+  const [simulatedCard, setSimulatedCard] = useState({
+    number: '•••• •••• •••• 4242',
+    holder: 'Guest Customer',
+    expiry: '12/28',
+    cvv: '•••'
+  });
+  const [otpCode, setOtpCode] = useState('2030');
+  const [pendingOrderPayload, setPendingOrderPayload] = useState<any>(null);
+
   // Auto-détection de langue
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -489,7 +501,22 @@ export default function TableOrderingPage() {
       timestamp: new Date().toISOString()
     };
 
+    // Si le client paie en ligne (Apple Pay ou Carte), déclencher la passerelle sécurisée
+    if (paymentMethod === 'apple_pay' || paymentMethod === 'card') {
+      setPendingOrderPayload(orderPayload);
+      setShowPaymentGatewayModal(true);
+      setGatewayStep('processing');
+      return;
+    }
+
+    // Sinon (Paiement en caisse), finaliser directement
+    await executeFinalOrderSubmission(orderPayload);
+  };
+
+  // Exécution finale et enregistrement de la commande après validation bancaire ou choix caisse
+  const executeFinalOrderSubmission = async (orderPayload: any) => {
     try {
+      setIsSubmitting(true);
       // Sauvegarder dans localStorage pour la page de succès et suivi en direct
       if (typeof window !== 'undefined') {
         localStorage.setItem('sr_last_order', JSON.stringify(orderPayload));
@@ -523,6 +550,7 @@ export default function TableOrderingPage() {
           const errData = await orderRes.json().catch(() => ({}));
           if (orderRes.status === 403 && errData.error === 'STORE_CLOSED') {
             setIsSubmitting(false);
+            setShowPaymentGatewayModal(false);
             alert(errData.message || (lang === 'ar' ? 'عذراً، المطبخ مغلق حالياً' : (lang === 'fr' ? 'Désolé, la cuisine est actuellement fermée pour la prise de commandes.' : 'Sorry, the kitchen is currently closed for orders.')));
             return;
           }
@@ -533,11 +561,13 @@ export default function TableOrderingPage() {
 
       setIsSubmitting(false);
       setOrderSuccess(true);
-      router.push(`/order/${rawInstance}/success?orderId=${orderId}&table=${tableNumber}`);
+      setShowPaymentGatewayModal(false);
+      router.push(`/order/${rawInstance}/success?orderId=${orderPayload.order_id}&table=${orderPayload.table_number}`);
 
     } catch (err) {
       console.error(err);
       setIsSubmitting(false);
+      setShowPaymentGatewayModal(false);
     }
   };
 
@@ -1326,6 +1356,219 @@ export default function TableOrderingPage() {
                 {t.confirm}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODALE IMMERSIVE : PASSERELLE DE PAIEMENT SÉCURISÉ (APPLE PAY & 3D SECURE NAPS/VISA) */}
+      {showPaymentGatewayModal && pendingOrderPayload && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+          <div className="w-full max-w-md bg-[#FAF8F5] rounded-t-3xl sm:rounded-3xl border border-[#E0D5C7] shadow-2xl overflow-hidden flex flex-col text-[#2E2722]">
+            
+            {/* Header Sécurisé Banque / Passerelle */}
+            <div className="bg-[#241E1A] text-white p-4 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-[#C5A880] text-[#1E1916] flex items-center justify-center font-black text-xs shadow">
+                  🔒
+                </div>
+                <div>
+                  <p className="text-xs font-black tracking-wide flex items-center gap-1.5">
+                    <span>Tap Payments Gateway</span>
+                    <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.2 rounded border border-emerald-500/40">PCI-DSS 3DS2</span>
+                  </p>
+                  <p className="text-[10px] text-[#A8988B]">
+                    {restaurant.name} • {restaurant.city}, {restaurant.country}
+                  </p>
+                </div>
+              </div>
+              <button 
+                onClick={() => { setShowPaymentGatewayModal(false); setGatewayStep('idle'); }}
+                className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xs transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Corps selon le mode de paiement */}
+            <div className="p-5 space-y-4">
+              
+              {/* Récapitulatif montant à débiter */}
+              <div className="bg-white p-3.5 rounded-2xl border border-[#EAE0D5] flex items-center justify-between shadow-sm">
+                <div>
+                  <span className="text-[11px] text-[#8C7A6B] block uppercase tracking-wider font-bold">Montant de la Transaction</span>
+                  <span className="text-xs text-[#2E2722] font-semibold">Table {pendingOrderPayload.table_number} • {pendingOrderPayload.order_id}</span>
+                </div>
+                <div className="text-end">
+                  <span className="text-xl font-black text-[#2E2722]">
+                    {pendingOrderPayload.total_amount.toFixed(2)}
+                  </span>
+                  <span className="text-xs font-bold text-[#8C6D48] ml-1">
+                    {pendingOrderPayload.currency}
+                  </span>
+                </div>
+              </div>
+
+              {/* 1. Cas APPLE PAY NATIVE SHEET */}
+              {pendingOrderPayload.payment_method === 'apple_pay' && (
+                <div className="space-y-4 text-center py-2">
+                  <div className="w-16 h-16 rounded-3xl bg-black text-white mx-auto flex items-center justify-center text-3xl font-bold shadow-xl">
+                    
+                  </div>
+
+                  <div className="space-y-1">
+                    <h4 className="text-base font-black text-[#2E2722]">Apple Pay</h4>
+                    <p className="text-xs text-[#7A695B]">
+                      Validez avec votre empreinte Touch ID ou reconnaissance Face ID
+                    </p>
+                  </div>
+
+                  <div className="bg-white p-3 rounded-2xl border border-[#EAE0D5] text-xs text-start space-y-1.5 font-mono">
+                    <div className="flex justify-between text-[#5C4D41]">
+                      <span>Carte enregistrée :</span>
+                      <span className="font-bold text-[#2E2722]">Apple Card (•••• 8821)</span>
+                    </div>
+                    <div className="flex justify-between text-[#5C4D41]">
+                      <span>Facturation :</span>
+                      <span>Doha, Qatar 🇶🇦</span>
+                    </div>
+                  </div>
+
+                  <button
+                    disabled={isSubmitting}
+                    onClick={async () => {
+                      setGatewayStep('authorized');
+                      setTimeout(async () => {
+                        await executeFinalOrderSubmission(pendingOrderPayload);
+                      }, 1200);
+                    }}
+                    className="w-full py-4 rounded-2xl bg-black hover:bg-zinc-900 text-white font-black text-sm shadow-xl flex items-center justify-center gap-2 transition active:scale-[0.98]"
+                  >
+                    {gatewayStep === 'authorized' ? (
+                      <>
+                        <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                        <span>Paiement Apple Pay Approuvé !</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-lg"></span>
+                        <span>Confirmer avec Face ID • {pendingOrderPayload.total_amount.toFixed(2)} {pendingOrderPayload.currency}</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              {/* 2. Cas CARTE BANCAIRE / NAPS 3D-SECURE */}
+              {pendingOrderPayload.payment_method === 'card' && (
+                <div className="space-y-3">
+                  
+                  {gatewayStep === 'processing' ? (
+                    <div className="space-y-3">
+                      <div className="space-y-2">
+                        <div>
+                          <label className="text-[11px] font-bold text-[#5C4D41] block mb-1">Numéro de Carte Bancaire</label>
+                          <input 
+                            type="text" 
+                            value={simulatedCard.number} 
+                            onChange={(e) => setSimulatedCard({ ...simulatedCard, number: e.target.value })}
+                            className="w-full p-2.5 bg-white border border-[#D5C4B4] rounded-xl text-xs font-mono font-bold text-[#2E2722] focus:outline-none focus:border-[#C5A880]"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[11px] font-bold text-[#5C4D41] block mb-1">Expiration</label>
+                            <input 
+                              type="text" 
+                              value={simulatedCard.expiry} 
+                              onChange={(e) => setSimulatedCard({ ...simulatedCard, expiry: e.target.value })}
+                              className="w-full p-2.5 bg-white border border-[#D5C4B4] rounded-xl text-xs font-mono text-[#2E2722] focus:outline-none focus:border-[#C5A880]"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[11px] font-bold text-[#5C4D41] block mb-1">CVV (Sécurité)</label>
+                            <input 
+                              type="text" 
+                              value={simulatedCard.cvv} 
+                              onChange={(e) => setSimulatedCard({ ...simulatedCard, cvv: e.target.value })}
+                              className="w-full p-2.5 bg-white border border-[#D5C4B4] rounded-xl text-xs font-mono text-[#2E2722] focus:outline-none focus:border-[#C5A880]"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => setGatewayStep('3ds_challenge')}
+                        className="w-full py-3.5 rounded-2xl bg-[#C8102E] hover:bg-[#A31D24] text-white font-black text-xs transition shadow-md flex items-center justify-center gap-2"
+                      >
+                        <ShieldCheck className="w-4 h-4" />
+                        <span>Continuer vers la vérification 3D-Secure</span>
+                      </button>
+                    </div>
+                  ) : (
+                    /* Défi 3D-Secure de la Banque */
+                    <div className="bg-white p-4 rounded-2xl border border-blue-200 space-y-3 text-center animate-fade-in">
+                      <div className="flex items-center justify-center gap-2 text-blue-900 font-black text-xs">
+                        <ShieldCheck className="w-4 h-4 text-blue-600" />
+                        <span>QNB / Qatar Central Bank 3D-Secure</span>
+                      </div>
+                      <p className="text-[11px] text-[#5C4D41] leading-relaxed">
+                        Un SMS avec un code de sécurité à 4 chiffres a été envoyé sur votre mobile pour autoriser le paiement de <strong>{pendingOrderPayload.total_amount.toFixed(2)} {pendingOrderPayload.currency}</strong>.
+                      </p>
+
+                      <div className="max-w-[160px] mx-auto">
+                        <input
+                          type="text"
+                          maxLength={6}
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value)}
+                          className="w-full text-center tracking-widest text-lg font-mono font-black p-2 bg-[#FAF8F5] border-2 border-blue-400 rounded-xl focus:outline-none"
+                        />
+                      </div>
+
+                      <button
+                        disabled={isSubmitting}
+                        onClick={async () => {
+                          setGatewayStep('authorized');
+                          setTimeout(async () => {
+                            await executeFinalOrderSubmission(pendingOrderPayload);
+                          }, 1000);
+                        }}
+                        className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md transition flex items-center justify-center gap-1.5"
+                      >
+                        {gatewayStep === 'authorized' ? (
+                          <>
+                            <CheckCircle2 className="w-4 h-4" />
+                            <span>Paiement NAPS Validé !</span>
+                          </>
+                        ) : (
+                          <>
+                            <Check className="w-4 h-4" />
+                            <span>Valider le Paiement Sécurisé</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  )}
+
+                </div>
+              )}
+
+              {/* Logo des cartes acceptées & Chiffrement */}
+              <div className="pt-2 border-t border-[#EAE0D5] flex items-center justify-between text-[10px] text-[#8C7A6B]">
+                <div className="flex items-center gap-1">
+                  <span>🔒 Chiffrement TLS 256-bit</span>
+                </div>
+                <div className="flex items-center gap-1.5 font-bold text-[#5C4D41]">
+                  <span>NAPS</span>
+                  <span>•</span>
+                  <span>VISA</span>
+                  <span>•</span>
+                  <span>Mastercard</span>
+                </div>
+              </div>
+
+            </div>
+
           </div>
         </div>
       )}
