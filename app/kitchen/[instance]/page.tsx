@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { 
   ChefHat, Clock, CheckCircle2, AlertCircle, Volume2, VolumeX, 
   RefreshCw, Utensils, ArrowRight, ShieldCheck, Flame, Bell, 
   Smartphone, Filter, Search, Check, Play, Sparkles, Lock, Unlock,
   KeyRound, Delete, LogOut, TrendingUp, DollarSign, ShoppingCart, 
-  Calendar, ChevronDown, BarChart3, CreditCard, Layers
+  Calendar, ChevronDown, BarChart3, CreditCard, Layers, QrCode
 } from 'lucide-react';
 
 export type OrderStatus = 'recue' | 'en_cuisine' | 'prete' | 'servie';
@@ -695,6 +696,16 @@ export default function KitchenDisplaySystemPage() {
               <BarChart3 className="w-4 h-4" />
               <span className="hidden md:inline">{showStatsWidget ? t.hideStats : t.showStats}</span>
             </button>
+
+            {/* Bouton Chevalets QR Codes Tables */}
+            <Link
+              href={`/qr-generator/${rawInstance}`}
+              title="Générateur de QR Codes & Chevalets"
+              className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-[#1A1411] hover:bg-[#2A221C] text-[#FAF8F5] border border-[#42362C] text-xs font-bold transition-all shadow-sm"
+            >
+              <QrCode className="w-4 h-4 text-[#C5A880]" />
+              <span className="hidden lg:inline">QR Tables</span>
+            </Link>
 
             {/* Bouton Verrouiller / Déconnexion */}
             <button
