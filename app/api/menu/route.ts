@@ -5,6 +5,95 @@ const NOCODB_HOST = "srv821341.hstgr.cloud";
 const NOCODB_PORT = 8086;
 const NOCODB_TOKEN = "nc_pat_6hZw4JgAjaFFfNbC7ui1IP4nuCi1mWWWq816JqFs";
 const MENU_TABLE_ID = "mo1b63dokvbmjyg";
+const RESTAURANTS_TABLE_ID = "mnq99g2rb63ja4i";
+
+interface StoreStatus {
+  isOpen: boolean;
+  reason: string;
+  message: string;
+  openingTime: string;
+  closingTime: string;
+  timezone: string;
+}
+
+// Vérifie si le restaurant est actuellement dans ses horaires d'ouverture
+function checkStoreOpenStatus(isAcceptingOrders: any, openTimeStr?: string, closeTimeStr?: string, timeZone: string = 'Asia/Qatar'): StoreStatus {
+  const safeOpen = openTimeStr || '08:00';
+  const safeClose = closeTimeStr || '23:30';
+  const safeTz = timeZone || 'Asia/Qatar';
+
+  // 1. Interrupteur manuel prioritaire
+  if (isAcceptingOrders === false || isAcceptingOrders === 0) {
+    return {
+      isOpen: false,
+      reason: 'manual_closed',
+      message: 'Service momentanément interrompu',
+      openingTime: safeOpen,
+      closingTime: safeClose,
+      timezone: safeTz
+    };
+  }
+
+  // 2. Horaires réguliers
+  if (openTimeStr && closeTimeStr) {
+    try {
+      const now = new Date();
+      // Heure locale dans le fuseau du restaurant (ex: Asia/Qatar)
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: safeTz,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+      const localTimeStr = formatter.format(now); // "HH:MM"
+      const [currH, currM] = localTimeStr.split(':').map(Number);
+      const currentMinutes = currH * 60 + currM;
+
+      const [openH, openM] = safeOpen.split(':').map(Number);
+      const openMinutes = openH * 60 + openM;
+
+      const [closeH, closeM] = safeClose.split(':').map(Number);
+      const closeMinutes = closeH * 60 + closeM;
+
+      // Cas standard (ex: 08:00 à 23:30)
+      if (openMinutes <= closeMinutes) {
+        if (currentMinutes < openMinutes || currentMinutes >= closeMinutes) {
+          return {
+            isOpen: false,
+            reason: 'outside_hours',
+            message: `Cuisine fermée • Ouvre à ${safeOpen}`,
+            openingTime: safeOpen,
+            closingTime: safeClose,
+            timezone: safeTz
+          };
+        }
+      } else {
+        // Cas service de nuit (ex: 18:00 à 02:00)
+        if (currentMinutes < openMinutes && currentMinutes >= closeMinutes) {
+          return {
+            isOpen: false,
+            reason: 'outside_hours',
+            message: `Cuisine fermée • Ouvre à ${safeOpen}`,
+            openingTime: safeOpen,
+            closingTime: safeClose,
+            timezone: safeTz
+          };
+        }
+      }
+    } catch (e) {
+      console.error('Erreur vérification fuseau/horaires:', e);
+    }
+  }
+
+  return {
+    isOpen: true,
+    reason: 'open',
+    message: 'Service ouvert',
+    openingTime: safeOpen,
+    closingTime: safeClose,
+    timezone: safeTz
+  };
+}
 
 // API Route dynamique connectée en direct à NocoDB avec fallback
 export async function GET(request: NextRequest) {
@@ -12,8 +101,54 @@ export async function GET(request: NextRequest) {
   const rawInstance = searchParams.get('instance') || 'bos_cafe_moq';
   const cleanInstance = rawInstance.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
 
+  let storeStatus: StoreStatus = {
+    isOpen: true,
+    reason: 'open',
+    message: 'Service ouvert',
+    openingTime: '08:00',
+    closingTime: '23:30',
+    timezone: 'Asia/Qatar'
+  };
+  let restaurantInfo: any = null;
+
   try {
-    // 1. Tenter la lecture en temps réel depuis NocoDB
+    // 0. Récupérer les informations du restaurant et ses horaires dans NocoDB
+
+    try {
+      const restRes = await fetch(
+        `http://${NOCODB_HOST}:${NOCODB_PORT}/api/v2/tables/${RESTAURANTS_TABLE_ID}/records?where=(instance_name,eq,${cleanInstance})&limit=1`,
+        {
+          headers: { 'xc-token': NOCODB_TOKEN },
+          cache: 'no-store'
+        }
+      );
+      if (restRes.ok) {
+        const restData = await restRes.json();
+        const records = Array.isArray(restData) ? restData : (restData.list || []);
+        if (records.length > 0) {
+          const r = records[0];
+          restaurantInfo = {
+            name: r.restaurant_name,
+            city: r.city,
+            country: r.country,
+            currency: r.currency,
+            coverImage: r.cover_image,
+            logoUrl: r.logo_url,
+            primaryColor: r.primary_color
+          };
+          storeStatus = checkStoreOpenStatus(
+            r.is_accepting_orders,
+            r.opening_time,
+            r.closing_time,
+            r.timezone || 'Asia/Qatar'
+          );
+        }
+      }
+    } catch (err) {
+      console.error('Erreur lecture restaurant NocoDB:', err);
+    }
+
+    // 1. Tenter la lecture en temps réel depuis NocoDB des articles de menu
     const nocoRes = await fetch(
       `http://${NOCODB_HOST}:${NOCODB_PORT}/api/v2/tables/${MENU_TABLE_ID}/records?where=(instance_name,eq,${cleanInstance})&limit=100&t=${Date.now()}`,
       {
@@ -64,7 +199,8 @@ export async function GET(request: NextRequest) {
           success: true,
           source: 'nocodb_live',
           instance: cleanInstance,
-          restaurant: localMenu.restaurantInfo,
+          storeStatus,
+          restaurant: restaurantInfo ? { ...localMenu.restaurantInfo, ...restaurantInfo, isOpen: storeStatus.isOpen } : localMenu.restaurantInfo,
           categories: localMenu.categories,
           total_items: items.length,
           items
@@ -81,7 +217,8 @@ export async function GET(request: NextRequest) {
     success: true,
     source: 'local_fallback',
     instance: cleanInstance,
-    restaurant: menuData.restaurantInfo,
+    storeStatus,
+    restaurant: restaurantInfo ? { ...menuData.restaurantInfo, ...restaurantInfo, isOpen: storeStatus.isOpen } : menuData.restaurantInfo,
     categories: menuData.categories,
     total_items: menuData.items.length,
     items: menuData.items

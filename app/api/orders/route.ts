@@ -93,13 +93,93 @@ export async function GET(request: Request) {
   return NextResponse.json({ success: true, orders });
 }
 
+const NOCODB_HOST = "srv821341.hstgr.cloud";
+const NOCODB_PORT = 8086;
+const NOCODB_TOKEN = "nc_pat_6hZw4JgAjaFFfNbC7ui1IP4nuCi1mWWWq816JqFs";
+const RESTAURANTS_TABLE_ID = "mnq99g2rb63ja4i";
+
+// Vérification serveur si les commandes sont acceptées
+async function verifyStoreIsOpen(instanceName: string): Promise<{ allowed: boolean; reason?: string }> {
+  try {
+    const cleanInstance = instanceName.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+    const res = await fetch(
+      `http://${NOCODB_HOST}:${NOCODB_PORT}/api/v2/tables/${RESTAURANTS_TABLE_ID}/records?where=(instance_name,eq,${cleanInstance})&limit=1`,
+      {
+        headers: { 'xc-token': NOCODB_TOKEN },
+        cache: 'no-store'
+      }
+    );
+    if (!res.ok) return { allowed: true }; // En cas d'indisponibilité réseau, autoriser par secours
+    const data = await res.json();
+    const records = Array.isArray(data) ? data : (data.list || []);
+    if (records.length === 0) return { allowed: true };
+
+    const r = records[0];
+
+    // 1. Interrupteur manuel
+    if (r.is_accepting_orders === false || r.is_accepting_orders === 0) {
+      return { allowed: false, reason: "Le restaurant n'accepte pas de commandes actuellement (fermeture manuelle)." };
+    }
+
+    // 2. Horaires réguliers
+    if (r.opening_time && r.closing_time) {
+      const timeZone = r.timezone || 'Asia/Qatar';
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+      });
+      const localTimeStr = formatter.format(new Date());
+      const [currH, currM] = localTimeStr.split(':').map(Number);
+      const currentMinutes = currH * 60 + currM;
+
+      const [openH, openM] = r.opening_time.split(':').map(Number);
+      const openMinutes = openH * 60 + openM;
+
+      const [closeH, closeM] = r.closing_time.split(':').map(Number);
+      const closeMinutes = closeH * 60 + closeM;
+
+      if (openMinutes <= closeMinutes) {
+        if (currentMinutes < openMinutes || currentMinutes >= closeMinutes) {
+          return { allowed: false, reason: `Cuisine fermée. Horaires : ${r.opening_time} - ${r.closing_time} (${timeZone})` };
+        }
+      } else {
+        if (currentMinutes < openMinutes && currentMinutes >= closeMinutes) {
+          return { allowed: false, reason: `Cuisine fermée. Horaires : ${r.opening_time} - ${r.closing_time} (${timeZone})` };
+        }
+      }
+    }
+
+    return { allowed: true };
+  } catch (err) {
+    console.error('Erreur vérification horaire serveur:', err);
+    return { allowed: true };
+  }
+}
+
 // POST /api/orders (Création d'une nouvelle commande par le client)
 export async function POST(request: Request) {
   try {
     const body = await request.json();
+    const instance = (body.instance_name || 'bos_cafe_moq').toLowerCase();
+
+    // VÉRIFICATION ANTI-FRAUDE SERVEUR : Le restaurant est-il ouvert ?
+    const check = await verifyStoreIsOpen(instance);
+    if (!check.allowed) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'STORE_CLOSED', 
+          message: check.reason || "La cuisine est actuellement fermée pour la prise de commandes." 
+        }, 
+        { status: 403 }
+      );
+    }
+
     const newOrder: StoredOrder = {
       order_id: body.order_id || `SR-${Math.floor(100000 + Math.random() * 900000)}`,
-      instance_name: body.instance_name || 'doha_pilot',
+      instance_name: instance,
       restaurant_name: body.restaurant_name || 'Lusail Courtyard Café',
       table_number: String(body.table_number || '01'),
       customer_phone: body.customer_phone || '',

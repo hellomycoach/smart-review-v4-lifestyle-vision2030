@@ -83,6 +83,15 @@ export default function TableOrderingPage() {
     isOpen: true
   });
 
+  // Statut d'ouverture du restaurant (horaires + interrupteur manuel NocoDB)
+  const [storeStatus, setStoreStatus] = useState<any>({
+    isOpen: true,
+    reason: 'open',
+    message: 'Service ouvert',
+    openingTime: '08:00',
+    closingTime: '23:30'
+  });
+
   // Menu data dynamique synchronisé avec NocoDB
   const [categories, setCategories] = useState<MenuCategory[]>(instanceMenu.categories);
   const [menuItems, setMenuItems] = useState<MenuItem[]>(instanceMenu.items);
@@ -102,6 +111,20 @@ export default function TableOrderingPage() {
             if (data.categories && data.categories.length > 0) {
               setCategories(data.categories);
             }
+          }
+          if (data.storeStatus) {
+            setStoreStatus(data.storeStatus);
+            setRestaurant((prev: any) => ({
+              ...prev,
+              isOpen: data.storeStatus.isOpen
+            }));
+          }
+          if (data.restaurant) {
+            setRestaurant((prev: any) => ({
+              ...prev,
+              ...data.restaurant,
+              isOpen: data.storeStatus ? data.storeStatus.isOpen : (data.restaurant.isOpen ?? prev.isOpen)
+            }));
           }
         }
       } catch (e) {
@@ -487,14 +510,23 @@ export default function TableOrderingPage() {
         } catch (e) {}
       }
 
-      // Envoi garanti à l'API interne du serveur pour affichage immédiat sur tous les écrans
+      // Envoi garanti à l'API interne du serveur avec contrôle anti-fraude d'horaires
       try {
-        await fetch('/api/orders', {
+        const orderRes = await fetch('/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(orderPayload),
           keepalive: true
         });
+
+        if (!orderRes.ok) {
+          const errData = await orderRes.json().catch(() => ({}));
+          if (orderRes.status === 403 && errData.error === 'STORE_CLOSED') {
+            setIsSubmitting(false);
+            alert(errData.message || (lang === 'ar' ? 'عذراً، المطبخ مغلق حالياً' : (lang === 'fr' ? 'Désolé, la cuisine est actuellement fermée pour la prise de commandes.' : 'Sorry, the kitchen is currently closed for orders.')));
+            return;
+          }
+        }
       } catch (apiErr) {
         console.log('Envoi /api/orders:', apiErr);
       }
@@ -588,7 +620,7 @@ export default function TableOrderingPage() {
         </div>
       </header>
 
-      {/* BANNIÈRE D'ACCUEIL & AMBIANCE */}
+      {/* BANNIÈRE D'ACCUEIL & AMBIANCE AVEC HORAIRES EN TEMPS RÉEL */}
       <section className="max-w-4xl mx-auto px-4 pt-4 pb-2">
         <div className="relative rounded-3xl overflow-hidden shadow-lg border border-[#E8DFD5] bg-[#3D352E]">
           <img 
@@ -597,17 +629,45 @@ export default function TableOrderingPage() {
             className="w-full h-36 md:h-48 object-cover opacity-75 hover:scale-105 transition-transform duration-700"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#241E1A]/95 via-[#241E1A]/40 to-transparent flex flex-col justify-end p-5 text-white">
-            <div className="flex items-center gap-2 text-xs text-[#DFCDBF] mb-1 font-medium">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              <span>{t.openHours}</span>
-              <span>•</span>
-              <span>{restaurant.city}</span>
+            <div className="flex flex-wrap items-center gap-2 text-xs mb-1 font-semibold">
+              {storeStatus.isOpen ? (
+                <span className="flex items-center gap-1.5 bg-emerald-500/90 text-white px-2.5 py-0.5 rounded-full text-[11px] font-black shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-white animate-ping"></span>
+                  <span>{lang === 'ar' ? `مفتوح لاستقبال الطلبات (حتى ${storeStatus.closingTime || '23:30'})` : (lang === 'fr' ? `Ouvert aux commandes (jusqu'à ${storeStatus.closingTime || '23:30'})` : `Open for orders (until ${storeStatus.closingTime || '23:30'})`)}</span>
+                </span>
+              ) : (
+                <span className="flex items-center gap-1.5 bg-red-600/95 text-white px-2.5 py-0.5 rounded-full text-[11px] font-black shadow-sm animate-pulse">
+                  <span className="w-2 h-2 rounded-full bg-white"></span>
+                  <span>{lang === 'ar' ? (storeStatus.reason === 'manual_closed' ? 'الخدمة متوقفة مؤقتاً' : `المطبخ مغلق • يفتح ${storeStatus.openingTime || '08:00'}`) : (lang === 'fr' ? (storeStatus.reason === 'manual_closed' ? 'Service momentanément interrompu' : `Cuisine fermée • Ouvre à ${storeStatus.openingTime || '08:00'}`) : (storeStatus.reason === 'manual_closed' ? 'Temporarily closed' : `Kitchen closed • Opens at ${storeStatus.openingTime || '08:00'}`))}</span>
+                </span>
+              )}
+              <span className="text-[#DFCDBF]">•</span>
+              <span className="text-[#DFCDBF]">{restaurant.city}</span>
             </div>
             <h2 className="text-xl md:text-2xl font-black text-[#FAF8F5]">
               {restaurant.name}
             </h2>
           </div>
         </div>
+
+        {/* Message d'information si le restaurant est actuellement fermé */}
+        {!storeStatus.isOpen && (
+          <div className="mt-3 p-3.5 bg-amber-50 border border-amber-200 rounded-2xl flex items-center gap-3 text-amber-900 shadow-sm">
+            <Clock className="w-5 h-5 text-amber-600 shrink-0" />
+            <div className="text-xs">
+              <span className="font-bold block text-sm">
+                {lang === 'ar' ? 'القائمة متاحة للتصفح فقط' : (lang === 'fr' ? 'La carte est disponible en consultation uniquement' : 'Menu is currently available for browsing only')}
+              </span>
+              <span className="text-amber-800">
+                {lang === 'ar' 
+                  ? `أوقات استقبال الطلبات في المطبخ: من ${storeStatus.openingTime || '08:00'} إلى ${storeStatus.closingTime || '23:30'}`
+                  : (lang === 'fr'
+                      ? `Prise de commande en cuisine active de ${storeStatus.openingTime || '08:00'} à ${storeStatus.closingTime || '23:30'}`
+                      : `Kitchen ordering hours: ${storeStatus.openingTime || '08:00'} to ${storeStatus.closingTime || '23:30'}`)}
+              </span>
+            </div>
+          </div>
+        )}
       </section>
 
       {/* BARRE DE RECHERCHE & FILTRES CATÉGORIES */}
@@ -758,6 +818,10 @@ export default function TableOrderingPage() {
                       <span className="px-3 py-1 rounded-full bg-[#E5DAD0] text-[#7A695B] text-[11px] font-bold">
                         {t.outOfStock}
                       </span>
+                    ) : !storeStatus.isOpen ? (
+                      <span className="px-3 py-1 rounded-full bg-[#EFE8DF] text-[#8C7A6B] text-[11px] font-bold border border-[#D5C4B4]">
+                        {lang === 'ar' ? 'المطبخ مغلق' : (lang === 'fr' ? 'Cuisine fermée' : 'Kitchen closed')}
+                      </span>
                     ) : (
                       <button
                         onClick={(e) => { e.stopPropagation(); handleOpenItem(item); }}
@@ -776,7 +840,7 @@ export default function TableOrderingPage() {
       </main>
 
       {/* BARRE FLOTTANTE PANIER (STICKY BOTTOM BAR) */}
-      {cart.length > 0 && !showCartDrawer && (
+      {cart.length > 0 && !showCartDrawer && storeStatus.isOpen && (
         <div className="fixed bottom-4 inset-x-0 z-40 px-4 pointer-events-none">
           <div className="max-w-md mx-auto pointer-events-auto">
             <button
@@ -930,15 +994,21 @@ export default function TableOrderingPage() {
               </div>
 
               {/* Bouton Ajouter */}
-              <button
-                onClick={handleAddToCart}
-                className="flex-1 bg-[#3D352E] hover:bg-[#241E1A] text-[#FAF8F5] py-3.5 px-4 rounded-2xl font-bold text-sm shadow-md flex items-center justify-between transition-all"
-              >
-                <span>{t.addToCart}</span>
-                <span className="text-[#C5A880] font-black">
-                  {(currentModalItemPrice * itemQuantity).toFixed(2)} {t.currency}
-                </span>
-              </button>
+              {storeStatus.isOpen ? (
+                <button
+                  onClick={handleAddToCart}
+                  className="flex-1 bg-[#3D352E] hover:bg-[#241E1A] text-[#FAF8F5] py-3.5 px-4 rounded-2xl font-bold text-sm shadow-md flex items-center justify-between transition-all"
+                >
+                  <span>{t.addToCart}</span>
+                  <span className="text-[#C5A880] font-black">
+                    {(currentModalItemPrice * itemQuantity).toFixed(2)} {t.currency}
+                  </span>
+                </button>
+              ) : (
+                <div className="flex-1 bg-[#EFE8DF] border border-[#D5C4B4] text-[#8C7A6B] py-3.5 px-4 rounded-2xl font-bold text-xs text-center">
+                  {lang === 'ar' ? 'المطبخ مغلق حالياً' : (lang === 'fr' ? 'La cuisine est actuellement fermée' : 'Kitchen is currently closed')}
+                </div>
+              )}
             </div>
 
           </div>
