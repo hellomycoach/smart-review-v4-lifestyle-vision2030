@@ -65,38 +65,101 @@ function saveStoredOrders(orders: StoredOrder[]) {
   } catch (e) {}
 }
 
+const NOCODB_HOST = "srv821341.hstgr.cloud";
+const NOCODB_PORT = 8086;
+const NOCODB_TOKEN = "nc_pat_6hZw4JgAjaFFfNbC7ui1IP4nuCi1mWWWq816JqFs";
+const RESTAURANTS_TABLE_ID = "mnq99g2rb63ja4i";
+const ORDERS_TABLE_ID = "mni5io8ofzftnc4";
+
+// Récupérer les commandes depuis NocoDB
+async function fetchNocoOrders(instance?: string): Promise<StoredOrder[]> {
+  try {
+    let url = `http://${NOCODB_HOST}:${NOCODB_PORT}/api/v2/tables/${ORDERS_TABLE_ID}/records?limit=200&sort=-Id`;
+    if (instance) {
+      url += `&where=(instance_name,eq,${instance.trim().toLowerCase()})`;
+    }
+    const res = await fetch(url, {
+      headers: { 'xc-token': NOCODB_TOKEN },
+      cache: 'no-store'
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const list = Array.isArray(data) ? data : (data.list || []);
+
+    return list.map((r: any) => {
+      let parsedItems = [];
+      try {
+        parsedItems = typeof r.items_json === 'string' ? JSON.parse(r.items_json) : (r.items_json || []);
+      } catch (e) {}
+
+      return {
+        order_id: r.order_id || `SR-${r.Id}`,
+        instance_name: r.instance_name || 'bos_cafe_moq',
+        restaurant_name: r.restaurant_name || "Bo's Coffee",
+        table_number: String(r.table_number || '01'),
+        customer_phone: r.customer_phone || '',
+        customer_email: r.customer_email || '',
+        customer_name: r.customer_name || 'Guest',
+        items: parsedItems,
+        subtotal: Number(r.total_amount) || 0,
+        tip: 0,
+        total_amount: Number(r.total_amount) || 0,
+        currency: r.currency || 'QAR',
+        payment_method: r.payment_method || 'apple_pay',
+        status: (r.status as any) || 'recue',
+        timestamp: r.CreatedAt || new Date().toISOString()
+      };
+    });
+  } catch (err) {
+    return [];
+  }
+}
+
 // GET /api/orders?instance=doha_pilot OU /api/orders?orderId=SR-123456
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const instance = searchParams.get('instance')?.toLowerCase();
   const orderId = searchParams.get('orderId');
 
-  const orders = getStoredOrders();
+  const localOrders = getStoredOrders();
+  let nocoOrders: StoredOrder[] = [];
+
+  try {
+    nocoOrders = await fetchNocoOrders(instance);
+  } catch (e) {}
+
+  // Fusionner les commandes locales et NocoDB sans doublons
+  const orderMap = new Map<string, StoredOrder>();
+  localOrders.forEach(o => orderMap.set(o.order_id.toLowerCase(), o));
+  nocoOrders.forEach(o => {
+    if (!orderMap.has(o.order_id.toLowerCase())) {
+      orderMap.set(o.order_id.toLowerCase(), o);
+    }
+  });
+
+  const allOrders = Array.from(orderMap.values()).sort((a, b) => {
+    return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
+  });
 
   // Si on cherche le statut d'une commande précise (pour le smartphone client)
   if (orderId) {
-    const order = orders.find(o => o.order_id.toLowerCase() === orderId.toLowerCase());
+    const order = allOrders.find(o => o.order_id.toLowerCase() === orderId.toLowerCase());
     if (order) {
       return NextResponse.json({ success: true, order });
     }
     return NextResponse.json({ success: true, order: { order_id: orderId, status: 'recue' } });
   }
 
-  // Si on cherche les commandes d'une instance pour l'écran cuisine KDS
+  // Si on cherche les commandes d'une instance pour l'écran cuisine KDS / Manager
   if (instance) {
-    const filtered = orders.filter(o => 
+    const filtered = allOrders.filter(o => 
       o.instance_name.toLowerCase().includes(instance) || instance.includes(o.instance_name.toLowerCase())
     );
     return NextResponse.json({ success: true, orders: filtered });
   }
 
-  return NextResponse.json({ success: true, orders });
+  return NextResponse.json({ success: true, orders: allOrders });
 }
-
-const NOCODB_HOST = "srv821341.hstgr.cloud";
-const NOCODB_PORT = 8086;
-const NOCODB_TOKEN = "nc_pat_6hZw4JgAjaFFfNbC7ui1IP4nuCi1mWWWq816JqFs";
-const RESTAURANTS_TABLE_ID = "mnq99g2rb63ja4i";
 
 // Vérification serveur si les commandes sont acceptées
 async function verifyStoreIsOpen(instanceName: string): Promise<{ allowed: boolean; reason?: string }> {

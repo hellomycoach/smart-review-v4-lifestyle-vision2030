@@ -6,7 +6,8 @@ import {
   ChefHat, Clock, CheckCircle2, AlertCircle, Volume2, VolumeX, 
   RefreshCw, Utensils, ArrowRight, ShieldCheck, Flame, Bell, 
   Smartphone, Filter, Search, Check, Play, Sparkles, Lock, Unlock,
-  KeyRound, Delete, LogOut
+  KeyRound, Delete, LogOut, TrendingUp, DollarSign, ShoppingCart, 
+  Calendar, ChevronDown, BarChart3, CreditCard, Layers
 } from 'lucide-react';
 
 export type OrderStatus = 'recue' | 'en_cuisine' | 'prete' | 'servie';
@@ -232,9 +233,76 @@ export default function KitchenDisplaySystemPage() {
     }
   };
 
-  // Filtrage des commandes
-  const filteredOrders = useMemo(() => {
+  const [timePeriod, setTimePeriod] = useState<'today' | 'week' | 'month' | 'all'>('today');
+  const [selectedDate, setSelectedDate] = useState<string>(''); // YYYY-MM-DD
+  const [showStatsWidget, setShowStatsWidget] = useState<boolean>(true);
+
+  // Filtrage avancé par table, date et période
+  const periodFilteredOrders = useMemo(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const now = new Date();
+
     return orders.filter(o => {
+      if (!o.timestamp) return true;
+      const orderDate = new Date(o.timestamp);
+      if (isNaN(orderDate.getTime())) return true;
+      const orderDateStr = orderDate.toISOString().split('T')[0];
+
+      // Filtre date spécifique si renseignée
+      if (selectedDate && orderDateStr !== selectedDate) {
+        return false;
+      }
+
+      // Filtre période si pas de date spécifique
+      if (!selectedDate) {
+        if (timePeriod === 'today') {
+          return orderDateStr === todayStr;
+        }
+        if (timePeriod === 'week') {
+          const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          return orderDate >= sevenDaysAgo;
+        }
+        if (timePeriod === 'month') {
+          return orderDate.getFullYear() === now.getFullYear() && orderDate.getMonth() === now.getMonth();
+        }
+      }
+
+      return true;
+    });
+  }, [orders, timePeriod, selectedDate]);
+
+  // Statistiques en direct basées sur les commandes filtrées par période
+  const stats = useMemo(() => {
+    const totalOrdersCount = periodFilteredOrders.length;
+    const totalRevenue = periodFilteredOrders.reduce((sum, o) => sum + (Number(o.total_amount) || 0), 0);
+    const averageTicket = totalOrdersCount > 0 ? totalRevenue / totalOrdersCount : 0;
+    const paidOnlineCount = periodFilteredOrders.filter(o => o.payment_method === 'apple_pay' || o.payment_method === 'card').length;
+    const paidCounterCount = periodFilteredOrders.filter(o => o.payment_method === 'counter').length;
+    const currency = orders[0]?.currency || 'QAR';
+
+    // Top tables
+    const tableCounts: Record<string, { count: number; total: number }> = {};
+    periodFilteredOrders.forEach(o => {
+      const tbl = o.table_number || '01';
+      if (!tableCounts[tbl]) tableCounts[tbl] = { count: 0, total: 0 };
+      tableCounts[tbl].count += 1;
+      tableCounts[tbl].total += (Number(o.total_amount) || 0);
+    });
+
+    return {
+      totalOrdersCount,
+      totalRevenue,
+      averageTicket,
+      paidOnlineCount,
+      paidCounterCount,
+      currency,
+      tableCounts
+    };
+  }, [periodFilteredOrders, orders]);
+
+  // Filtrage des commandes pour la vue KDS des tickets en cuisine
+  const filteredOrders = useMemo(() => {
+    return periodFilteredOrders.filter(o => {
       if (filterTable && !o.table_number.toLowerCase().includes(filterTable.toLowerCase())) {
         return false;
       }
@@ -243,11 +311,11 @@ export default function KitchenDisplaySystemPage() {
       }
       return o.status !== 'servie';
     });
-  }, [orders, filterTable, activeTab]);
+  }, [periodFilteredOrders, filterTable, activeTab]);
 
-  const countRecues = orders.filter(o => o.status === 'recue').length;
-  const countEnCuisine = orders.filter(o => o.status === 'en_cuisine').length;
-  const countPretes = orders.filter(o => o.status === 'prete').length;
+  const countRecues = periodFilteredOrders.filter(o => o.status === 'recue').length;
+  const countEnCuisine = periodFilteredOrders.filter(o => o.status === 'en_cuisine').length;
+  const countPretes = periodFilteredOrders.filter(o => o.status === 'prete').length;
 
   const t = {
     fr: {
@@ -279,7 +347,19 @@ export default function KitchenDisplaySystemPage() {
       clearPin: "Effacer",
       validatePin: "Déverrouiller",
       lockKds: "Verrouiller",
-      defaultPinHint: "PIN configuré dans NocoDB"
+      defaultPinHint: "PIN configuré dans NocoDB",
+      kpiRevenue: "Chiffre d'Affaires",
+      kpiOrders: "Commandes Validées",
+      kpiAverage: "Panier Moyen",
+      kpiOnline: "Payé en ligne",
+      kpiCounter: "À régler comptoir",
+      periodToday: "Aujourd'hui",
+      periodWeek: "7 Derniers Jours",
+      periodMonth: "Ce Mois",
+      periodAll: "Tout l'Historique",
+      filterByDate: "Filtrer par date",
+      hideStats: "Masquer stats",
+      showStats: "Voir stats financières"
     },
     ar: {
       kdsTitle: "شاشة المطبخ KDS",
@@ -310,7 +390,19 @@ export default function KitchenDisplaySystemPage() {
       clearPin: "مسح",
       validatePin: "دخول",
       lockKds: "قفل الشاشة",
-      defaultPinHint: "الرمز محدد في لوحة التحكم NocoDB"
+      defaultPinHint: "الرمز محدد في لوحة التحكم NocoDB",
+      kpiRevenue: "إجمالي المبيعات",
+      kpiOrders: "عدد الطلبات",
+      kpiAverage: "متوسط الفاتورة",
+      kpiOnline: "دفع إلكتروني",
+      kpiCounter: "دفع كاشير",
+      periodToday: "اليوم",
+      periodWeek: "آخر 7 أيام",
+      periodMonth: "هذا الشهر",
+      periodAll: "السجل بالكامل",
+      filterByDate: "فلترة بالتاريخ",
+      hideStats: "إخفاء الإحصائيات",
+      showStats: "عرض المبيعات"
     },
     en: {
       kdsTitle: "Kitchen Display KDS",
@@ -341,7 +433,19 @@ export default function KitchenDisplaySystemPage() {
       clearPin: "Clear",
       validatePin: "Unlock KDS",
       lockKds: "Lock",
-      defaultPinHint: "PIN managed via NocoDB"
+      defaultPinHint: "PIN managed via NocoDB",
+      kpiRevenue: "Total Revenue",
+      kpiOrders: "Orders Placed",
+      kpiAverage: "Average Ticket",
+      kpiOnline: "Paid Online",
+      kpiCounter: "Pay at Counter",
+      periodToday: "Today",
+      periodWeek: "Last 7 Days",
+      periodMonth: "This Month",
+      periodAll: "All Time",
+      filterByDate: "Filter date",
+      hideStats: "Hide stats",
+      showStats: "Show live revenue"
     }
   }[lang];
 
@@ -578,6 +682,20 @@ export default function KitchenDisplaySystemPage() {
               ))}
             </div>
 
+            {/* Bouton Afficher / Masquer Stats Manager */}
+            <button
+              onClick={() => setShowStatsWidget(!showStatsWidget)}
+              title={showStatsWidget ? t.hideStats : t.showStats}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-2xl border text-xs font-bold transition-all shadow-sm ${
+                showStatsWidget 
+                  ? 'bg-gradient-to-r from-[#D4AF37] to-[#B38F26] text-[#1E1916] border-[#D4AF37] font-black' 
+                  : 'bg-[#1A1411] text-[#C5A880] border-[#42362C] hover:bg-[#2A221C]'
+              }`}
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span className="hidden md:inline">{showStatsWidget ? t.hideStats : t.showStats}</span>
+            </button>
+
             {/* Bouton Verrouiller / Déconnexion */}
             <button
               onClick={handleLock}
@@ -589,6 +707,113 @@ export default function KitchenDisplaySystemPage() {
             </button>
           </div>
         </div>
+
+        {/* WIDGET STATISTIQUES FINANCIÈRES & FILTRES EN TEMPS RÉEL (POUR LE MANAGER) */}
+        {showStatsWidget && (
+          <div className="mt-4 pt-4 border-t border-[#3D332A] space-y-3 animate-fade-in">
+            
+            {/* Barre de filtres de période */}
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[11px] font-bold text-[#A8988B] flex items-center gap-1 mr-1">
+                  <Calendar className="w-3.5 h-3.5 text-[#C5A880]" />
+                  <span>Période :</span>
+                </span>
+                {(['today', 'week', 'month', 'all'] as const).map(p => (
+                  <button
+                    key={p}
+                    onClick={() => { setTimePeriod(p); setSelectedDate(''); }}
+                    className={`px-3 py-1 rounded-xl text-xs font-bold transition-all ${
+                      timePeriod === p && !selectedDate
+                        ? 'bg-[#C5A880] text-[#1E1916] font-black shadow-sm'
+                        : 'bg-[#1A1411] text-[#8C7A6B] hover:text-[#FAF8F5] border border-[#332A22]'
+                    }`}
+                  >
+                    {p === 'today' ? t.periodToday : (p === 'week' ? t.periodWeek : (p === 'month' ? t.periodMonth : t.periodAll))}
+                  </button>
+                ))}
+              </div>
+
+              {/* Sélecteur de date précise */}
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-[#A8988B]">{t.filterByDate} :</span>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => { setSelectedDate(e.target.value); }}
+                  className="bg-[#1A1411] border border-[#42362C] rounded-xl px-2.5 py-1 text-xs text-[#FAF8F5] focus:outline-none focus:border-[#C5A880]"
+                />
+                {selectedDate && (
+                  <button
+                    onClick={() => setSelectedDate('')}
+                    className="text-[10px] text-amber-400 hover:underline"
+                  >
+                    Effacer
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* 4 Cartes KPI Financières & Métier */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              
+              {/* KPI 1 : Chiffre d'Affaires */}
+              <div className="bg-[#1A1411]/90 border border-[#3D332A] rounded-2xl p-3.5 flex items-center justify-between shadow-md">
+                <div>
+                  <p className="text-[11px] font-bold text-[#A8988B] uppercase tracking-wider">{t.kpiRevenue}</p>
+                  <p className="text-xl md:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FAF8F5] via-[#DFCDBC] to-[#C5A880] mt-0.5">
+                    {stats.totalRevenue.toFixed(2)} <span className="text-xs font-normal text-[#A8988B]">{stats.currency}</span>
+                  </p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-emerald-950/80 border border-emerald-700/50 text-emerald-400 flex items-center justify-center shrink-0">
+                  <TrendingUp className="w-5 h-5" />
+                </div>
+              </div>
+
+              {/* KPI 2 : Nombre de Commandes */}
+              <div className="bg-[#1A1411]/90 border border-[#3D332A] rounded-2xl p-3.5 flex items-center justify-between shadow-md">
+                <div>
+                  <p className="text-[11px] font-bold text-[#A8988B] uppercase tracking-wider">{t.kpiOrders}</p>
+                  <p className="text-xl md:text-2xl font-black text-[#FAF8F5] mt-0.5">
+                    {stats.totalOrdersCount} <span className="text-xs font-normal text-[#A8988B]">ventes</span>
+                  </p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-blue-950/80 border border-blue-700/50 text-blue-400 flex items-center justify-center shrink-0">
+                  <ShoppingCart className="w-5 h-5" />
+                </div>
+              </div>
+
+              {/* KPI 3 : Panier Moyen */}
+              <div className="bg-[#1A1411]/90 border border-[#3D332A] rounded-2xl p-3.5 flex items-center justify-between shadow-md">
+                <div>
+                  <p className="text-[11px] font-bold text-[#A8988B] uppercase tracking-wider">{t.kpiAverage}</p>
+                  <p className="text-xl md:text-2xl font-black text-[#FAF8F5] mt-0.5">
+                    {stats.averageTicket.toFixed(2)} <span className="text-xs font-normal text-[#A8988B]">{stats.currency}</span>
+                  </p>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-purple-950/80 border border-purple-700/50 text-purple-400 flex items-center justify-center shrink-0">
+                  <BarChart3 className="w-5 h-5" />
+                </div>
+              </div>
+
+              {/* KPI 4 : Répartition Paiements */}
+              <div className="bg-[#1A1411]/90 border border-[#3D332A] rounded-2xl p-3.5 flex items-center justify-between shadow-md">
+                <div>
+                  <p className="text-[11px] font-bold text-[#A8988B] uppercase tracking-wider">Moyens de Paiement</p>
+                  <div className="flex items-center gap-2 mt-1 text-xs">
+                    <span className="text-emerald-400 font-black">💳 {stats.paidOnlineCount} en ligne</span>
+                    <span className="text-[#8C7A6B]">•</span>
+                    <span className="text-amber-400 font-black">💵 {stats.paidCounterCount} comptoir</span>
+                  </div>
+                </div>
+                <div className="w-10 h-10 rounded-xl bg-amber-950/80 border border-amber-700/50 text-amber-400 flex items-center justify-center shrink-0">
+                  <CreditCard className="w-5 h-5" />
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
 
         {/* Onglets de Statut KDS */}
         <div className="grid grid-cols-4 gap-2 mt-4 pt-4 border-t border-[#3D332A]">
