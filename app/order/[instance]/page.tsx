@@ -473,7 +473,6 @@ export default function TableOrderingPage() {
   // Validation de la commande
   const handlePlaceOrder = async () => {
     if (cart.length === 0) return;
-    setIsSubmitting(true);
 
     const orderId = `SR-${Math.floor(100000 + Math.random() * 900000)}`;
     const orderPayload = {
@@ -506,6 +505,7 @@ export default function TableOrderingPage() {
       setPendingOrderPayload(orderPayload);
       setShowPaymentGatewayModal(true);
       setGatewayStep('processing');
+      setIsSubmitting(false); // Laisser les boutons actifs dans la modale
       return;
     }
 
@@ -1198,7 +1198,7 @@ export default function TableOrderingPage() {
                     }`}
                   >
                     <div className="flex items-center gap-2.5 font-bold text-xs">
-                      <span className="text-base"></span>
+                      <Smartphone className="w-4 h-4 text-white" />
                       <span>{t.applePay}</span>
                     </div>
                     {paymentMethod === 'apple_pay' && <CheckCircle2 className="w-4 h-4 text-[#C5A880]" />}
@@ -1382,10 +1382,14 @@ export default function TableOrderingPage() {
                 </div>
               </div>
               <button 
-                onClick={() => { setShowPaymentGatewayModal(false); setGatewayStep('idle'); }}
-                className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xs transition"
+                onClick={() => { 
+                  setShowPaymentGatewayModal(false); 
+                  setGatewayStep('idle'); 
+                  setIsSubmitting(false);
+                }}
+                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-xs transition cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -1411,8 +1415,8 @@ export default function TableOrderingPage() {
               {/* 1. Cas APPLE PAY NATIVE SHEET */}
               {pendingOrderPayload.payment_method === 'apple_pay' && (
                 <div className="space-y-4 text-center py-2">
-                  <div className="w-16 h-16 rounded-3xl bg-black text-white mx-auto flex items-center justify-center text-3xl font-bold shadow-xl">
-                    
+                  <div className="w-16 h-16 rounded-3xl bg-black text-white mx-auto flex items-center justify-center shadow-xl">
+                    <Smartphone className="w-8 h-8 text-white" />
                   </div>
 
                   <div className="space-y-1">
@@ -1434,14 +1438,14 @@ export default function TableOrderingPage() {
                   </div>
 
                   <button
-                    disabled={isSubmitting}
                     onClick={async () => {
+                      setIsSubmitting(true);
                       setGatewayStep('authorized');
                       setTimeout(async () => {
                         await executeFinalOrderSubmission(pendingOrderPayload);
-                      }, 1200);
+                      }, 1000);
                     }}
-                    className="w-full py-4 rounded-2xl bg-black hover:bg-zinc-900 text-white font-black text-sm shadow-xl flex items-center justify-center gap-2 transition active:scale-[0.98]"
+                    className="w-full py-4 rounded-2xl bg-black hover:bg-zinc-900 active:bg-zinc-800 text-white font-black text-sm shadow-xl flex items-center justify-center gap-2 transition active:scale-[0.98] cursor-pointer"
                   >
                     {gatewayStep === 'authorized' ? (
                       <>
@@ -1450,7 +1454,7 @@ export default function TableOrderingPage() {
                       </>
                     ) : (
                       <>
-                        <span className="text-lg"></span>
+                        <Smartphone className="w-4 h-4 text-white" />
                         <span>Confirmer avec Face ID • {pendingOrderPayload.total_amount.toFixed(2)} {pendingOrderPayload.currency}</span>
                       </>
                     )}
