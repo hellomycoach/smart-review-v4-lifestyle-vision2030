@@ -8,7 +8,7 @@ import {
   RefreshCw, Utensils, ArrowRight, ShieldCheck, Flame, Bell, 
   Smartphone, Filter, Search, Check, Play, Sparkles, Lock, Unlock,
   KeyRound, Delete, LogOut, TrendingUp, DollarSign, ShoppingCart, 
-  Calendar, ChevronDown, BarChart3, CreditCard, Layers, QrCode
+  Calendar, ChevronDown, BarChart3, CreditCard, Layers, QrCode, FileSpreadsheet, Download
 } from 'lucide-react';
 
 export type OrderStatus = 'recue' | 'en_cuisine' | 'prete' | 'servie';
@@ -28,6 +28,7 @@ export interface KitchenOrder {
   restaurant_name: string;
   table_number: string;
   customer_phone?: string;
+  customer_email?: string;
   customer_name?: string;
   items: KitchenOrderItem[];
   subtotal: number;
@@ -762,6 +763,53 @@ export default function KitchenDisplaySystemPage() {
                     Effacer
                   </button>
                 )}
+
+                {/* Bouton Export Récapitulatif Comptable CSV / Excel */}
+                <button
+                  onClick={() => {
+                    if (periodFilteredOrders.length === 0) {
+                      alert("Aucune commande sur cette période à exporter.");
+                      return;
+                    }
+
+                    // En-têtes CSV
+                    const headers = ["ID Commande", "Date & Heure", "Table", "Statut", "Moyen de Paiement", "Total (Devise)", "Plats & Quantités", "Client", "Tel WhatsApp", "Email"];
+                    
+                    // Lignes CSV
+                    const rows = periodFilteredOrders.map(o => {
+                      const itemsSummary = o.items.map(it => `${it.quantity}x ${it.name}`).join(' | ');
+                      const formattedDate = new Date(o.timestamp).toLocaleString('fr-FR');
+                      return [
+                        `"${o.order_id}"`,
+                        `"${formattedDate}"`,
+                        `"Table ${o.table_number}"`,
+                        `"${o.status}"`,
+                        `"${o.payment_method === 'apple_pay' ? 'Apple Pay' : (o.payment_method === 'card' ? 'Carte Bancaire' : 'En Caisse')}"`,
+                        `"${o.total_amount.toFixed(2)} ${o.currency || 'QAR'}"`,
+                        `"${itemsSummary.replace(/"/g, '""')}"`,
+                        `"${(o.customer_name || 'Client').replace(/"/g, '""')}"`,
+                        `"${o.customer_phone || ''}"`,
+                        `"${o.customer_email || ''}"`
+                      ].join(';');
+                    });
+
+                    const csvContent = "\uFEFF" + [headers.join(';'), ...rows].join('\r\n');
+                    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', `Recapitulatif_Ventes_${rawInstance}_${timePeriod || 'custom'}_${new Date().toISOString().slice(0,10)}.csv`);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1 bg-[#241E1A] hover:bg-[#382E27] text-emerald-400 border border-emerald-600/40 rounded-xl text-xs font-bold transition shadow-sm"
+                  title="Exporter le récapitulatif détaillé en Excel / CSV"
+                >
+                  <FileSpreadsheet className="w-3.5 h-3.5" />
+                  <span>Exporter CSV / Excel</span>
+                </button>
               </div>
             </div>
 

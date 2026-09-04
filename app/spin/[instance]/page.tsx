@@ -533,8 +533,8 @@ export default function LuxuryRestaurantPortalV4() {
           </button>
         </div>
 
-        {/* 3 MODULES DE SERVICES DIRECTS (THÈME CLAIR ÉLÉGANT) */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {/* 4 MODULES DE SERVICES DIRECTS (THÈME CLAIR ÉLÉGANT) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* 1. COMMANDE & MENU DIGITAL */}
           <a 
             href={`/order/${rawInstance}?table=01`}
@@ -549,7 +549,21 @@ export default function LuxuryRestaurantPortalV4() {
             </div>
           </a>
 
-          {/* 2. WI-FI RAPIDE */}
+          {/* 2. EAT & FIT : SCAN PLAT & SÉANCE SPORT */}
+          <button 
+            onClick={() => setActiveModal('food_ai')}
+            className="bg-white/95 border border-[#E8DDD0] p-4 rounded-2xl space-y-2 hover:border-orange-500 hover:shadow-md transition text-start shadow-sm group"
+          >
+            <div className="p-2.5 w-fit rounded-xl bg-orange-50 text-orange-600 border border-orange-200 group-hover:scale-110 transition-transform">
+              <Camera className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black text-[#2B1810] group-hover:text-orange-700 transition">Eat & Fit : Scan Plat</h3>
+              <p className="text-xs text-[#7A695B] mt-1 leading-snug">{t.aiCardDesc}</p>
+            </div>
+          </button>
+
+          {/* 3. WI-FI RAPIDE */}
           <button 
             onClick={() => setActiveModal('wifi')}
             className="bg-white/95 border border-[#E8DDD0] p-4 rounded-2xl space-y-2 hover:border-emerald-500 hover:shadow-md transition text-start shadow-sm group"
@@ -563,7 +577,7 @@ export default function LuxuryRestaurantPortalV4() {
             </div>
           </button>
 
-          {/* 3. CARTE DE FIDÉLITÉ VIP */}
+          {/* 4. CARTE DE FIDÉLITÉ VIP */}
           <a 
             href={`/card/33767803233?instance=${rawInstance}`}
             className="bg-white/95 border border-[#E8DDD0] p-4 rounded-2xl space-y-2 hover:border-[#D4A373] hover:shadow-md transition text-start block shadow-sm group"
