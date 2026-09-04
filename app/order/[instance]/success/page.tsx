@@ -57,23 +57,35 @@ export default function OrderSuccessPage() {
   // Auto-langue & chargement initial de commande
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const userLang = (navigator.language || 'ar').toLowerCase();
-      if (userLang.startsWith('fr')) setLang('fr');
-      else if (userLang.startsWith('en')) setLang('en');
-      else setLang('ar');
-
+      const urlLang = searchParams?.get('lang');
+      const storedLang = localStorage.getItem('user_lang');
       const saved = localStorage.getItem('sr_last_order');
+      let orderLang: string | null = null;
+
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          // Si l'orderId dans l'URL correspond ou si aucun orderId n'est spécifié
           if (!urlOrderId || parsed.order_id === urlOrderId) {
             setOrderData(parsed);
             if (parsed.status) {
               setOrderStatusIndex(getIndexFromStatus(parsed.status));
             }
+            if (parsed.lang) {
+              orderLang = parsed.lang;
+            }
           }
         } catch (e) {}
+      }
+
+      // Priorité langue : URL > Commande enregistrée > Préférence utilisateur localStorage > Langue du téléphone
+      const resolvedLang = urlLang || orderLang || storedLang;
+      if (resolvedLang === 'ar' || resolvedLang === 'fr' || resolvedLang === 'en') {
+        setLang(resolvedLang);
+      } else {
+        const userNavLang = (navigator.language || 'ar').toLowerCase();
+        if (userNavLang.startsWith('fr')) setLang('fr');
+        else if (userNavLang.startsWith('en')) setLang('en');
+        else setLang('ar');
       }
 
       // Synchronisation Cloud multi-appareils (Polling toutes les 3 secondes avec orderId exact)
@@ -357,6 +369,30 @@ export default function OrderSuccessPage() {
         {/* CARTE PRINCIPALE DE CONFIRMATION */}
         <div className="bg-[#FAF8F5] rounded-3xl p-6 md:p-8 border border-[#E5DAD0] shadow-xl text-center relative overflow-hidden">
           
+          {/* Sélecteur de langue flottant */}
+          <div className="flex justify-end mb-2">
+            <div className="inline-flex bg-[#EAE0D5] p-0.5 rounded-full border border-[#D5C4B4]">
+              {(['ar', 'fr', 'en'] as const).map((l) => (
+                <button
+                  key={l}
+                  onClick={() => {
+                    setLang(l);
+                    if (typeof window !== 'undefined') {
+                      localStorage.setItem('user_lang', l);
+                    }
+                  }}
+                  className={`px-2.5 py-0.5 text-[11px] font-bold rounded-full transition-all ${
+                    lang === l 
+                      ? 'bg-[#3D352E] text-[#FAF8F5] shadow-sm' 
+                      : 'text-[#6E5D4F] hover:text-[#2E2722]'
+                  }`}
+                >
+                  {l.toUpperCase()}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Badge statut succès */}
           <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-[#3D352E] to-[#6E5D4F] text-[#FAF8F5] flex items-center justify-center mx-auto mb-4 shadow-lg ring-8 ring-[#EAE0D5]">
             <CheckCircle2 className="w-9 h-9 text-[#C5A880]" />

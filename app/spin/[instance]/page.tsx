@@ -51,15 +51,23 @@ export default function LuxuryRestaurantPortalV4() {
   const [fitnessLevel, setFitnessLevel] = useState<'beginner' | 'intermediate' | 'advanced'>('intermediate');
   const [userNotes, setUserNotes] = useState('');
   
-  // Auto-détection de la langue du téléphone
+  // Auto-détection & persistance de la langue
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const userLang = (navigator.language || (navigator as any).userLanguage || 'ar').toLowerCase();
-      if (userLang.startsWith('fr')) setLang('fr');
-      else if (userLang.startsWith('en')) setLang('en');
-      else setLang('ar');
+      const urlLang = searchParams?.get('lang');
+      const storedLang = localStorage.getItem('user_lang');
+      const resolved = urlLang || storedLang;
+
+      if (resolved === 'ar' || resolved === 'fr' || resolved === 'en') {
+        setLang(resolved);
+      } else {
+        const userLang = (navigator.language || (navigator as any).userLanguage || 'ar').toLowerCase();
+        if (userLang.startsWith('fr')) setLang('fr');
+        else if (userLang.startsWith('en')) setLang('en');
+        else setLang('ar');
+      }
     }
-  }, []);
+  }, [searchParams]);
 
   // Charger automatiquement le téléphone s'il a déjà été saisi ou passé dans l'URL
   useEffect(() => {
@@ -408,9 +416,15 @@ export default function LuxuryRestaurantPortalV4() {
   }[lang];
 
   const toggleLanguage = () => {
-    if (lang === 'ar') setLang('fr');
-    else if (lang === 'fr') setLang('en');
-    else setLang('ar');
+    let nextLang: 'ar' | 'fr' | 'en' = 'ar';
+    if (lang === 'ar') nextLang = 'fr';
+    else if (lang === 'fr') nextLang = 'en';
+    else nextLang = 'ar';
+
+    setLang(nextLang);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('user_lang', nextLang);
+    }
   };
 
   return (

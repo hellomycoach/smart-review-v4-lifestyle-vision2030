@@ -163,13 +163,18 @@ export default function TableOrderingPage() {
   const [otpCode, setOtpCode] = useState('2030');
   const [pendingOrderPayload, setPendingOrderPayload] = useState<any>(null);
 
-  // Auto-détection de langue
+  // Auto-détection de langue & persistance
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const userLang = (navigator.language || 'ar').toLowerCase();
-      if (userLang.startsWith('fr')) setLang('fr');
-      else if (userLang.startsWith('en')) setLang('en');
-      else setLang('ar');
+      const storedLang = localStorage.getItem('user_lang');
+      if (storedLang === 'ar' || storedLang === 'fr' || storedLang === 'en') {
+        setLang(storedLang);
+      } else {
+        const userLang = (navigator.language || 'ar').toLowerCase();
+        if (userLang.startsWith('fr')) setLang('fr');
+        else if (userLang.startsWith('en')) setLang('en');
+        else setLang('ar');
+      }
 
       const savedPhone = localStorage.getItem('user_phone') || '';
       if (savedPhone) setCustomerPhone(savedPhone);
@@ -562,7 +567,7 @@ export default function TableOrderingPage() {
       setIsSubmitting(false);
       setOrderSuccess(true);
       setShowPaymentGatewayModal(false);
-      router.push(`/order/${rawInstance}/success?orderId=${orderPayload.order_id}&table=${orderPayload.table_number}`);
+      router.push(`/order/${rawInstance}/success?orderId=${orderPayload.order_id}&table=${orderPayload.table_number}&lang=${orderPayload.lang || lang}`);
 
     } catch (err) {
       console.error(err);
@@ -622,7 +627,12 @@ export default function TableOrderingPage() {
               {(['ar', 'fr', 'en'] as const).map((l) => (
                 <button
                   key={l}
-                  onClick={() => setLang(l)}
+                  onClick={() => {
+                    setLang(l);
+                    if (typeof window !== 'undefined') {
+                      localStorage.setItem('user_lang', l);
+                    }
+                  }}
                   className={`px-2.5 py-1 text-xs font-bold rounded-full transition-all duration-200 ${
                     lang === l 
                       ? 'bg-[#3D352E] text-[#FAF8F5] shadow-sm' 
