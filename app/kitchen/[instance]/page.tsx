@@ -45,8 +45,22 @@ export default function KitchenDisplaySystemPage() {
   const params = useParams();
   const searchParams = useSearchParams();
 
-  // Langue
-  const [lang, setLang] = useState<'fr' | 'ar' | 'en'>('fr');
+  // Langue avec auto-détection et mémorisation
+  const [lang, setLang] = useState<'fr' | 'ar' | 'en'>('en'); // Anglais par défaut pour les cuisines internationales de luxe (Doha)
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('kds_lang') || localStorage.getItem('user_lang');
+      if (stored === 'en' || stored === 'ar' || stored === 'fr') {
+        setLang(stored);
+      } else {
+        const userNavLang = (navigator.language || '').toLowerCase();
+        if (userNavLang.startsWith('fr')) setLang('fr');
+        else if (userNavLang.startsWith('ar')) setLang('ar');
+        else setLang('en');
+      }
+    }
+  }, []);
   
   // Authentification sécurisée
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -361,7 +375,14 @@ export default function KitchenDisplaySystemPage() {
       periodAll: "Tout l'Historique",
       filterByDate: "Filtrer par date",
       hideStats: "Masquer stats",
-      showStats: "Voir stats financières"
+      showStats: "Voir stats financières",
+      exportBtn: "Exporter CSV / Excel",
+      salesCount: "ventes",
+      paymentSplitTitle: "Moyens de Paiement",
+      paidOnlineBadge: "en ligne",
+      paidCounterBadge: "comptoir",
+      periodLabel: "Période",
+      clearFilter: "Effacer"
     },
     ar: {
       kdsTitle: "شاشة المطبخ KDS",
@@ -404,7 +425,14 @@ export default function KitchenDisplaySystemPage() {
       periodAll: "السجل بالكامل",
       filterByDate: "فلترة بالتاريخ",
       hideStats: "إخفاء الإحصائيات",
-      showStats: "عرض المبيعات"
+      showStats: "عرض المبيعات",
+      exportBtn: "تصدير Excel / CSV",
+      salesCount: "طلبات",
+      paymentSplitTitle: "طرق الدفع",
+      paidOnlineBadge: "إلكتروني",
+      paidCounterBadge: "كاشير",
+      periodLabel: "الفترة",
+      clearFilter: "مسح"
     },
     en: {
       kdsTitle: "Kitchen Display KDS",
@@ -447,7 +475,14 @@ export default function KitchenDisplaySystemPage() {
       periodAll: "All Time",
       filterByDate: "Filter date",
       hideStats: "Hide stats",
-      showStats: "Show live revenue"
+      showStats: "Show live revenue",
+      exportBtn: "Export CSV / Excel",
+      salesCount: "sales",
+      paymentSplitTitle: "Payment Methods",
+      paidOnlineBadge: "online",
+      paidCounterBadge: "counter",
+      periodLabel: "Period",
+      clearFilter: "Clear"
     }
   }[lang];
 
@@ -669,10 +704,15 @@ export default function KitchenDisplaySystemPage() {
 
             {/* Sélecteur de langue */}
             <div className="flex bg-[#1A1411] p-0.5 rounded-2xl border border-[#3A2F27]">
-              {(['fr', 'ar', 'en'] as const).map((l) => (
+              {(['en', 'fr', 'ar'] as const).map((l) => (
                 <button
                   key={l}
-                  onClick={() => setLang(l)}
+                  onClick={() => {
+                    setLang(l);
+                    if (typeof window !== 'undefined') {
+                      localStorage.setItem('kds_lang', l);
+                    }
+                  }}
                   className={`px-2.5 py-1 text-xs font-bold rounded-xl transition-all ${
                     lang === l 
                       ? 'bg-[#C5A880] text-[#1E1916] shadow-sm font-black' 
@@ -729,7 +769,7 @@ export default function KitchenDisplaySystemPage() {
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="text-[11px] font-bold text-[#A8988B] flex items-center gap-1 mr-1">
                   <Calendar className="w-3.5 h-3.5 text-[#C5A880]" />
-                  <span>Période :</span>
+                  <span>{t.periodLabel} :</span>
                 </span>
                 {(['today', 'week', 'month', 'all'] as const).map(p => (
                   <button
@@ -760,7 +800,7 @@ export default function KitchenDisplaySystemPage() {
                     onClick={() => setSelectedDate('')}
                     className="text-[10px] text-amber-400 hover:underline"
                   >
-                    Effacer
+                    {t.clearFilter}
                   </button>
                 )}
 
@@ -768,23 +808,25 @@ export default function KitchenDisplaySystemPage() {
                 <button
                   onClick={() => {
                     if (periodFilteredOrders.length === 0) {
-                      alert("Aucune commande sur cette période à exporter.");
+                      alert(lang === 'ar' ? 'لا توجد طلبات في هذه الفترة لتصديرها' : (lang === 'en' ? 'No orders in this period to export.' : 'Aucune commande sur cette période à exporter.'));
                       return;
                     }
 
                     // En-têtes CSV
-                    const headers = ["ID Commande", "Date & Heure", "Table", "Statut", "Moyen de Paiement", "Total (Devise)", "Plats & Quantités", "Client", "Tel WhatsApp", "Email"];
+                    const headers = lang === 'en' 
+                      ? ["Order ID", "Date & Time", "Table", "Status", "Payment Method", "Total (Currency)", "Items & Quantities", "Customer", "WhatsApp Phone", "Email"]
+                      : ["ID Commande", "Date & Heure", "Table", "Statut", "Moyen de Paiement", "Total (Devise)", "Plats & Quantités", "Client", "Tel WhatsApp", "Email"];
                     
                     // Lignes CSV
                     const rows = periodFilteredOrders.map(o => {
                       const itemsSummary = o.items.map(it => `${it.quantity}x ${it.name}`).join(' | ');
-                      const formattedDate = new Date(o.timestamp).toLocaleString('fr-FR');
+                      const formattedDate = new Date(o.timestamp).toLocaleString(lang === 'en' ? 'en-US' : (lang === 'ar' ? 'ar-QA' : 'fr-FR'));
                       return [
                         `"${o.order_id}"`,
                         `"${formattedDate}"`,
                         `"Table ${o.table_number}"`,
                         `"${o.status}"`,
-                        `"${o.payment_method === 'apple_pay' ? 'Apple Pay' : (o.payment_method === 'card' ? 'Carte Bancaire' : 'En Caisse')}"`,
+                        `"${o.payment_method === 'apple_pay' ? 'Apple Pay' : (o.payment_method === 'card' ? 'Card' : 'Cashier')}"`,
                         `"${o.total_amount.toFixed(2)} ${o.currency || 'QAR'}"`,
                         `"${itemsSummary.replace(/"/g, '""')}"`,
                         `"${(o.customer_name || 'Client').replace(/"/g, '""')}"`,
@@ -798,7 +840,7 @@ export default function KitchenDisplaySystemPage() {
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
                     link.setAttribute('href', url);
-                    link.setAttribute('download', `Recapitulatif_Ventes_${rawInstance}_${timePeriod || 'custom'}_${new Date().toISOString().slice(0,10)}.csv`);
+                    link.setAttribute('download', `Sales_Report_${rawInstance}_${timePeriod || 'custom'}_${new Date().toISOString().slice(0,10)}.csv`);
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
@@ -808,7 +850,7 @@ export default function KitchenDisplaySystemPage() {
                   title="Exporter le récapitulatif détaillé en Excel / CSV"
                 >
                   <FileSpreadsheet className="w-3.5 h-3.5" />
-                  <span>Exporter CSV / Excel</span>
+                  <span>{t.exportBtn}</span>
                 </button>
               </div>
             </div>
@@ -834,7 +876,7 @@ export default function KitchenDisplaySystemPage() {
                 <div>
                   <p className="text-[11px] font-bold text-[#A8988B] uppercase tracking-wider">{t.kpiOrders}</p>
                   <p className="text-xl md:text-2xl font-black text-[#FAF8F5] mt-0.5">
-                    {stats.totalOrdersCount} <span className="text-xs font-normal text-[#A8988B]">ventes</span>
+                    {stats.totalOrdersCount} <span className="text-xs font-normal text-[#A8988B]">{t.salesCount}</span>
                   </p>
                 </div>
                 <div className="w-10 h-10 rounded-xl bg-blue-950/80 border border-blue-700/50 text-blue-400 flex items-center justify-center shrink-0">
@@ -858,11 +900,11 @@ export default function KitchenDisplaySystemPage() {
               {/* KPI 4 : Répartition Paiements */}
               <div className="bg-[#1A1411]/90 border border-[#3D332A] rounded-2xl p-3.5 flex items-center justify-between shadow-md">
                 <div>
-                  <p className="text-[11px] font-bold text-[#A8988B] uppercase tracking-wider">Moyens de Paiement</p>
+                  <p className="text-[11px] font-bold text-[#A8988B] uppercase tracking-wider">{t.paymentSplitTitle}</p>
                   <div className="flex items-center gap-2 mt-1 text-xs">
-                    <span className="text-emerald-400 font-black">💳 {stats.paidOnlineCount} en ligne</span>
+                    <span className="text-emerald-400 font-black">💳 {stats.paidOnlineCount} {t.paidOnlineBadge}</span>
                     <span className="text-[#8C7A6B]">•</span>
-                    <span className="text-amber-400 font-black">💵 {stats.paidCounterCount} comptoir</span>
+                    <span className="text-amber-400 font-black">💵 {stats.paidCounterCount} {t.paidCounterBadge}</span>
                   </div>
                 </div>
                 <div className="w-10 h-10 rounded-xl bg-amber-950/80 border border-amber-700/50 text-amber-400 flex items-center justify-center shrink-0">
