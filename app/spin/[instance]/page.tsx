@@ -176,8 +176,8 @@ export default function LuxuryRestaurantPortalV4() {
             logo_url: item.logo_url || "",
             cover_image: item.cover_image || "",
             primary_color: item.primary_color || "#C5A880",
-            enable_spin_wheel: item.enable_spin_wheel !== false && String(item.enable_spin_wheel).toLowerCase() !== 'false',
-            google_review_url: item.google_review_url || item.review_url || `https://search.google.com/local/writereview?placeid=${item.google_place_id || ''}`,
+            enable_spin_wheel: item.enable_spin_wheel !== false && item.enable_spin_wheel !== 0 && String(item.enable_spin_wheel).toLowerCase() !== 'false' && String(item.enable_spin_wheel) !== '0',
+            google_review_url: item.google_review_url || item.google_review_link || item.review_url || `https://search.google.com/local/writereview?placeid=${item.google_place_id || ''}`,
             direct_review_mode: item.direct_review_mode || 'whatsapp_first',
             found: true
           });
