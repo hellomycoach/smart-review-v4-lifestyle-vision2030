@@ -454,13 +454,7 @@ export default function LuxuryRestaurantPortalV4() {
 
   const botPhoneClean = String(restaurantData.linked_evolution || "").replace(/[^0-9]/g, '');
 
-  const directReviewMsg = lang === 'ar'
-    ? `مرحباً! أود مشاركة رأيي وتقييمي لتجربتي في ${restaurantData.restaurant_name || ''} والحصول على بطاقة ولاء VIP ⭐`
-    : lang === 'en'
-    ? `Hello! I would like to share my feedback and review for ${restaurantData.restaurant_name || ''} and get my VIP Loyalty Pass ⭐`
-    : `Bonjour ! J'aimerais donner mon avis sur mon expérience chez ${restaurantData.restaurant_name || ''} et recevoir mon Pass Fidélité VIP ⭐`;
-
-  const directReviewWhatsappUrl = `https://wa.me/${botPhoneClean}?text=${encodeURIComponent(directReviewMsg)}`;
+  const directReviewWhatsappUrl = botPhoneClean ? `https://wa.me/${botPhoneClean}` : (restaurantData.google_review_url || '#');
 
   return (
     <div 

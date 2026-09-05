@@ -126,15 +126,9 @@ export default function DynamicRestaurantPortal() {
     loadRestaurant();
   }, [currentInstance]);
 
-  // Message pré-rempli WhatsApp pour l'avis Google
-  const cleanPhone = restaurantData?.manager_whatsapp || "33767803233";
-  const defaultReviewMessage = lang === 'ar'
-    ? `مرحباً ${restaurantData.restaurant_name}، أود مشاركة تجربتي وتقييمي للحصول على ${restaurantData.reward_offer}`
-    : (lang === 'fr'
-        ? `Bonjour ${restaurantData.restaurant_name}, je souhaite partager mon avis et profiter de mon offre : ${restaurantData.reward_offer}`
-        : `Hello ${restaurantData.restaurant_name}, I would like to review my experience and claim my offer: ${restaurantData.reward_offer}`);
-
-  const whatsappUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(defaultReviewMessage)}`;
+  // Lien direct WhatsApp sans texte pré-rempli pour laisser le micro visible
+  const cleanPhone = String(restaurantData?.manager_whatsapp || restaurantData?.linked_evolution || "").replace(/[^0-9]/g, '') || "97450000000";
+  const whatsappUrl = `https://wa.me/${cleanPhone}`;
 
   const isRTL = lang === 'ar';
 
