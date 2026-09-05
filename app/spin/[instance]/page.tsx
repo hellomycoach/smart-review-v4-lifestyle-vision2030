@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import { 
   Sparkles, Wifi, Utensils, Camera, Flame, Activity, ShieldCheck, 
-  Globe, Award, Check, X, RefreshCw, Trophy, HeartPulse, Gift, Mic
+  Globe, Award, Check, X, RefreshCw, Trophy, HeartPulse, Gift, Mic,
+  Star, MessageCircle, ExternalLink
 } from 'lucide-react';
 
 const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants";
@@ -175,6 +176,9 @@ export default function LuxuryRestaurantPortalV4() {
             logo_url: item.logo_url || "",
             cover_image: item.cover_image || "",
             primary_color: item.primary_color || "#C5A880",
+            enable_spin_wheel: item.enable_spin_wheel !== false && String(item.enable_spin_wheel).toLowerCase() !== 'false',
+            google_review_url: item.google_review_url || item.review_url || `https://search.google.com/local/writereview?placeid=${item.google_place_id || ''}`,
+            direct_review_mode: item.direct_review_mode || 'whatsapp_first',
             found: true
           });
         } else {
@@ -185,6 +189,9 @@ export default function LuxuryRestaurantPortalV4() {
             wifi_password: "",
             menu_url: "#",
             linked_evolution: "",
+            enable_spin_wheel: true,
+            google_review_url: "#",
+            direct_review_mode: 'whatsapp_first',
             found: false
           });
         }
@@ -310,20 +317,25 @@ export default function LuxuryRestaurantPortalV4() {
   };
 
   // URL WHATSAPP DYNAMIQUE DU BOT RESTAURANT
-  const botPhoneClean = String(restaurantData.linked_evolution || "").replace(/[^0-9]/g, '');
-
   const t = {
     ar: {
       portalTitle: "بوابة الضيافة الفاخرة",
       subTitle: "مرحباً بكم في",
       spinCardTitle: "عجلة الحظ والهدايا VIP",
       spinCardDesc: "أدر العجلة واكسب هدية فورية عند تقييمنا على جوجل",
+      directReviewCardTitle: "شاركنا رأيك وتجربتك على جوجل ⭐",
+      directReviewCardDesc: "رأيك يهمنا كثيراً! قيّم تجربتك بـ 5 نجوم واحصل فوراً على هديتك وبطاقة ولاء VIP الحصرية.",
+      directReviewBtnWhatsapp: "تقييم عبر واتساب واستلام الهدية 💬",
+      directReviewBtnGoogle: "كتابة تقييم مباشر على جوجل ⭐",
+      directReviewBadge: "تجربة ضيافة 5 نجوم",
+      directReviewOrGoogle: "أو اكتب تقييمك مباشرة على Google Reviews",
       aiCardTitle: "مدرب التغذية واللياقة بالذكاء الاصطناعي",
       aiCardDesc: "التقط صورة لطبقك لمعرفة السعرات وحصة اللياقة المناسبة",
       wifiCardTitle: "شبكة الواي فاي المجانية",
       wifiCardDesc: "احصل على كلمة سر الواي فاي بضغطة واحدة",
       menuCardTitle: "قائمة الطعام الرقمية",
       menuCardDesc: "استعرض أشهى المأكولات والمشروبات",
+      btnSpin: "أدر العجلة 🎲",
       btnAi: "مسح الطبق بالذكاء الاصطناعي 📸",
       btnWifi: "احصل على كلمة السر 📶",
       btnMenu: "عرض القائمة 🍽️",
@@ -351,12 +363,19 @@ export default function LuxuryRestaurantPortalV4() {
       subTitle: "Bienvenue chez",
       spinCardTitle: "Roue de la Fortune & Cadeaux VIP",
       spinCardDesc: "Tournez la roue et gagnez un cadeau en laissant votre avis",
+      directReviewCardTitle: "Partagez votre expérience sur Google ⭐",
+      directReviewCardDesc: "Votre avis compte énormément ! Évaluez notre service en 5 étoiles et recevez immédiatement votre cadeau & Pass VIP.",
+      directReviewBtnWhatsapp: "Donner mon avis sur WhatsApp & recevoir mon cadeau 💬",
+      directReviewBtnGoogle: "Laisser un avis direct sur Google ⭐",
+      directReviewBadge: "Excellence & Avis 5 Étoiles",
+      directReviewOrGoogle: "Ou déposer directement votre avis sur Google Reviews",
       aiCardTitle: "Coach IA Nutrition & Fitness Pass",
       aiCardDesc: "Scannez votre plat pour évaluer les calories & la séance fitness 12 min",
       wifiCardTitle: "Accès WiFi Haut Débit",
       wifiCardDesc: "Obtenez le mot de passe WiFi instantanément",
       menuCardTitle: "Menu & Carte du Restaurant",
       menuCardDesc: "Découvrez nos spécialités et boissons",
+      btnSpin: "Tourner la Roue 🎲",
       btnAi: "Scanner mon Plat (IA) 📸",
       btnWifi: "Obtenir le Code WiFi 📶",
       btnMenu: "Consulter le Menu 🍽️",
@@ -384,6 +403,12 @@ export default function LuxuryRestaurantPortalV4() {
       subTitle: "Welcome to",
       spinCardTitle: "VIP Wheel of Fortune",
       spinCardDesc: "Spin the wheel & win a prize when leaving a Google review",
+      directReviewCardTitle: "Share Your Experience on Google ⭐",
+      directReviewCardDesc: "Your feedback is precious to us! Leave a 5-star review and unlock your instant reward & VIP Loyalty Pass.",
+      directReviewBtnWhatsapp: "Leave Review on WhatsApp & Claim Gift 💬",
+      directReviewBtnGoogle: "Write Review Directly on Google ⭐",
+      directReviewBadge: "5-Star Customer Excellence",
+      directReviewOrGoogle: "Or leave your review directly on Google Reviews",
       aiCardTitle: "AI Nutrition & Fitness Coach",
       aiCardDesc: "Scan your dish to estimate calories & get a 12-min workout",
       wifiCardTitle: "High-Speed WiFi Access",
@@ -426,6 +451,16 @@ export default function LuxuryRestaurantPortalV4() {
       localStorage.setItem('user_lang', nextLang);
     }
   };
+
+  const botPhoneClean = String(restaurantData.linked_evolution || "").replace(/[^0-9]/g, '');
+
+  const directReviewMsg = lang === 'ar'
+    ? `مرحباً! أود مشاركة رأيي وتقييمي لتجربتي في ${restaurantData.restaurant_name || ''} والحصول على بطاقة ولاء VIP ⭐`
+    : lang === 'en'
+    ? `Hello! I would like to share my feedback and review for ${restaurantData.restaurant_name || ''} and get my VIP Loyalty Pass ⭐`
+    : `Bonjour ! J'aimerais donner mon avis sur mon expérience chez ${restaurantData.restaurant_name || ''} et recevoir mon Pass Fidélité VIP ⭐`;
+
+  const directReviewWhatsappUrl = `https://wa.me/${botPhoneClean}?text=${encodeURIComponent(directReviewMsg)}`;
 
   return (
     <div 
@@ -483,69 +518,155 @@ export default function LuxuryRestaurantPortalV4() {
           </div>
         </div>
 
-        {/* ROUE DE LA FORTUNE 3D CLAIRE ET GOURMANDE */}
-        <div className="bg-white/95 border border-[#E8DDD0] p-6 sm:p-8 rounded-[26px] text-center space-y-5 shadow-[0_15px_40px_rgba(43,24,16,0.08)] relative overflow-hidden backdrop-blur-md">
-          <div className="space-y-2">
-            <div className="inline-flex p-3 bg-[#C8102E]/10 border border-[#C8102E]/20 text-[#C8102E] rounded-2xl mb-1 shadow-inner">
-              <Trophy className="w-8 h-8" />
+        {/* CONDITIONNEL: ROUE DE LA FORTUNE OU BANNIÈRE GOOGLE AVIS DIRECT */}
+        {restaurantData.enable_spin_wheel ? (
+          /* ROUE DE LA FORTUNE 3D CLAIRE ET GOURMANDE */
+          <div className="bg-white/95 border border-[#E8DDD0] p-6 sm:p-8 rounded-[26px] text-center space-y-5 shadow-[0_15px_40px_rgba(43,24,16,0.08)] relative overflow-hidden backdrop-blur-md">
+            <div className="space-y-2">
+              <div className="inline-flex p-3 bg-[#C8102E]/10 border border-[#C8102E]/20 text-[#C8102E] rounded-2xl mb-1 shadow-inner">
+                <Trophy className="w-8 h-8" />
+              </div>
+              <h2 className="text-2xl font-black text-[#2B1810]">{t.spinCardTitle}</h2>
+              <p className="text-sm text-[#7A695B] font-bold leading-relaxed">{t.spinCardDesc}</p>
             </div>
-            <h2 className="text-2xl font-black text-[#2B1810]">{t.spinCardTitle}</h2>
-            <p className="text-sm text-[#7A695B] font-bold leading-relaxed">{t.spinCardDesc}</p>
-          </div>
 
-          <div className="relative w-64 h-64 aspect-square mx-auto my-3 shrink-0">
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20 text-[#C8102E] text-2xl drop-shadow-md">
-              ▼
+            <div className="relative w-64 h-64 aspect-square mx-auto my-3 shrink-0">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-20 text-[#C8102E] text-2xl drop-shadow-md">
+                ▼
+              </div>
+              
+              <div 
+                className="w-full h-full rounded-full border-4 border-[#C8102E] shadow-[0_0_35px_rgba(200,16,46,0.25)] overflow-hidden origin-center bg-white"
+                style={{ 
+                  transform: `rotate(${rotationDegree}deg)`,
+                  transition: mustSpin ? 'transform 4.5s cubic-bezier(0.15, 0.9, 0.2, 1)' : 'none'
+                }}
+              >
+                <svg viewBox="0 0 100 100" className="w-full h-full">
+                  <g transform="translate(50,50)">
+                    <path d="M0,0 L50,0 A50,50 0 0,1 25,43.3 Z" fill="#C8102E" />
+                    <text x="25" y="15" fill="#FFFFFF" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(30, 25, 15)">☕ OFFRE</text>
+
+                    <path d="M0,0 L25,43.3 A50,50 0 0,1 -25,43.3 Z" fill="#241712" />
+                    <text x="0" y="28" fill="#D4A373" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(90, 0, 28)">🎁 CADEAU</text>
+
+                    <path d="M0,0 L-25,43.3 A50,50 0 0,1 -50,0 Z" fill="#D4A373" />
+                    <text x="-25" y="15" fill="#1A110D" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(150, -25, 15)">⭐ WIN</text>
+
+                    <path d="M0,0 L-50,0 A50,50 0 0,1 -25,-43.3 Z" fill="#C8102E" />
+                    <text x="-25" y="-12" fill="#FFFFFF" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(210, -25, -12)">🍰 DESSERT</text>
+
+                    <path d="M0,0 L-25,-43.3 A50,50 0 0,1 25,-43.3 Z" fill="#241712" />
+                    <text x="0" y="-26" fill="#D4A373" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(270, 0, -26)">🥤 BOBA</text>
+
+                    <path d="M0,0 L25,-43.3 A50,50 0 0,1 50,0 Z" fill="#D4A373" />
+                    <text x="25" y="-12" fill="#1A110D" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(330, 25, -12)">🏆 GAGNANT</text>
+                  </g>
+                </svg>
+              </div>
+
+              {/* Moyeu central avec Logo du restaurant */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-white border-2 border-[#C8102E] shadow-xl flex items-center justify-center overflow-hidden z-10 p-1">
+                {restaurantData.logo_url ? (
+                  <img src={restaurantData.logo_url} alt="Logo" className="w-full h-full object-cover rounded-full" />
+                ) : (
+                  <Sparkles className="w-6 h-6 text-[#C8102E]" />
+                )}
+              </div>
             </div>
-            
-            <div 
-              className="w-full h-full rounded-full border-4 border-[#C8102E] shadow-[0_0_35px_rgba(200,16,46,0.25)] overflow-hidden origin-center bg-white"
-              style={{ 
-                transform: `rotate(${rotationDegree}deg)`,
-                transition: mustSpin ? 'transform 4.5s cubic-bezier(0.15, 0.9, 0.2, 1)' : 'none'
-              }}
+
+            <button 
+              onClick={handleSpinWheel}
+              disabled={mustSpin}
+              className="w-full bg-gradient-to-r from-[#C8102E] via-[#E63946] to-[#A31D24] text-white font-black text-base py-4 rounded-2xl transition shadow-[0_10px_25px_rgba(200,16,46,0.35)] hover:brightness-105 active:scale-95 flex items-center justify-center gap-2 border border-red-300/30"
             >
-              <svg viewBox="0 0 100 100" className="w-full h-full">
-                <g transform="translate(50,50)">
-                  <path d="M0,0 L50,0 A50,50 0 0,1 25,43.3 Z" fill="#C8102E" />
-                  <text x="25" y="15" fill="#FFFFFF" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(30, 25, 15)">☕ OFFRE</text>
+              {mustSpin ? <RefreshCw className="w-6 h-6 animate-spin" /> : t.spinBtnAction}
+            </button>
+          </div>
+        ) : (
+          /* HERO CARD DIRECT GOOGLE REVIEW (MODE SOBRE & HAUT DE GAMME) */
+          <div className="bg-white/95 border border-[#E8DDD0] p-6 sm:p-8 rounded-[26px] text-center space-y-5 shadow-[0_15px_40px_rgba(43,24,16,0.08)] relative overflow-hidden backdrop-blur-md">
+            {/* BADGE 5 ÉTOILES */}
+            <div className="space-y-3">
+              <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-black shadow-sm">
+                <div className="flex gap-0.5 text-amber-400">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+                <span>{t.directReviewBadge}</span>
+              </div>
 
-                  <path d="M0,0 L25,43.3 A50,50 0 0,1 -25,43.3 Z" fill="#241712" />
-                  <text x="0" y="28" fill="#D4A373" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(90, 0, 28)">🎁 CADEAU</text>
-
-                  <path d="M0,0 L-25,43.3 A50,50 0 0,1 -50,0 Z" fill="#D4A373" />
-                  <text x="-25" y="15" fill="#1A110D" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(150, -25, 15)">⭐ WIN</text>
-
-                  <path d="M0,0 L-50,0 A50,50 0 0,1 -25,-43.3 Z" fill="#C8102E" />
-                  <text x="-25" y="-12" fill="#FFFFFF" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(210, -25, -12)">🍰 DESSERT</text>
-
-                  <path d="M0,0 L-25,-43.3 A50,50 0 0,1 25,-43.3 Z" fill="#241712" />
-                  <text x="0" y="-26" fill="#D4A373" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(270, 0, -26)">🥤 BOBA</text>
-
-                  <path d="M0,0 L25,-43.3 A50,50 0 0,1 50,0 Z" fill="#D4A373" />
-                  <text x="25" y="-12" fill="#1A110D" fontSize="4.5" fontWeight="900" textAnchor="middle" transform="rotate(330, 25, -12)">🏆 GAGNANT</text>
-                </g>
-              </svg>
+              <h2 className="text-2xl sm:text-3xl font-black text-[#2B1810] tracking-tight">
+                {t.directReviewCardTitle}
+              </h2>
+              <p className="text-sm text-[#7A695B] font-bold leading-relaxed max-w-md mx-auto">
+                {t.directReviewCardDesc}
+              </p>
             </div>
 
-            {/* Moyeu central avec Logo du restaurant */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-full bg-white border-2 border-[#C8102E] shadow-xl flex items-center justify-center overflow-hidden z-10 p-1">
-              {restaurantData.logo_url ? (
-                <img src={restaurantData.logo_url} alt="Logo" className="w-full h-full object-cover rounded-full" />
-              ) : (
-                <Sparkles className="w-6 h-6 text-[#C8102E]" />
+            {/* REWARD HIGHLIGHT BANNER */}
+            {restaurantData.reward_offer && (
+              <div className="bg-gradient-to-r from-[#FAF8F5] via-[#F5EFE6] to-[#FAF8F5] border border-[#E8DDD0] rounded-2xl p-3.5 flex items-center justify-center gap-2.5 text-sm font-black text-[#2B1810] shadow-sm">
+                <Gift className="w-5 h-5 text-[#C8102E] shrink-0" />
+                <span>
+                  {lang === 'ar' ? 'الهدية المقدمة لك :' : lang === 'en' ? 'Your exclusive gift:' : 'Votre privilège offert :'} 
+                  <span className="text-[#C8102E] font-black ms-1">{restaurantData.reward_offer}</span>
+                </span>
+              </div>
+            )}
+
+            {/* ACTION BUTTONS */}
+            <div className="space-y-3 pt-1">
+              {/* PRIMARY CTA: WHATSAPP BOT OR DIRECT GOOGLE */}
+              <a
+                href={restaurantData.direct_review_mode === 'direct_google' ? (restaurantData.google_review_url || '#') : (botPhoneClean ? directReviewWhatsappUrl : (restaurantData.google_review_url || '#'))}
+                target={restaurantData.direct_review_mode === 'direct_google' ? '_blank' : '_self'}
+                rel="noopener noreferrer"
+                className="w-full bg-gradient-to-r from-[#C8102E] via-[#E63946] to-[#A31D24] text-white font-black text-base py-4 px-6 rounded-2xl transition shadow-[0_10px_25px_rgba(200,16,46,0.35)] hover:brightness-105 active:scale-95 flex items-center justify-center gap-2.5 border border-red-300/30"
+              >
+                {restaurantData.direct_review_mode === 'direct_google' ? (
+                  <>
+                    <Star className="w-5 h-5 fill-white text-white" />
+                    <span>{t.directReviewBtnGoogle}</span>
+                    <ExternalLink className="w-4 h-4 opacity-80" />
+                  </>
+                ) : (
+                  <>
+                    <MessageCircle className="w-5 h-5" />
+                    <span>{t.directReviewBtnWhatsapp}</span>
+                  </>
+                )}
+              </a>
+
+              {/* SECONDARY LINK IF IN WHATSAPP MODE: DIRECT GOOGLE LINK */}
+              {restaurantData.direct_review_mode !== 'direct_google' && restaurantData.google_review_url && restaurantData.google_review_url !== '#' && (
+                <a
+                  href={restaurantData.google_review_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs text-[#7A695B] hover:text-[#C8102E] font-bold underline transition-colors"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>{t.directReviewOrGoogle}</span>
+                </a>
               )}
             </div>
-          </div>
 
-          <button 
-            onClick={handleSpinWheel}
-            disabled={mustSpin}
-            className="w-full bg-gradient-to-r from-[#C8102E] via-[#E63946] to-[#A31D24] text-white font-black text-base py-4 rounded-2xl transition shadow-[0_10px_25px_rgba(200,16,46,0.35)] hover:brightness-105 active:scale-95 flex items-center justify-center gap-2 border border-red-300/30"
-          >
-            {mustSpin ? <RefreshCw className="w-6 h-6 animate-spin" /> : t.spinBtnAction}
-          </button>
-        </div>
+            {/* 3 STEPS MINI-GUIDE */}
+            <div className="pt-2 border-t border-[#E8DDD0]/80 grid grid-cols-3 gap-2 text-center text-xs text-[#7A695B] font-bold">
+              <div className="p-2 bg-[#FAF8F5] rounded-xl">
+                <span>{t.step1}</span>
+              </div>
+              <div className="p-2 bg-[#FAF8F5] rounded-xl">
+                <span>{t.step2}</span>
+              </div>
+              <div className="p-2 bg-[#FAF8F5] rounded-xl">
+                <span>{t.step3}</span>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 4 MODULES DE SERVICES DIRECTS (THÈME CLAIR ÉLÉGANT) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
