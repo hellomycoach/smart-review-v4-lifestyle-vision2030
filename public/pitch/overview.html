@@ -1,0 +1,1748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Smart Review AI • Turn Every Restaurant Table into 5-Star Reviews, Seated Orders & Repeat Diners">
+  <title>Smart Review AI • The Next-Gen Hospitality & Dine-In OS</title>
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-dark: #3730A3;
+      --primary-light: #EEF2FF;
+      --accent: #F59E0B;
+      --accent-dark: #D97706;
+      --accent-light: #FEF3C7;
+      --bg-main: #F8FAFC;
+      --bg-surface: #FFFFFF;
+      --border: #E2E8F0;
+      --text-main: #0F172A;
+      --text-muted: #475569;
+      --success: #10B981;
+      --danger: #EF4444;
+      --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+      --shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.12);
+      --radius-sm: 10px;
+      --radius-md: 18px;
+      --radius-lg: 26px;
+      --radius-full: 9999px;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.5;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { text-decoration: none; color: inherit; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+    /* Top Navigation */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--primary-light);
+      border: 1px solid rgba(79, 70, 229, 0.2);
+      border-radius: var(--radius-full);
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: var(--primary);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .lang-switcher {
+      display: flex;
+      align-items: center;
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 3px;
+      gap: 2px;
+    }
+
+    .lang-btn {
+      padding: 5px 12px;
+      border-radius: var(--radius-full);
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      transition: var(--transition);
+    }
+
+    .lang-btn.active {
+      background: var(--primary);
+      color: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+    }
+
+    .demo-pill-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: var(--accent-light);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent-dark);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .demo-pill-btn:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-light);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      padding: 9px 20px;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.28);
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.38);
+    }
+
+    .btn-outline {
+      padding: 9px 18px;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 800;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-main);
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-outline:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    /* Hero */
+    .hero-container {
+      max-width: 1200px;
+      margin: 36px auto 24px;
+      padding: 0 24px;
+      text-align: center;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 18px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 20px;
+    }
+
+    .hero-title {
+      font-size: 2.75rem;
+      font-weight: 900;
+      letter-spacing: -0.8px;
+      line-height: 1.15;
+      max-width: 1000px;
+      margin: 0 auto 18px;
+      color: var(--text-main);
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.18rem;
+      color: var(--text-muted);
+      max-width: 860px;
+      margin: 0 auto 30px;
+      font-weight: 500;
+      line-height: 1.6;
+    }
+
+    .hero-ctas {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .hero-metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      max-width: 1080px;
+      margin: 0 auto 48px;
+    }
+
+    .metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px 20px;
+      text-align: left;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .metric-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .metric-value {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--primary);
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+
+    .metric-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* SECTION 1: PROBLEM VS SOLUTION INFOGRAPHIC */
+    .infographic-section {
+      max-width: 1200px;
+      margin: 0 auto 56px;
+      padding: 0 24px;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .section-badge {
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 5px 14px;
+      border-radius: var(--radius-full);
+      background: var(--accent-light);
+      color: var(--accent-dark);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    .section-title {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .section-desc {
+      font-size: 1rem;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .vs-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+    }
+
+    .vs-card {
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+    }
+
+    .vs-card.problem {
+      background: #FFF5F5;
+      border: 1px solid #FECACA;
+    }
+
+    .vs-card.solution {
+      background: #F0FDF4;
+      border: 2px solid #86EFAC;
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.1);
+    }
+
+    .vs-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 900;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+
+    .vs-card.problem .vs-badge {
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+
+    .vs-card.solution .vs-badge {
+      background: #DCFCE7;
+      color: #166534;
+    }
+
+    .vs-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .vs-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .vs-icon {
+      font-size: 1.2rem;
+      line-height: 1.3;
+      flex-shrink: 0;
+    }
+
+    .vs-item-text strong {
+      display: block;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      margin-bottom: 2px;
+    }
+
+    .vs-item-text p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    /* Tabs */
+    .tabs-wrapper {
+      max-width: 1200px;
+      margin: 0 auto 24px;
+      padding: 0 24px;
+    }
+
+    .tabs-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(226, 232, 240, 0.6);
+      padding: 6px;
+      border-radius: var(--radius-full);
+      width: fit-content;
+      margin: 0 auto 36px;
+      border: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      padding: 10px 22px;
+      border-radius: var(--radius-full);
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn:hover { color: var(--text-main); }
+
+    .tab-btn.active {
+      background: var(--bg-surface);
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out forwards;
+    }
+
+    .tab-content.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Pillars */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-bottom: 48px;
+    }
+
+    .pillar-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .pillar-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-3px);
+    }
+
+    .pillar-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .pillar-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: var(--radius-md);
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      border: 1px solid rgba(79, 70, 229, 0.2);
+    }
+
+    .pillar-badge {
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      background: var(--accent-light);
+      color: var(--accent-dark);
+      border: 1px solid var(--border);
+    }
+
+    .pillar-title {
+      font-size: 1.35rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+      color: var(--text-main);
+    }
+
+    .pillar-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-bottom: 20px;
+    }
+
+    .pillar-kpi-row {
+      display: flex;
+      gap: 16px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .pillar-kpi {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .pillar-kpi strong {
+      color: var(--primary);
+      font-size: 0.95rem;
+      display: block;
+    }
+
+    .card-click-hint {
+      margin-top: 16px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Simulator */
+    .simulator-container {
+      display: grid;
+      grid-template-columns: 1fr 1.25fr;
+      gap: 32px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 48px;
+    }
+
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .control-value-badge {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 2px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.9rem;
+      font-weight: 900;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: var(--radius-full);
+      outline: none;
+      transition: var(--transition);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      background: var(--primary);
+      border: 3px solid #FFFFFF;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: var(--transition);
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+    .results-panel {
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .roi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .roi-stat-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 18px;
+    }
+
+    .roi-stat-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .roi-stat-num {
+      font-size: 1.6rem;
+      font-weight: 900;
+      color: var(--text-main);
+      line-height: 1.1;
+    }
+
+    .roi-stat-num.highlight { color: var(--primary); }
+    .roi-stat-num.success { color: var(--success); }
+
+    .chart-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      position: relative;
+    }
+
+    .chart-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 180px !important;
+      display: block;
+    }
+
+    /* SECTION 2: FAQ ACCORDION */
+    .faq-section {
+      max-width: 1000px;
+      margin: 0 auto 64px;
+      padding: 0 24px;
+    }
+
+    .faq-accordion {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .faq-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      transition: var(--transition);
+    }
+
+    .faq-item:hover {
+      border-color: var(--primary);
+    }
+
+    .faq-question {
+      padding: 20px 24px;
+      font-weight: 800;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .faq-toggle-icon {
+      font-size: 1.2rem;
+      transition: transform 0.25s ease;
+      color: var(--primary);
+    }
+
+    .faq-item.open .faq-toggle-icon {
+      transform: rotate(45deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      padding: 0 24px;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    .faq-item.open .faq-answer {
+      max-height: 240px;
+      padding-bottom: 20px;
+    }
+
+    /* Side Drawer */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .drawer-overlay.active { opacity: 1; pointer-events: auto; }
+
+    .details-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 520px;
+      max-width: 90vw;
+      background: var(--bg-surface);
+      box-shadow: -10px 0 40px rgba(0,0,0,0.15);
+      z-index: 101;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 36px;
+    }
+
+    .details-drawer.active { transform: translateX(0); }
+
+    .drawer-close-btn {
+      align-self: flex-end;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: var(--text-main);
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    .drawer-close-btn:hover { background: var(--primary-light); color: var(--primary); }
+    .drawer-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      background: var(--accent-light);
+      color: var(--accent-dark);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .drawer-title { font-size: 1.7rem; font-weight: 900; margin-bottom: 14px; line-height: 1.2; }
+    .drawer-body { font-size: 0.95rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 24px; }
+    .drawer-features-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+    .drawer-features-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.9rem; font-weight: 600; }
+    .drawer-check-icon { color: var(--success); font-size: 1.1rem; line-height: 1; }
+
+    .drawer-cta-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      background: var(--primary);
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+      transition: var(--transition);
+      margin-top: auto;
+    }
+
+    .drawer-cta-btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+    /* Sticky WhatsApp Floating Action Button */
+    .whatsapp-float-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 60;
+      background: #25D366;
+      color: #FFFFFF;
+      padding: 12px 20px;
+      border-radius: var(--radius-full);
+      box-shadow: 0 8px 24px rgba(37, 211, 102, 0.35);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      transition: var(--transition);
+    }
+
+    .whatsapp-float-btn:hover {
+      transform: translateY(-2px) scale(1.03);
+      box-shadow: 0 12px 28px rgba(37, 211, 102, 0.45);
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 24px 80px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 900px) {
+      .hero-title { font-size: 2.1rem; }
+      .hero-metrics-bar { grid-template-columns: repeat(2, 1fr); }
+      .vs-grid { grid-template-columns: 1fr; }
+      .pillars-grid { grid-template-columns: 1fr; }
+      .simulator-container { grid-template-columns: 1fr; }
+      .tabs-nav { flex-wrap: wrap; border-radius: var(--radius-md); }
+    }
+
+    @media (max-width: 600px) {
+      .hero-metrics-bar { grid-template-columns: 1fr; }
+      .top-nav { flex-direction: column; align-items: flex-start; }
+      .nav-links { width: 100%; justify-content: space-between; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="top-nav">
+    <div class="nav-brand">
+      <div class="brand-logo-pill">
+        <span>⚡ SMART REVIEW AI</span>
+      </div>
+      <div class="lang-switcher">
+        <button class="lang-btn active" id="btnLangEN" onclick="setLanguage('en')">🇬🇧 EN</button>
+        <button class="lang-btn" id="btnLangFR" onclick="setLanguage('fr')">🇫🇷 FR</button>
+      </div>
+    </div>
+
+    <div class="nav-links">
+      <a href="/spin/bos_cafe_moq" target="_blank" rel="noopener noreferrer" class="demo-pill-btn" id="navDemoBtn" title="Launch live interactive guest experience">
+        <span id="textNavDemo">📱 Try Live Demo</span>
+        <span style="font-size: 0.8rem; margin-left: 2px;">↗</span>
+      </a>
+      <a href="/login" class="btn-outline" id="navLoginBtn">
+        <span>🔐 Login</span>
+      </a>
+      <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" id="navPilotBtn">
+        <span id="textNavPilot">💬 30-Day Pilot</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-container">
+    <div class="hero-tag" id="heroTag">
+      Hospitality OS 2030 • Automated Growth Engine
+    </div>
+    <h1 class="hero-title" id="heroTitle">
+      Turn Every Restaurant Guest into a <span>5-Star Google Review</span>, VIP Repeat Diner & Instant Direct Order.
+    </h1>
+    <p class="hero-subtitle" id="heroSubtitle">
+      The frictionless dine-in ordering and hospitality engine built for high-performing restaurants, specialty cafes, and brasseries. Zero apps to download. Seated guests order smoothly, eliminating rush-hour stress even when short-staffed.
+    </p>
+
+    <div class="hero-ctas">
+      <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" id="heroCtaPilot" style="padding: 14px 28px; font-size: 1rem;">
+        <span id="textHeroPilot">🚀 Request 30-Day Risk-Free Pilot (WhatsApp)</span>
+      </a>
+      <a href="/spin/bos_cafe_moq" target="_blank" rel="noopener noreferrer" class="btn-outline" id="heroCtaDemo" style="padding: 14px 24px; font-size: 1rem;">
+        <span id="textHeroDemo">📱 Experience Guest Spin Wheel</span>
+      </a>
+    </div>
+
+    <!-- Key Metrics Bar -->
+    <div class="hero-metrics-bar">
+      <div class="metric-card" onclick="openDrawer('reviews')">
+        <div class="metric-value">+450%</div>
+        <div class="metric-label" id="metricLabelReviews">5★ Review Velocity</div>
+      </div>
+      <div class="metric-card" onclick="openDrawer('vip')">
+        <div class="metric-value">100%</div>
+        <div class="metric-label" id="metricLabelCRM">Owned Guest CRM</div>
+      </div>
+      <div class="metric-card" onclick="openDrawer('tableordering')">
+        <div class="metric-value">+28%</div>
+        <div class="metric-label" id="metricLabelSpeed">Service Speed & Turns</div>
+      </div>
+      <div class="metric-card" onclick="openDrawer('eatfit')">
+        <div class="metric-value">Guilt-Free</div>
+        <div class="metric-label" id="metricLabelAI">AI Vision & Fitness</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 1: PROBLEM VS SOLUTION INFOGRAPHIC -->
+  <section class="infographic-section">
+    <div class="section-header">
+      <span class="section-badge" id="infographicBadge">The Market Reality</span>
+      <h2 class="section-title" id="infographicTitle">Why Traditional Restaurants Struggle vs. The Smart Review AI Advantage</h2>
+      <p class="section-desc" id="infographicDesc">High labor turnover, rising overhead, and bad online reviews hurt hospitality margins. Here is how our automated system solves each challenge directly at the table.</p>
+    </div>
+
+    <div class="vs-grid">
+      <!-- Problem Card -->
+      <div class="vs-card problem">
+        <div class="vs-badge">❌ Traditional Chaos (The Pain)</div>
+        <ul class="vs-list" id="problemList">
+          <!-- Filled dynamically via JS -->
+        </ul>
+      </div>
+
+      <!-- Solution Card -->
+      <div class="vs-card solution">
+        <div class="vs-badge">✅ Smart Review AI (The Solution)</div>
+        <ul class="vs-list" id="solutionList">
+          <!-- Filled dynamically via JS -->
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation Tabs for Deep Dive -->
+  <div class="tabs-wrapper">
+    <div class="section-header" style="margin-bottom: 24px;">
+      <span class="section-badge" id="pillarsSectionBadge">Core Architecture</span>
+      <h2 class="section-title" id="pillarsSectionTitle">Engineered to Drive Immediate Bottom-Line Growth</h2>
+    </div>
+
+    <nav class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('pillars')">
+        <span id="tabLabelPillars">🏛️ 4 Growth Pillars</span>
+      </button>
+      <button class="tab-btn" onclick="switchTab('simulator')">
+        <span id="tabLabelSimulator">📊 ROI & Impact Simulator</span>
+      </button>
+    </nav>
+  </div>
+
+  <main class="tabs-wrapper">
+    <!-- TAB 1: PILLARS -->
+    <section id="tab-pillars" class="tab-content active">
+      <div class="pillars-grid" id="pillarsGrid">
+        <!-- Rendered dynamically via JS -->
+      </div>
+    </section>
+
+    <!-- TAB 2: ROI SIMULATOR -->
+    <section id="tab-simulator" class="tab-content">
+      <div class="simulator-container">
+        <!-- Controls -->
+        <div class="controls-panel">
+          <div>
+            <h3 style="font-size: 1.4rem; font-weight: 900; margin-bottom: 6px;" id="simTitle">Financial Impact Simulator</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;" id="simDesc">Adjust operational numbers to forecast monthly gains.</p>
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span id="labelCovers">Daily Seated Guests:</span>
+              <span class="control-value-badge" id="valCovers">350 guests/day</span>
+            </div>
+            <input type="range" id="inputCovers" min="50" max="1000" step="25" value="350">
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span id="labelTicket">Average Check per Guest:</span>
+              <span class="control-value-badge" id="valTicket">$35</span>
+            </div>
+            <input type="range" id="inputTicket" min="10" max="150" step="5" value="35">
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span id="labelConversion">Table Interaction Rate:</span>
+              <span class="control-value-badge" id="valConversion">25 %</span>
+            </div>
+            <input type="range" id="inputConversion" min="5" max="50" step="1" value="25">
+          </div>
+
+          <div style="background: var(--bg-main); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 0.8rem; color: var(--text-muted);" id="simNote">
+            💡 <strong>Forecast Model:</strong> Evaluates table turn acceleration (+18% seating capacity absorbed without extra labor) + average check increase (+15% upsell from visual food & drink recommendations).
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="results-panel">
+          <div class="roi-grid">
+            <div class="roi-stat-box">
+              <div class="roi-stat-title" id="statTitleReviews">New 5★ Reviews / Month</div>
+              <div class="roi-stat-num highlight" id="statReviews">2,625</div>
+            </div>
+            <div class="roi-stat-box">
+              <div class="roi-stat-title" id="statTitleLeads">WhatsApp CRM Contacts / Month</div>
+              <div class="roi-stat-num" id="statLeads">3,150</div>
+            </div>
+            <div class="roi-stat-box">
+              <div class="roi-stat-title" id="statTitleRotation">Table Turn Gain / Month</div>
+              <div class="roi-stat-num success" id="statSavings">$66,150</div>
+            </div>
+            <div class="roi-stat-box">
+              <div class="roi-stat-title" id="statTitleUpsell">Upsell Revenue / Month</div>
+              <div class="roi-stat-num" id="statRepeat">$55,125</div>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <div class="chart-title">
+              <span id="chartHeading">📈 6-Month Projected Google Review Trajectory</span>
+              <span style="color: var(--primary); font-size: 0.8rem; font-weight: 800;">● Smart Review vs Standard QR</span>
+            </div>
+            <canvas id="growthChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- SECTION 2: INTERACTIVE FAQ -->
+  <section class="faq-section">
+    <div class="section-header">
+      <span class="section-badge" id="faqBadge">Got Questions?</span>
+      <h2 class="section-title" id="faqTitle">Frequently Asked Questions</h2>
+      <p class="section-desc" id="faqDesc">Everything you need to know before launching your 30-day single restaurant or multi-branch pilot.</p>
+    </div>
+
+    <div class="faq-accordion" id="faqAccordion">
+      <!-- Injected dynamically via JS -->
+    </div>
+  </section>
+
+  <!-- Side Drawer for Detailed Cards -->
+  <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+  <aside class="details-drawer" id="detailsDrawer">
+    <button class="drawer-close-btn" onclick="closeDrawer()" title="Close">&times;</button>
+    <span class="drawer-tag" id="drawerTag">Module Overview</span>
+    <h3 class="drawer-title" id="drawerTitle">Module Title</h3>
+    <p class="drawer-body" id="drawerBody">Detailed explanations loaded dynamically.</p>
+    <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;" id="drawerListHeading">Key Strategic Highlights:</h4>
+    <ul class="drawer-features-list" id="drawerList"></ul>
+    <a href="#" target="_blank" rel="noopener noreferrer" class="drawer-cta-btn" id="drawerCtaBtn">
+      <span id="drawerCtaText">💬 Request Branch Pilot (WhatsApp)</span>
+    </a>
+  </aside>
+
+  <!-- Sticky WhatsApp Floating Button -->
+  <a href="#" target="_blank" rel="noopener noreferrer" class="whatsapp-float-btn" id="floatWhatsappBtn">
+    <span style="font-size: 1.2rem;">💬</span>
+    <span id="floatWhatsappText">Chat on WhatsApp</span>
+  </a>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 Smart Review AI • Next-Generation Hospitality Gamification & Table Ordering Platform.</p>
+    <p style="margin-top: 6px; font-size: 0.78rem;">Designed for hospitality leaders, restaurant chains & specialty cafes.</p>
+  </footer>
+
+  <!-- Script & Multilingual Logic -->
+  <script>
+    let currentLang = 'en';
+
+    const I18N = {
+      en: {
+        navDemo: "📱 Try Live Demo",
+        navPilot: "💬 30-Day Pilot",
+        navLogin: "🔐 Login",
+        heroTag: "Hospitality OS 2030 • Automated Growth Engine",
+        heroTitle: "Turn Every Restaurant Guest into a <span>5-Star Google Review</span>, VIP Repeat Diner & Instant Direct Order.",
+        heroSubtitle: "The frictionless dine-in ordering and hospitality engine built for high-performing restaurants, specialty cafes, and brasseries. Zero apps to download. Seated guests order smoothly, eliminating rush-hour stress even when short-staffed.",
+        heroPilot: "🚀 Request 30-Day Risk-Free Pilot (WhatsApp)",
+        heroDemo: "📱 Experience Guest Spin Wheel",
+        metricReviews: "5★ Review Velocity",
+        metricCRM: "Owned Guest CRM",
+        metricSpeed: "Service Speed & Turns",
+        metricAI: "AI Vision & Fitness",
+        infographicBadge: "The Market Reality",
+        infographicTitle: "Why Traditional Restaurants Struggle vs. The Smart Review AI Advantage",
+        infographicDesc: "High labor turnover, rising overhead, and bad online reviews hurt hospitality margins. Here is how our automated system solves each challenge directly at the table.",
+        problems: [
+          { title: "Cluttered Kiosks & Awkward Lines", desc: "Bulky touchscreens crowd entrances, create stressful queues, and cost $4,000+ each while ruining the dining ambiance." },
+          { title: "Under-Staffed Shift Panic", desc: "During terrace rushes and summer peaks, waitstaff are overwhelmed; orders are delayed, and frustrated guests leave negative impressions." },
+          { title: "Only Angry Diners Leave Reviews", desc: "95% of satisfied diners leave quietly, while the few unhappy diners post online, dragging Google ratings down to 3.8★." },
+          { title: "Zero Customer Re-engagement Data", desc: "Guests pay and walk out the door. Restaurants possess zero phone numbers to invite them back on slow Tuesday afternoons." }
+        ],
+        solutions: [
+          { title: "Seated Comfort Table Ordering", desc: "Guests sit, scan the elegant table QR, browse high-res photo menus, and order at their pace on their own phone." },
+          { title: "Peak Rush Resilience (Anti-Shortage)", desc: "Orders route straight to kitchen KDS / thermal printers; zero forgotten tables even when running on half the floor staff." },
+          { title: "Gamified 5★ Google Review Engine", desc: "The irresistible post-meal Spin Wheel captures 25% to 40% verified 5-star Google ratings with smart private mediation for complaints." },
+          { title: "WhatsApp VIP Automated Club", desc: "98% open-rate retention engine brings guests back during quiet hours with personalized perks without app downloads." }
+        ],
+        pillarsBadge: "Core Architecture",
+        pillarsTitle: "Engineered to Drive Immediate Bottom-Line Growth",
+        tabPillars: "🏛️ 4 Growth Pillars",
+        tabSimulator: "📊 ROI & Impact Simulator",
+        pillars: [
+          {
+            key: "reviews",
+            icon: "⭐",
+            badge: "Local Dominance",
+            title: "1. Frictionless 5★ Google Review Engine",
+            desc: "Outrank competitors on Google Maps. The gamified Spin & Win wheel engages diners at peak meal satisfaction, generating authentic 5★ reviews in under 30 seconds.",
+            kpi1: "Table Conversion: <strong>25% to 40%</strong>",
+            kpi2: "Completion Time: <strong>< 30 seconds</strong>"
+          },
+          {
+            key: "tableordering",
+            icon: "🛎️",
+            badge: "No Cluttered Kiosks",
+            title: "2. Relaxed Table Ordering & Anti-Shortage Shield",
+            desc: "No bulky kiosks or standing in lines. Seated guests browse the visual menu and order on their phone. Even when short-staffed during rushes, orders flow straight to kitchen KDS.",
+            kpi1: "Order Speed: <strong>Instant & queue-free</strong>",
+            kpi2: "Peak Resilience: <strong>Zero missed tables</strong>"
+          },
+          {
+            key: "eatfit",
+            icon: "🏋️‍♂️",
+            badge: "F&B World-First",
+            title: "3. 'Eat & Fit' : AI Guilt-Free Dining",
+            desc: "Guests snap a photo of their gourmet dish. Multimodal Vision AI computes calories and delivers a tailored, equipment-free 12-minute home workout directly on WhatsApp.",
+            kpi1: "Viral Shares: <strong>3x on Instagram</strong>",
+            kpi2: "Social Buzz: <strong>+82% engagement</strong>"
+          },
+          {
+            key: "vip",
+            icon: "💎",
+            badge: "Direct Retention",
+            title: "4. WhatsApp VIP Pass & Automated Re-engagement",
+            desc: "No plastic cards or app store downloads. Guests keep a live VIP pass inside WhatsApp. Automated campaigns re-activate guests during slow weekday shifts.",
+            kpi1: "Open Rate: <strong>98% on WhatsApp</strong>",
+            kpi2: "Repeat Visits: <strong>+22% within 60 days</strong>"
+          }
+        ],
+        simTitle: "Financial Impact Simulator",
+        simDesc: "Adjust operational numbers to forecast monthly returns.",
+        labelCovers: "Daily Seated Guests:",
+        labelTicket: "Average Check per Guest:",
+        labelConversion: "Table Interaction Rate:",
+        simNote: "💡 <strong>Forecast Model:</strong> Evaluates table turn acceleration (+18% seating capacity absorbed without extra labor) + average check increase (+15% upsell from visual food & drink recommendations).",
+        statReviews: "New 5★ Reviews / Month",
+        statLeads: "WhatsApp CRM Contacts / Month",
+        statRotation: "Table Turn Gain / Month",
+        statUpsell: "Upsell Revenue / Month",
+        chartHeading: "📈 6-Month Projected Google Review Trajectory",
+        currencySymbol: "$",
+        unitGuests: "guests/day",
+        faqBadge: "Got Questions?",
+        faqTitle: "Frequently Asked Questions",
+        faqDesc: "Everything you need to know before launching your 30-day single restaurant or multi-branch pilot.",
+        faqs: [
+          {
+            q: "Do diners or staff need to download an application?",
+            a: "No. The system is 100% web-based and native to WhatsApp. Diners simply scan the table QR code with their regular smartphone camera—no app store downloads, no registrations, no friction."
+          },
+          {
+            q: "How does the system prevent negative reviews on Google Maps?",
+            a: "Smart Review AI features a smart sentiment filter: guests rating 5★ are routed seamlessly to Google Maps to post their public review. Any rating below 4★ triggers an immediate private feedback form sent directly to management, resolving issues before they hit public channels."
+          },
+          {
+            q: "How does table ordering help during peak hours and staff shortages?",
+            a: "Instead of waitstaff running back and forth to take orders and process payments, seated guests order and pay directly from their table. Orders are instantly printed or displayed on the kitchen KDS, reducing table wait time by up to 25% and ensuring zero tables are neglected even with limited staff."
+          },
+          {
+            q: "Can this integrate with our existing kitchen printers or POS?",
+            a: "Yes. Smart Review AI offers standalone Kitchen Display System (KDS) tablets, direct ESC/POS thermal printer integrations, and webhook/API connections to popular POS systems."
+          },
+          {
+            q: "How does the 30-day pilot work?",
+            a: "We set up your custom branded digital menu, table QR cards, and WhatsApp workflow within 48 hours. You test it in one branch with real diners and measure review velocity and table turn gains before deciding on broader rollout."
+          }
+        ],
+        drawerDetails: {
+          reviews: {
+            tag: "Reputation & Dominance",
+            title: "5★ Google Review Engine",
+            body: "In competitive dining markets, top Google Maps rankings directly determine walk-ins and tourist footfall. Smart Review AI gamifies the feedback moment right after a great meal.",
+            features: [
+              "One-tap redirection to verified Google Business Profile.",
+              "Smart mediation: dissatisfaction is handled privately before going online.",
+              "Demonstrated +0.6★ score increase within 45 days.",
+              "Automated instant reward to encourage off-peak weekday visits."
+            ]
+          },
+          tableordering: {
+            tag: "Operational Excellence",
+            title: "Relaxed Table Ordering vs Cluttered Kiosks",
+            body: "Bulky fast-food kiosks clutter doorways and make diners stand uncomfortably in line. Smart Review AI allows guests to sit down comfortably, explore rich visual menus, and order without waiting for a busy server.",
+            features: [
+              "Seated convenience: diners order comfortably from their smartphones.",
+              "Staff shortage resilience: orders route directly to kitchen even when short-staffed.",
+              "Faster table turns (+20% to +30% acceleration during peak services).",
+              "Visual upselling: mouth-watering photos drive +15% higher drink & dessert spend.",
+              "Direct kitchen KDS chime: eliminates handwritten notes and order errors."
+            ]
+          },
+          eatfit: {
+            tag: "F&B World-First",
+            title: "Gemini Vision AI 'Eat & Fit' Guilt-Free Dining",
+            body: "An exclusive culinary experience. By taking a quick picture of their meal, diners receive an instant calorie balance and a fun 12-minute bodyweight routine on WhatsApp to burn it guilt-free.",
+            features: [
+              "Cutting-edge Multimodal AI (Gemini 3.1) with rapid food recognition.",
+              "Custom 12-minute bodyweight routine tailored to restaurant portion sizes.",
+              "Zero app download: 100% native WhatsApp delivery.",
+              "Massive viral word-of-mouth on Instagram Stories and TikTok."
+            ]
+          },
+          vip: {
+            tag: "Customer Retention",
+            title: "WhatsApp VIP Membership & Automated Re-activation",
+            body: "WhatsApp enjoys a 98% open rate compared to 18% for emails. Guests keep an active digital VIP card on their phone, receiving tailored invitations during quiet shifts.",
+            features: [
+              "Zero plastic cards, zero clunky mobile apps to install.",
+              "Automated smart campaigns targeting slow weekday lunch or afternoon hours.",
+              "Precise guest segmentation by visit frequency and spend.",
+              "Proven +22% repeat visit frequency within 60 days."
+            ]
+          }
+        },
+        drawerHeading: "Key Strategic Highlights:",
+        drawerCta: "💬 Request Branch Pilot (WhatsApp)",
+        floatWhatsapp: "Chat on WhatsApp",
+        whatsappMsg: "Hello Abdel, I reviewed the Smart Review AI overview and would like to discuss launching a 30-day restaurant pilot."
+      },
+      fr: {
+        navDemo: "📱 Démo Client Live",
+        navPilot: "💬 Pilote 30 Jours",
+        navLogin: "🔐 Connexion",
+        heroTag: "Hospitalité OS 2030 • Moteur de Croissance Automatisé",
+        heroTitle: "Transformez chaque table en un <span>Avis Google 5 Étoiles</span>, Client Fidèle VIP & Commande Directe.",
+        heroSubtitle: "Le moteur tout-en-un de commande à table et d'hospitalité conçu pour les restaurants, brasseries et cafés exigeants. Zéro application à télécharger. Les convives commandent assis à leur rythme, éliminant le stress des coups de feu même en sous-effectif.",
+        heroPilot: "🚀 Demander un Pilote 30 Jours sans Engagement (WhatsApp)",
+        heroDemo: "📱 Découvrir la Roue de la Fortune Client",
+        metricReviews: "Volume d'Avis 5★",
+        metricCRM: "Fichier Client 100% Propriétaire",
+        metricSpeed: "Vitesse de Service & Rotation",
+        metricAI: "IA Vision & Fitness Guilt-Free",
+        infographicBadge: "La Réalité du Marché",
+        infographicTitle: "Pourquoi les Méthodes Traditionnelles Échouent vs. L'Avantage Smart Review AI",
+        infographicDesc: "Pénurie de personnel en salle, coûts de fonctionnement et avis injustes pénalisent la rentabilité. Voici comment notre système automatisé résout chaque friction directement à table.",
+        problems: [
+          { title: "Bornes Encombrantes & Files d'Attente", desc: "Des écrans tactiles froids qui bouchent l'entrée, créent des queues inconfortables debout et coûtent plus de 4 000 € l'unité tout en gâchant l'ambiance." },
+          { title: "Coup de Feu & Stress en Sous-Effectif", desc: "En terrasse ou lors des rushs estivaux, les serveurs courent partout ; les commandes prennent du retard et les clients s'impatientent." },
+          { title: "Seuls les Clients Mécontents Publient", desc: "95% des clients ravis s'en vont sans rien dire, tandis que le moindre mécontent s'exprime sur Google Maps, faisant chuter la note globale à 3.8★." },
+          { title: "Zéro Donnée pour Faire Revenir les Clients", desc: "Les convives paient et partent. Le restaurateur n'a aucun contact pour les réinviter lors des services calmes du mardi ou mercredi." }
+        ],
+        solutions: [
+          { title: "Commande à Table Assise & Confortable", desc: "Les convives s'assoient, scannent le QR discret posé sur la table, explorent la carte illustrée avec photos et commandent sur leur téléphone." },
+          { title: "Bouclier Anti-Pénurie de Personnel", desc: "Les bons partent directement en cuisine (KDS / imprimante) ; zéro table délaissée même avec un effectif de salle réduit de moitié." },
+          { title: "Moteur d'Avis 5★ Ludique & Médiation", desc: "La Roue de la Fortune engage 25% à 40% des tables satisfaites au moment du dessert, avec filtrage privé des remarques constructives (<4★)." },
+          { title: "Club VIP Automatisé sur WhatsApp", desc: "98% de taux d'ouverture pour réactiver vos clients lors des services creux avec des offres personnalisées, sans application à installer." }
+        ],
+        pillarsBadge: "Architecture Complète",
+        pillarsTitle: "Conçu pour Générer un Impact Financier Immédiat",
+        tabPillars: "🏛️ 4 Piliers Stratégiques",
+        tabSimulator: "📊 Simulateur ROI & Rentabilité",
+        pillars: [
+          {
+            key: "reviews",
+            icon: "⭐",
+            badge: "Domination Locale",
+            title: "1. Récolte Massive d'Avis Google 5★ Sans Friction",
+            desc: "Surclassez vos concurrents sur Google Maps. La Roue de la Fortune engage les convives au moment du dessert pour récolter des avis 5★ vérifiés en moins de 30 secondes.",
+            kpi1: "Taux d'Engagement : <strong>25% à 40%</strong>",
+            kpi2: "Temps de Dépôt : <strong>< 30 secondes</strong>"
+          },
+          {
+            key: "tableordering",
+            icon: "🛎️",
+            badge: "Adieu les Bornes Fast-Food",
+            title: "2. Commande à Table Confortable & Zéro File d'Attente",
+            desc: "Fini les bornes tactiles encombrantes. Les convives installés explorent la carte et commandent à leur rythme. En coup de feu ou sous-effectif, les bons partent direct en cuisine.",
+            kpi1: "Prise de Commande : <strong>Instantanée</strong>",
+            kpi2: "Gestion Sous-Effectif : <strong>Zéro table oubliée</strong>"
+          },
+          {
+            key: "eatfit",
+            icon: "🏋️‍♂️",
+            badge: "Exclusivité F&B",
+            title: "3. 'Eat & Fit' : Savourer Sans Culpabilité grâce à l'IA",
+            desc: "Le convive photographie son plat. Notre IA Vision calcule les calories et lui génère instantanément sur WhatsApp une séance fitness sur-mesure de 12 min sans matériel.",
+            kpi1: "Partage Viral : <strong>x3 sur Instagram</strong>",
+            kpi2: "Bouche-à-Oreille : <strong>+82% d'interaction</strong>"
+          },
+          {
+            key: "vip",
+            icon: "💎",
+            badge: "Fidélisation Directe",
+            title: "4. Pass VIP WhatsApp & Réactivation Automatique",
+            desc: "Zéro carte plastique, zéro application lourde. Vos clients gardent leur pass digital sur WhatsApp. Notre IA relance automatiquement les convives lors des services creux.",
+            kpi1: "Taux d'Ouverture : <strong>98% sur WhatsApp</strong>",
+            kpi2: "Revisites : <strong>+18% à +25% sous 60 jours</strong>"
+          }
+        ],
+        simTitle: "Simulateur d'Impact Financier",
+        simDesc: "Ajustez vos variables réelles pour estimer vos gains mensuels.",
+        labelCovers: "Couverts / Clients par Jour :",
+        labelTicket: "Ticket Moyen Convive :",
+        labelConversion: "Taux d'Adhésion / Spin :",
+        simNote: "💡 <strong>Base de calcul :</strong> Modèle estimant une accélération de la rotation des tables (+18% de capacité absorbée sans surcharge d'équipe) + augmentation du panier moyen (+12% d'upsell boissons/desserts).",
+        statReviews: "Nouveaux Avis 5★ / Mois",
+        statLeads: "Contacts WhatsApp CRM / Mois",
+        statRotation: "Gain Rotation & Productivité / Mois",
+        statUpsell: "Gain Panier Moyen (Upsell) / Mois",
+        chartHeading: "📈 Croissance Projetée des Avis Google à 6 Mois",
+        currencySymbol: "€",
+        unitGuests: "clients/jour",
+        faqBadge: "Des Questions ?",
+        faqTitle: "Foire Aux Questions",
+        faqDesc: "Tout ce que vous devez savoir avant de lancer votre pilote de 30 jours dans votre établissement.",
+        faqs: [
+          {
+            q: "Les clients ou le personnel doivent-ils télécharger une application ?",
+            a: "Non. Le système fonctionne à 100% sur le web mobile et dans WhatsApp. Vos convives scannent simplement le QR code de table avec l'appareil photo de leur smartphone, sans rien installer."
+          },
+          {
+            q: "Comment le système protège-t-il l'établissement contre les mauvais avis ?",
+            a: "Smart Review AI intègre un sas de médiation intelligent : les clients attribuant 5★ sont redirigés directement sur votre fiche Google Maps. Si un client note moins de 4★, il est invité à expliquer sa remarque dans un formulaire privé transmis en direct à la direction, évitant tout avis négatif public."
+          },
+          {
+            q: "Comment la commande à table aide-t-elle en cas de sous-effectif ou en plein été ?",
+            a: "Au lieu que les serveurs courent pour prendre les commandes et apporter les additions, les clients installés commandent et règlent directement depuis leur smartphone. Les bons s'impriment ou s'affichent instantanément en cuisine/bar, accélérant le service de 25% sans délaisser aucune table."
+          },
+          {
+            q: "Est-ce compatible avec nos imprimantes ou logiciels de caisse actuels ?",
+            a: "Oui. Smart Review AI propose des écrans tactiles cuisine (KDS) légers, des passerelles d'impression thermique directes (ESC/POS) et des webhooks/APIs connectables à vos logiciels de caisse."
+          },
+          {
+            q: "Comment se déroule la période pilote de 30 jours ?",
+            a: "Nous configurons votre carte illustrée, vos QR codes de table personnalisés et votre canal WhatsApp sous 48h. Vous testez en conditions réelles avec vos clients et mesurez la hausse d'avis 5★ et de rotation avant d'étendre la solution."
+          }
+        ],
+        drawerDetails: {
+          reviews: {
+            tag: "Réputation & Domination",
+            title: "Moteur d'Avis 5★ sur Google Maps",
+            body: "En restauration, 88% des clients choisissent leur table selon les avis Google Maps. Notre mécanique ludique engage le convive au pic émotionnel du repas.",
+            features: [
+              "Redirection en 1 clic vers votre fiche Google vérifiée.",
+              "Médiation privée intelligente : les critiques constructives restent confidentielles.",
+              "Progression moyenne de +0.6★ sous 45 jours constatée.",
+              "Récompense instantanée pour stimuler les visites aux heures creuses."
+            ]
+          },
+          tableordering: {
+            tag: "Efficacité Opérationnelle",
+            title: "Commande à Table Confortable vs Bornes Encombrantes",
+            body: "Contrairement aux bornes de fast-food qui encombrent l'entrée et imposent de faire la queue debout, Smart Review AI permet au client de commander assis, tranquillement depuis sa table.",
+            features: [
+              "Confort premium : les clients commandent assis sans faire la queue debout.",
+              "Bouclier anti-pénurie : les commandes partent en cuisine même avec des serveurs en moins.",
+              "Rotation des tables accélérée de +20% à +30% aux heures de pointe.",
+              "Suggestions visuelles : les photos augmentent le panier moyen de +15%.",
+              "Transmission KDS directe : zéro erreur de saisie ou oubli de commande."
+            ]
+          },
+          eatfit: {
+            tag: "Exclusivité F&B",
+            title: "IA 'Eat & Fit' : Savourer Sans Culpabilité",
+            body: "Une exclusivité mondiale en restauration. Le convive prend en photo son plat, découvre son équilibre calorique et reçoit une routine fitness de 12 min sur WhatsApp pour compenser avec le sourire.",
+            features: [
+              "IA Vision multimodale (Gemini 3.1) avec détection d'assiette instantanée.",
+              "Routine de 12 min au poids du corps étalonnée sur les portions du restaurant.",
+              "100% natif WhatsApp : zéro compte à créer, zéro friction.",
+              "Partage viral massif sur Instagram Stories et TikTok."
+            ]
+          },
+          vip: {
+            tag: "Fidélisation Client",
+            title: "Pass Membre VIP & Réactivation WhatsApp",
+            body: "WhatsApp affiche 98% de taux d'ouverture contre 18% pour les e-mails. Vos clients conservent un pass digital interactif et sont réactivés lors des services creux.",
+            features: [
+              "Zéro carte plastique, zéro application lourde à télécharger.",
+              "Campagnes automatisées ciblées pour remplir les services du mardi midi au jeudi soir.",
+              "Segmentation fine selon les habitudes et paniers de consommation.",
+              "Augmentation mesurée de +18% à +25% de la fréquence de visite sous 60 jours."
+            ]
+          }
+        },
+        drawerHeading: "Bénéfices Clés du Module :",
+        drawerCta: "💬 Demander un Pilote en Établissement (WhatsApp)",
+        floatWhatsapp: "Échanger sur WhatsApp",
+        whatsappMsg: "Bonjour Abdel, j'ai consulté la présentation Smart Review AI et je souhaiterais échanger sur le lancement d'un pilote de 30 jours."
+      }
+    };
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      const data = I18N[lang];
+
+      document.getElementById('btnLangEN').classList.toggle('active', lang === 'en');
+      document.getElementById('btnLangFR').classList.toggle('active', lang === 'fr');
+
+      // Navigation
+      document.getElementById('textNavDemo').innerText = data.navDemo;
+      document.getElementById('textNavPilot').innerText = data.navPilot;
+      document.getElementById('navLoginBtn').innerHTML = `<span>${data.navLogin}</span>`;
+
+      // Hero
+      document.getElementById('heroTag').innerText = data.heroTag;
+      document.getElementById('heroTitle').innerHTML = data.heroTitle;
+      document.getElementById('heroSubtitle').innerText = data.heroSubtitle;
+      document.getElementById('textHeroPilot').innerText = data.heroPilot;
+      document.getElementById('textHeroDemo').innerText = data.heroDemo;
+
+      // Metrics
+      document.getElementById('metricLabelReviews').innerText = data.metricReviews;
+      document.getElementById('metricLabelCRM').innerText = data.metricCRM;
+      document.getElementById('metricLabelSpeed').innerText = data.metricSpeed;
+      document.getElementById('metricLabelAI').innerText = data.metricAI;
+
+      // Infographic
+      document.getElementById('infographicBadge').innerText = data.infographicBadge;
+      document.getElementById('infographicTitle').innerText = data.infographicTitle;
+      document.getElementById('infographicDesc').innerText = data.infographicDesc;
+
+      const probList = document.getElementById('problemList');
+      probList.innerHTML = data.problems.map(p => `
+        <li class="vs-item">
+          <span class="vs-icon">❌</span>
+          <div class="vs-item-text">
+            <strong>${p.title}</strong>
+            <p>${p.desc}</p>
+          </div>
+        </li>
+      `).join('');
+
+      const solList = document.getElementById('solutionList');
+      solList.innerHTML = data.solutions.map(s => `
+        <li class="vs-item">
+          <span class="vs-icon">✅</span>
+          <div class="vs-item-text">
+            <strong>${s.title}</strong>
+            <p>${s.desc}</p>
+          </div>
+        </li>
+      `).join('');
+
+      // Pillars Header & Tabs
+      document.getElementById('pillarsSectionBadge').innerText = data.pillarsBadge;
+      document.getElementById('pillarsSectionTitle').innerText = data.pillarsTitle;
+      document.getElementById('tabLabelPillars').innerText = data.tabPillars;
+      document.getElementById('tabLabelSimulator').innerText = data.tabSimulator;
+
+      // Pillars Grid
+      const pillarsGrid = document.getElementById('pillarsGrid');
+      pillarsGrid.innerHTML = data.pillars.map(pillar => `
+        <article class="pillar-card" onclick="openDrawer('${pillar.key}')">
+          <div>
+            <div class="pillar-header">
+              <div class="pillar-icon">${pillar.icon}</div>
+              <span class="pillar-badge">${pillar.badge}</span>
+            </div>
+            <h3 class="pillar-title">${pillar.title}</h3>
+            <p class="pillar-desc">${pillar.desc}</p>
+          </div>
+          <div>
+            <div class="pillar-kpi-row">
+              <div class="pillar-kpi">${pillar.kpi1}</div>
+              <div class="pillar-kpi">${pillar.kpi2}</div>
+            </div>
+            <div class="card-click-hint">${lang === 'en' ? 'Click to inspect operational details &rarr;' : 'Cliquez pour voir les détails opérationnels &rarr;'}</div>
+          </div>
+        </article>
+      `).join('');
+
+      // Simulator Text
+      document.getElementById('simTitle').innerText = data.simTitle;
+      document.getElementById('simDesc').innerText = data.simDesc;
+      document.getElementById('labelCovers').innerText = data.labelCovers;
+      document.getElementById('labelTicket').innerText = data.labelTicket;
+      document.getElementById('labelConversion').innerText = data.labelConversion;
+      document.getElementById('simNote').innerHTML = data.simNote;
+      document.getElementById('statTitleReviews').innerText = data.statReviews;
+      document.getElementById('statTitleLeads').innerText = data.statLeads;
+      document.getElementById('statTitleRotation').innerText = data.statRotation;
+      document.getElementById('statTitleUpsell').innerText = data.statUpsell;
+      document.getElementById('chartHeading').innerText = data.chartHeading;
+
+      // FAQ
+      document.getElementById('faqBadge').innerText = data.faqBadge;
+      document.getElementById('faqTitle').innerText = data.faqTitle;
+      document.getElementById('faqDesc').innerText = data.faqDesc;
+
+      const faqAcc = document.getElementById('faqAccordion');
+      faqAcc.innerHTML = data.faqs.map((f, i) => `
+        <div class="faq-item ${i === 0 ? 'open' : ''}" onclick="toggleFaq(this)">
+          <div class="faq-question">
+            <span>${f.q}</span>
+            <span class="faq-toggle-icon">+</span>
+          </div>
+          <div class="faq-answer">
+            <p>${f.a}</p>
+          </div>
+        </div>
+      `).join('');
+
+      // Drawer Headings
+      document.getElementById('drawerListHeading').innerText = data.drawerHeading;
+      document.getElementById('drawerCtaText').innerText = data.drawerCta;
+      document.getElementById('floatWhatsappText').innerText = data.floatWhatsapp;
+
+      // WhatsApp links
+      const whatsappUrl = `https://wa.me/33767803233?text=${encodeURIComponent(data.whatsappMsg)}`;
+      document.getElementById('navPilotBtn').href = whatsappUrl;
+      document.getElementById('heroCtaPilot').href = whatsappUrl;
+      document.getElementById('drawerCtaBtn').href = whatsappUrl;
+      document.getElementById('floatWhatsappBtn').href = whatsappUrl;
+
+      updateCalculations();
+    }
+
+    function toggleFaq(elem) {
+      elem.classList.toggle('open');
+    }
+
+    // Tabs
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      event.currentTarget.classList.add('active');
+      const targetContent = document.getElementById(`tab-${tabId}`);
+      if (targetContent) {
+        targetContent.classList.add('active');
+        if (tabId === 'simulator') {
+          setTimeout(renderChart, 50);
+        }
+      }
+    }
+
+    // Side Drawer
+    const drawerOverlay = document.getElementById('drawerOverlay');
+    const detailsDrawer = document.getElementById('detailsDrawer');
+    const drawerTag = document.getElementById('drawerTag');
+    const drawerTitle = document.getElementById('drawerTitle');
+    const drawerBody = document.getElementById('drawerBody');
+    const drawerList = document.getElementById('drawerList');
+
+    function openDrawer(key) {
+      const langData = I18N[currentLang];
+      const data = langData.drawerDetails[key];
+      if (!data) return;
+
+      drawerTag.innerText = data.tag;
+      drawerTitle.innerText = data.title;
+      drawerBody.innerText = data.body;
+
+      drawerList.innerHTML = data.features.map(f => `
+        <li><span class="drawer-check-icon">✔</span> <span>${f}</span></li>
+      `).join('');
+
+      drawerOverlay.classList.add('active');
+      detailsDrawer.classList.add('active');
+    }
+
+    function closeDrawer() {
+      drawerOverlay.classList.remove('active');
+      detailsDrawer.classList.remove('active');
+    }
+
+    // Simulator
+    const inputCovers = document.getElementById('inputCovers');
+    const inputTicket = document.getElementById('inputTicket');
+    const inputConversion = document.getElementById('inputConversion');
+
+    const valCovers = document.getElementById('valCovers');
+    const valTicket = document.getElementById('valTicket');
+    const valConversion = document.getElementById('valConversion');
+
+    const statReviews = document.getElementById('statReviews');
+    const statLeads = document.getElementById('statLeads');
+    const statSavings = document.getElementById('statSavings');
+    const statRepeat = document.getElementById('statRepeat');
+
+    function updateCalculations() {
+      const covers = parseInt(inputCovers.value, 10);
+      const ticket = parseInt(inputTicket.value, 10);
+      const conversion = parseInt(inputConversion.value, 10) / 100;
+      const data = I18N[currentLang];
+
+      valCovers.innerText = `${covers} ${data.unitGuests}`;
+      valTicket.innerText = currentLang === 'en' ? `${data.currencySymbol}${ticket}` : `${ticket} ${data.currencySymbol}`;
+      valConversion.innerText = `${Math.round(conversion * 100)} %`;
+
+      const monthlyGuests = covers * 30;
+      const newReviews = Math.round(monthlyGuests * conversion);
+      const newLeads = Math.round(monthlyGuests * (conversion * 1.2));
+      const monthlyRevenue = monthlyGuests * ticket;
+      
+      const rotationGain = Math.round(monthlyRevenue * 0.18);
+      const upsellGain = Math.round(monthlyRevenue * 0.15);
+
+      statReviews.innerText = newReviews.toLocaleString(currentLang === 'en' ? 'en-US' : 'fr-FR');
+      statLeads.innerText = newLeads.toLocaleString(currentLang === 'en' ? 'en-US' : 'fr-FR');
+
+      if (currentLang === 'en') {
+        statSavings.innerText = `${data.currencySymbol}${rotationGain.toLocaleString('en-US')}`;
+        statRepeat.innerText = `${data.currencySymbol}${upsellGain.toLocaleString('en-US')}`;
+      } else {
+        statSavings.innerText = `${rotationGain.toLocaleString('fr-FR')} ${data.currencySymbol}`;
+        statRepeat.innerText = `${upsellGain.toLocaleString('fr-FR')} ${data.currencySymbol}`;
+      }
+
+      renderChart();
+    }
+
+    inputCovers.addEventListener('input', updateCalculations);
+    inputTicket.addEventListener('input', updateCalculations);
+    inputConversion.addEventListener('input', updateCalculations);
+
+    // Chart Canvas
+    const chartCanvas = document.getElementById('growthChart');
+    const ctx = chartCanvas.getContext('2d');
+
+    function renderChart() {
+      if (!chartCanvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      const rect = chartCanvas.getBoundingClientRect();
+      chartCanvas.width = rect.width * dpr;
+      chartCanvas.height = rect.height * dpr;
+      ctx.resetTransform();
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const covers = parseInt(inputCovers.value, 10);
+      const conversion = parseInt(inputConversion.value, 10) / 100;
+      const monthlyReviewGain = (covers * 30 * conversion);
+
+      const months = currentLang === 'en' 
+        ? ['Month 1', 'Month 2', 'Month 3', 'Month 4', 'Month 5', 'Month 6']
+        : ['Mois 1', 'Mois 2', 'Mois 3', 'Mois 4', 'Mois 5', 'Mois 6'];
+      const standardGrowth = [100, 120, 140, 165, 190, 220];
+      const smartReviewGrowth = [
+        100,
+        Math.round(100 + monthlyReviewGain * 0.85),
+        Math.round(100 + monthlyReviewGain * 1.8),
+        Math.round(100 + monthlyReviewGain * 2.9),
+        Math.round(100 + monthlyReviewGain * 4.1),
+        Math.round(100 + monthlyReviewGain * 5.4)
+      ];
+
+      const maxVal = Math.max(...smartReviewGrowth) * 1.15;
+      const paddingX = 44;
+      const paddingY = 24;
+      const chartW = w - paddingX * 2;
+      const chartH = h - paddingY * 2;
+
+      ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 3; i++) {
+        const y = paddingY + (chartH / 3) * i;
+        ctx.beginPath();
+        ctx.moveTo(paddingX, y);
+        ctx.lineTo(w - paddingX, y);
+        ctx.stroke();
+      }
+
+      function drawLine(data, color, isDashed = false) {
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        if (isDashed) ctx.setLineDash([5, 5]);
+        else ctx.setLineDash([]);
+
+        data.forEach((val, i) => {
+          const x = paddingX + (chartW / (data.length - 1)) * i;
+          const y = paddingY + chartH - (val / maxVal) * chartH;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        data.forEach((val, i) => {
+          const x = paddingX + (chartW / (data.length - 1)) * i;
+          const y = paddingY + chartH - (val / maxVal) * chartH;
+          ctx.beginPath();
+          ctx.fillStyle = color;
+          ctx.arc(x, y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      drawLine(standardGrowth, '#9CA3AF', true);
+      drawLine(smartReviewGrowth, '#4F46E5');
+
+      ctx.fillStyle = '#64748B';
+      ctx.font = '10px -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      months.forEach((m, i) => {
+        const x = paddingX + (chartW / (months.length - 1)) * i;
+        ctx.fillText(m, x, h - 6);
+      });
+    }
+
+    window.addEventListener('load', () => {
+      setLanguage('en');
+      window.addEventListener('resize', renderChart);
+    });
+  </script>
+</body>
+</html>

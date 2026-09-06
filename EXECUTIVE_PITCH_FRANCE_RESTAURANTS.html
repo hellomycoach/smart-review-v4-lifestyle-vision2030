@@ -1,26 +1,39 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Présentation Exécutive & Simulateur de ROI - Smart Review AI pour Restaurants & Brasseries en France">
+  <meta name="description"
+    content="Présentation Exécutive & Simulateur de ROI - Smart Review AI pour Restaurants & Brasseries en France">
   <title>Smart Review AI • Présentation Exécutive | Restauration & Brasseries France</title>
   <style>
     /* ==========================================================================
        1. CHARTE GRAPHIQUE RESTAURATION HAUTE GAMME FRANCE (BLEU NUIT & OR)
        ========================================================================== */
     :root {
-      --primary: #1E3A8A;         /* Bleu Nuit Royal Élégant */
-      --primary-dark: #0F172A;    /* Ardoise Nuit Intense */
-      --primary-light: #EFF6FF;   /* Voile Bleu Pastel Doux */
-      --accent: #D97706;          /* Or Ambré / Caramel Chaud */
-      --accent-dark: #B45309;     /* Or Foncé Cuivré */
-      --accent-light: #FEF3C7;    /* Ivoire Doré Chaud */
-      --bg-main: #F8FAFC;         /* Fond Gris Perle Chaud */
-      --bg-surface: #FFFFFF;      /* Surface Blanche Épurée */
-      --border: #E2E8F0;          /* Bordure Discrète */
-      --text-main: #0F172A;       /* Noir Encre Titres */
-      --text-muted: #475569;      /* Gris Ardoise Textes */
+      --primary: #1E3A8A;
+      /* Bleu Nuit Royal Élégant */
+      --primary-dark: #0F172A;
+      /* Ardoise Nuit Intense */
+      --primary-light: #EFF6FF;
+      /* Voile Bleu Pastel Doux */
+      --accent: #D97706;
+      /* Or Ambré / Caramel Chaud */
+      --accent-dark: #B45309;
+      /* Or Foncé Cuivré */
+      --accent-light: #FEF3C7;
+      /* Ivoire Doré Chaud */
+      --bg-main: #F8FAFC;
+      /* Fond Gris Perle Chaud */
+      --bg-surface: #FFFFFF;
+      /* Surface Blanche Épurée */
+      --border: #E2E8F0;
+      /* Bordure Discrète */
+      --text-main: #0F172A;
+      /* Noir Encre Titres */
+      --text-muted: #475569;
+      /* Gris Ardoise Textes */
       --success: #10B981;
       --shadow-sm: 0 2px 8px rgba(15, 23, 42, 0.04);
       --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
@@ -33,7 +46,11 @@
       --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       font-family: var(--font-family);
@@ -44,8 +61,17 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    a { text-decoration: none; color: inherit; }
-    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
 
     /* Barre de navigation */
     .top-nav {
@@ -244,7 +270,9 @@
       gap: 8px;
     }
 
-    .tab-btn:hover { color: var(--text-main); }
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
 
     .tab-btn.active {
       background: var(--bg-surface);
@@ -257,11 +285,20 @@
       animation: fadeIn 0.3s ease-in-out forwards;
     }
 
-    .tab-content.active { display: block; }
+    .tab-content.active {
+      display: block;
+    }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* Piliers */
@@ -426,11 +463,13 @@
       border: 3px solid #FFFFFF;
       border-radius: 50%;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       transition: var(--transition);
     }
 
-    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
 
     .results-panel {
       background: var(--bg-main);
@@ -470,8 +509,13 @@
       line-height: 1.1;
     }
 
-    .roi-stat-num.highlight { color: var(--primary); }
-    .roi-stat-num.success { color: var(--success); }
+    .roi-stat-num.highlight {
+      color: var(--primary);
+    }
+
+    .roi-stat-num.success {
+      color: var(--success);
+    }
 
     .chart-box {
       background: var(--bg-surface);
@@ -523,7 +567,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       padding-bottom: 12px;
       margin-bottom: 16px;
       font-size: 0.85rem;
@@ -546,7 +590,11 @@
       margin-bottom: 8px;
     }
 
-    .dish-title { font-weight: 800; font-size: 1.1rem; }
+    .dish-title {
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
     .cal-badge {
       background: #EF4444;
       color: #FFFFFF;
@@ -604,8 +652,17 @@
       margin: 0 auto 12px;
     }
 
-    .flow-step-title { font-weight: 800; font-size: 1rem; margin-bottom: 8px; }
-    .flow-step-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.45; }
+    .flow-step-title {
+      font-weight: 800;
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .flow-step-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
 
     /* Volet coulissant */
     .drawer-overlay {
@@ -619,7 +676,10 @@
       transition: opacity 0.3s ease;
     }
 
-    .drawer-overlay.active { opacity: 1; pointer-events: auto; }
+    .drawer-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
 
     .details-drawer {
       position: fixed;
@@ -629,7 +689,7 @@
       width: 520px;
       max-width: 90vw;
       background: var(--bg-surface);
-      box-shadow: -10px 0 40px rgba(0,0,0,0.15);
+      box-shadow: -10px 0 40px rgba(0, 0, 0, 0.15);
       z-index: 101;
       transform: translateX(100%);
       transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -639,7 +699,9 @@
       padding: 36px;
     }
 
-    .details-drawer.active { transform: translateX(0); }
+    .details-drawer.active {
+      transform: translateX(0);
+    }
 
     .drawer-close-btn {
       align-self: flex-end;
@@ -657,7 +719,11 @@
       margin-bottom: 20px;
     }
 
-    .drawer-close-btn:hover { background: var(--primary-light); color: var(--primary); }
+    .drawer-close-btn:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
     .drawer-tag {
       display: inline-block;
       font-size: 0.75rem;
@@ -670,11 +736,41 @@
       text-transform: uppercase;
     }
 
-    .drawer-title { font-size: 1.7rem; font-weight: 900; margin-bottom: 14px; line-height: 1.2; }
-    .drawer-body { font-size: 0.95rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 24px; }
-    .drawer-features-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
-    .drawer-features-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.9rem; font-weight: 600; }
-    .drawer-check-icon { color: var(--success); font-size: 1.1rem; line-height: 1; }
+    .drawer-title {
+      font-size: 1.7rem;
+      font-weight: 900;
+      margin-bottom: 14px;
+      line-height: 1.2;
+    }
+
+    .drawer-body {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 24px;
+    }
+
+    .drawer-features-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .drawer-features-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .drawer-check-icon {
+      color: var(--success);
+      font-size: 1.1rem;
+      line-height: 1;
+    }
 
     .drawer-cta-btn {
       width: 100%;
@@ -693,25 +789,59 @@
       margin-top: auto;
     }
 
-    .drawer-cta-btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
+    .drawer-cta-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
 
     @media (max-width: 900px) {
-      .hero-title { font-size: 2rem; }
-      .hero-metrics-bar { grid-template-columns: repeat(2, 1fr); }
-      .pillars-grid { grid-template-columns: 1fr; }
-      .simulator-container { grid-template-columns: 1fr; }
-      .eat-fit-wrapper { grid-template-columns: 1fr; }
-      .flow-grid { grid-template-columns: repeat(2, 1fr); }
-      .tabs-nav { flex-wrap: wrap; border-radius: var(--radius-md); }
+      .hero-title {
+        font-size: 2rem;
+      }
+
+      .hero-metrics-bar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .pillars-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .simulator-container {
+        grid-template-columns: 1fr;
+      }
+
+      .eat-fit-wrapper {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .tabs-nav {
+        flex-wrap: wrap;
+        border-radius: var(--radius-md);
+      }
     }
 
     @media (max-width: 600px) {
-      .hero-metrics-bar { grid-template-columns: 1fr; }
-      .flow-grid { grid-template-columns: 1fr; }
-      .top-nav { flex-direction: column; align-items: flex-start; }
+      .hero-metrics-bar {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .top-nav {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
   </style>
 </head>
+
 <body>
 
   <!-- ========================================================================
@@ -722,7 +852,8 @@
       <div class="brand-logo-pill">
         <span>⚡ SMART REVIEW AI</span>
       </div>
-      <a id="navBranchBadge" href="#" target="_blank" rel="noopener noreferrer" class="branch-badge" title="Ouvrir la Démonstration Client Interactive">
+      <a id="navBranchBadge" href="#" target="_blank" rel="noopener noreferrer" class="branch-badge"
+        title="Ouvrir la Démonstration Client Interactive">
         <span>📍 Le Café Gourmet • Paris Opéra</span>
         <span style="font-size: 0.8rem; margin-left: 2px;">↗</span>
       </a>
@@ -743,10 +874,14 @@
       Proposition Stratégique Exclusive • Restauration & Brasseries France
     </div>
     <h1 class="hero-title">
-      Transformez chaque client de <span id="heroTitleRestaurant">votre établissement</span> en un <span>Avis Google 5 Étoiles</span>, Client Fidèle VIP & Revenu Direct.
+      Transformez chaque client de <span id="heroTitleRestaurant">votre établissement</span> en un <span>Avis Google 5
+        Étoiles</span>, Client Fidèle VIP & Revenu Direct.
     </h1>
     <p class="hero-subtitle" id="heroSubtitle">
-      Un moteur d'hospitalité et de commande à table sans friction conçu pour les restaurants et brasseries en France. Zéro application à télécharger. Le convive s'installe confortablement, scanne le QR et commande à son rythme sans faire la queue debout. Une fluidité absolue même en période estivale ou en situation de sous-effectif. 100% conforme aux normes DSP2 et Cartes Bancaires (CB).
+      Un moteur d'hospitalité et de commande à table sans friction conçu pour les restaurants et brasseries en France.
+      Zéro application à télécharger. Le convive s'installe confortablement, scanne le QR et commande à son rythme sans
+      faire la queue debout. Une fluidité absolue même en période estivale ou en situation de sous-effectif. 100%
+      conforme aux normes DSP2 et Cartes Bancaires (CB).
     </p>
 
     <!-- Métriques Clés -->
@@ -796,7 +931,7 @@
          ====================================================================== -->
     <section id="tab-pillars" class="tab-content active">
       <div class="pillars-grid">
-        
+
         <!-- Pilier 1 -->
         <article class="pillar-card" onclick="openDrawer('reviews')">
           <div>
@@ -806,13 +941,16 @@
             </div>
             <h3 class="pillar-title">1. Récolte Massive d'Avis Google 5★ Sans Friction</h3>
             <p class="pillar-desc">
-              Surclassez vos concurrents sur Google Maps dans votre quartier. La Roue de la Fortune ludique engage vos convives au moment de l'addition et génère des avis authentiques vérifiés en moins de 30 secondes.
+              Surclassez vos concurrents sur Google Maps dans votre quartier. La Roue de la Fortune ludique engage vos
+              convives au moment de l'addition et génère des avis authentiques vérifiés en moins de 30 secondes.
             </p>
           </div>
           <div>
             <div class="pillar-kpi-row">
               <div class="pillar-kpi">Conversion Moyenne : <strong>25% à 40% des tables</strong></div>
-              <div class="pillar-kpi">Temps de dépôt : <strong>< 30 secondes</strong></div>
+              <div class="pillar-kpi">Temps de dépôt : <strong>
+                  < 30 secondes</strong>
+              </div>
             </div>
             <div class="card-click-hint">Cliquez pour voir les détails stratégiques &rarr;</div>
           </div>
@@ -827,7 +965,10 @@
             </div>
             <h3 class="pillar-title">2. Commande à Table Confortable & Zéro File d'Attente</h3>
             <p class="pillar-desc">
-              Oubliez les bornes tactiles encombrantes et impersonnelles où les clients s'entassent debout dans le passage. Vos convives s'installent tranquillement à leur table, explorent la carte illustrée et commandent sereinement depuis leur smartphone. En terrasse comme aux heures de pointe estivales, le service reste fluide même en cas de sous-effectif.
+              Oubliez les bornes tactiles encombrantes et impersonnelles où les clients s'entassent debout dans le
+              passage. Vos convives s'installent tranquillement à leur table, explorent la carte illustrée et commandent
+              sereinement depuis leur smartphone. En terrasse comme aux heures de pointe estivales, le service reste
+              fluide même en cas de sous-effectif.
             </p>
           </div>
           <div>
@@ -848,7 +989,8 @@
             </div>
             <h3 class="pillar-title">3. L'Innovation "Eat & Fit" : Guilt-Free Dining</h3>
             <p class="pillar-desc">
-              Le convive prend en photo son plat gourmand ou sa formule bistrot. Notre IA Vision calcule les calories et lui génère instantanément sur WhatsApp une séance fitness sur-mesure pour savourer sans culpabiliser.
+              Le convive prend en photo son plat gourmand ou sa formule bistrot. Notre IA Vision calcule les calories et
+              lui génère instantanément sur WhatsApp une séance fitness sur-mesure pour savourer sans culpabiliser.
             </p>
           </div>
           <div>
@@ -869,7 +1011,8 @@
             </div>
             <h3 class="pillar-title">4. Pass VIP WhatsApp & Réactivation Automatique</h3>
             <p class="pillar-desc">
-              Fini les cartes de fidélité papier perdues ou les applications lourdes. Vos clients reçoivent leur pass membre directement sur WhatsApp. Notre IA réactive les clients inactifs lors des services creux.
+              Fini les cartes de fidélité papier perdues ou les applications lourdes. Vos clients reçoivent leur pass
+              membre directement sur WhatsApp. Notre IA réactive les clients inactifs lors des services creux.
             </p>
           </div>
           <div>
@@ -893,7 +1036,8 @@
         <div class="controls-panel">
           <div>
             <h3 style="font-size: 1.4rem; font-weight: 900; margin-bottom: 6px;">Simulateur d'Impact Financier</h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">Ajustez vos paramètres opérationnels réels pour projeter vos gains nets en euros (€).</p>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Ajustez vos paramètres opérationnels réels pour
+              projeter vos gains nets en euros (€).</p>
           </div>
 
           <div class="control-group">
@@ -920,8 +1064,10 @@
             <input type="range" id="inputConversion" min="5" max="50" step="1" value="25">
           </div>
 
-          <div style="background: var(--bg-main); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 0.8rem; color: var(--text-muted);">
-            💡 <strong>Base de calcul :</strong> Modèle estimant une accélération de la rotation des tables (+18% de capacité absorbée sans surcharge d'équipe) + augmentation du panier moyen (+12% d'upsell boissons/desserts).
+          <div
+            style="background: var(--bg-main); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 0.8rem; color: var(--text-muted);">
+            💡 <strong>Base de calcul :</strong> Modèle estimant une accélération de la rotation des tables (+18% de
+            capacité absorbée sans surcharge d'équipe) + augmentation du panier moyen (+12% d'upsell boissons/desserts).
           </div>
         </div>
 
@@ -949,7 +1095,8 @@
           <div class="chart-box">
             <div class="chart-title">
               <span>📈 Croissance Projetée des Avis Google à 6 Mois</span>
-              <span style="color: var(--primary); font-size: 0.8rem; font-weight: 800;">● Smart Review vs QR Standard</span>
+              <span style="color: var(--primary); font-size: 0.8rem; font-weight: 800;">● Smart Review vs QR
+                Standard</span>
             </div>
             <canvas id="growthChart"></canvas>
           </div>
@@ -963,17 +1110,23 @@
     <section id="tab-eatfit" class="tab-content">
       <div class="eat-fit-wrapper">
         <div>
-          <span class="pillar-badge" style="margin-bottom: 12px; display: inline-block;">Innovation Exclusivité F&B</span>
+          <span class="pillar-badge" style="margin-bottom: 12px; display: inline-block;">Innovation Exclusivité
+            F&B</span>
           <h2 style="font-size: 2rem; font-weight: 900; line-height: 1.2; margin-bottom: 16px;">
-            Savourer Sans Culpabilité grâce à <span style="color: var(--primary);">l'IA Vision Nutrition & Fitness</span>
+            Savourer Sans Culpabilité grâce à <span style="color: var(--primary);">l'IA Vision Nutrition &
+              Fitness</span>
           </h2>
           <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.6; margin-bottom: 20px;">
-            La clientèle urbaine et active en France recherche un équilibre entre plaisir gastronomique et hygiène de vie. Offrez-lui une expérience mémorable intégrée directement dans votre pass digital.
+            La clientèle urbaine et active en France recherche un équilibre entre plaisir gastronomique et hygiène de
+            vie. Offrez-lui une expérience mémorable intégrée directement dans votre pass digital.
           </p>
           <ul class="drawer-features-list">
-            <li><span class="drawer-check-icon">✔</span> <strong>Reconnaissance Visuelle Instantanée :</strong> Analyse de n'importe quel plat de brasserie ou dessert par IA multimodale.</li>
-            <li><span class="drawer-check-icon">✔</span> <strong>Estimation Calorique Équilibrée :</strong> Étalonnage selon les portions réelles servies en salle.</li>
-            <li><span class="drawer-check-icon">✔</span> <strong>Séance Fitness Brûle-Repas sur WhatsApp :</strong> Un circuit court de 12 min au poids du corps pour éliminer sans contrainte.</li>
+            <li><span class="drawer-check-icon">✔</span> <strong>Reconnaissance Visuelle Instantanée :</strong> Analyse
+              de n'importe quel plat de brasserie ou dessert par IA multimodale.</li>
+            <li><span class="drawer-check-icon">✔</span> <strong>Estimation Calorique Équilibrée :</strong> Étalonnage
+              selon les portions réelles servies en salle.</li>
+            <li><span class="drawer-check-icon">✔</span> <strong>Séance Fitness Brûle-Repas sur WhatsApp :</strong> Un
+              circuit court de 12 min au poids du corps pour éliminer sans contrainte.</li>
           </ul>
           <button class="btn-primary" onclick="openDrawer('eatfit')">
             📱 Explorer le flux complet de l'IA &rarr;
@@ -1011,30 +1164,36 @@
          ====================================================================== -->
     <section id="tab-payments" class="tab-content">
       <div class="hero-container" style="margin-top: 0; margin-bottom: 24px;">
-        <h2 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 8px;">Circuit Financier Direct & 100% Conforme aux Normes Françaises & DSP2</h2>
-        <p style="color: var(--text-muted); font-size: 0.95rem;">Zéro intermédiaire opaque. Les règlements sont crédités directement sur le compte bancaire commercial de votre restaurant.</p>
+        <h2 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 8px;">Circuit Financier Direct & 100% Conforme
+          aux Normes Françaises & DSP2</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Zéro intermédiaire opaque. Les règlements sont crédités
+          directement sur le compte bancaire commercial de votre restaurant.</p>
       </div>
 
       <div class="flow-grid">
         <div class="flow-step-card">
           <div class="step-number">1</div>
           <h4 class="flow-step-title">Scan du QR Code</h4>
-          <p class="flow-step-desc">Le QR posé sur la table ouvre le menu interactif instantanément, sans installer d'application.</p>
+          <p class="flow-step-desc">Le QR posé sur la table ouvre le menu interactif instantanément, sans installer
+            d'application.</p>
         </div>
         <div class="flow-step-card">
           <div class="step-number">2</div>
           <h4 class="flow-step-title">Règlement Sans Contact</h4>
-          <p class="flow-step-desc">Apple Pay, Google Pay ou Carte Bancaire (CB) avec authentification forte 3D-Secure.</p>
+          <p class="flow-step-desc">Apple Pay, Google Pay ou Carte Bancaire (CB) avec authentification forte 3D-Secure.
+          </p>
         </div>
         <div class="flow-step-card">
           <div class="step-number">3</div>
           <h4 class="flow-step-title">Passerelle Agréée DSP2</h4>
-          <p class="flow-step-desc">Flux monétique sécurisé de bout en bout via Stripe ou passerelle bancaire française partenaire.</p>
+          <p class="flow-step-desc">Flux monétique sécurisé de bout en bout via Stripe ou passerelle bancaire française
+            partenaire.</p>
         </div>
         <div class="flow-step-card">
           <div class="step-number">4</div>
           <h4 class="flow-step-title">Virement IBAN Direct</h4>
-          <p class="flow-step-desc">Impression automatique du bon en cuisine et versement net en euros (€) sur votre compte pro.</p>
+          <p class="flow-step-desc">Impression automatique du bon en cuisine et versement net en euros (€) sur votre
+            compte pro.</p>
         </div>
       </div>
 
@@ -1052,12 +1211,13 @@
   <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
   <aside class="details-drawer" id="detailsDrawer">
     <button class="drawer-close-btn" onclick="closeDrawer()" title="Fermer">&times;</button>
-    
+
     <span class="drawer-tag" id="drawerTag">Détails du Module</span>
     <h3 class="drawer-title" id="drawerTitle">Titre du Module</h3>
     <p class="drawer-body" id="drawerBody">Explications détaillées chargées dynamiquement.</p>
 
-    <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Bénéfices Clés pour votre Établissement :</h4>
+    <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Bénéfices Clés pour votre Établissement :
+    </h4>
     <ul class="drawer-features-list" id="drawerList"></ul>
 
     <a href="#" target="_blank" rel="noopener noreferrer" class="drawer-cta-btn" id="drawerCtaBtn">
@@ -1139,7 +1299,7 @@
         title: "Intelligence Artificielle 'Eat & Fit' : Guilt-Free Dining",
         body: "Une première exclusive en restauration en France. En photographiant son assiette, le convive découvre ses calories et reçoit une routine courte de remise en forme sur WhatsApp pour compenser son repas avec bienveillance. Cette touche de modernité suscite un bouche-à-oreille et un partage massif sur les réseaux sociaux.",
         features: [
-          "Modèle IA Vision dernière génération (Gemini 3.1 Multimodal) rapide et précis.",
+          "Modèle IA Coach IA dernière génération rapide et précis.",
           "Protocole de 12 minutes sans matériel spécialement formulé pour chaque plat.",
           "Expérience 100% intégrée à WhatsApp, sans création de compte fastidieuse.",
           "Effet viral : le convive partage fièrement son score et son badge 'Guilt-Free' sur Instagram et TikTok."
@@ -1240,7 +1400,7 @@
       const newReviews = Math.round(monthlyGuests * conversion);
       const newLeads = Math.round(monthlyGuests * (conversion * 1.2));
       const monthlyRevenue = monthlyGuests * ticket;
-      
+
       // Gain rotation de table (+18% de volume absorbé en salle/terrasse sans surcoût de personnel)
       const rotationGain = Math.round(monthlyRevenue * 0.18);
       // Gain d'upselling (+12% de ventes additionnelles boissons, desserts, formules)
@@ -1349,4 +1509,5 @@
     });
   </script>
 </body>
+
 </html>

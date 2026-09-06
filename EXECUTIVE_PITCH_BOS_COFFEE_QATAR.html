@@ -1,26 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Executive Pitch & ROI Simulator - Smart Review AI for Bo's Coffee Qatar (Qutoof Al Majed For Restaurants)">
+  <meta name="description"
+    content="Executive Pitch & ROI Simulator - Smart Review AI for Bo's Coffee Qatar (Qutoof Al Majed For Restaurants)">
   <title>Smart Review AI • Executive Presentation | Bo's Coffee Qatar</title>
   <style>
     /* ==========================================================================
        1. BO'S COFFEE SIGNATURE DESIGN TOKENS (CRIMSON RED, CARAMEL & LATTE)
        ========================================================================== */
     :root {
-      --primary: #C8102E;         /* Signature Bo's Crimson Red */
-      --primary-dark: #8F0B20;    /* Deep Roasted Crimson */
-      --primary-light: #FDE8EA;   /* Soft Rose Foam Tint */
-      --accent: #D4A373;          /* Warm Roasted Caramel / Soft Gold */
-      --accent-dark: #A67245;     /* Dark Caramel / Espresso */
-      --accent-light: #FBF4ED;    /* Cream Latte / Warm Ivory */
-      --bg-main: #FAF8F5;         /* Warm Ivory Paper Background */
-      --bg-surface: #FFFFFF;      /* Clean White Card Surface */
-      --border: #E8DDD0;          /* Subtle Latte Foam Border */
-      --text-main: #241712;       /* Dark Roasted Coffee Bean */
-      --text-muted: #6E5C53;      /* Warm Charcoal Body Text */
+      --primary: #C8102E;
+      /* Signature Bo's Crimson Red */
+      --primary-dark: #8F0B20;
+      /* Deep Roasted Crimson */
+      --primary-light: #FDE8EA;
+      /* Soft Rose Foam Tint */
+      --accent: #D4A373;
+      /* Warm Roasted Caramel / Soft Gold */
+      --accent-dark: #A67245;
+      /* Dark Caramel / Espresso */
+      --accent-light: #FBF4ED;
+      /* Cream Latte / Warm Ivory */
+      --bg-main: #FAF8F5;
+      /* Warm Ivory Paper Background */
+      --bg-surface: #FFFFFF;
+      /* Clean White Card Surface */
+      --border: #E8DDD0;
+      /* Subtle Latte Foam Border */
+      --text-main: #241712;
+      /* Dark Roasted Coffee Bean */
+      --text-muted: #6E5C53;
+      /* Warm Charcoal Body Text */
       --success: #10B981;
       --shadow-sm: 0 2px 8px rgba(36, 23, 18, 0.04);
       --shadow-md: 0 8px 24px rgba(36, 23, 18, 0.08);
@@ -33,7 +46,11 @@
       --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       font-family: var(--font-family);
@@ -44,8 +61,17 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    a { text-decoration: none; color: inherit; }
-    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
 
     /* Top Navigation */
     .top-nav {
@@ -244,7 +270,9 @@
       gap: 8px;
     }
 
-    .tab-btn:hover { color: var(--text-main); }
+    .tab-btn:hover {
+      color: var(--text-main);
+    }
 
     .tab-btn.active {
       background: var(--bg-surface);
@@ -257,11 +285,20 @@
       animation: fadeIn 0.3s ease-in-out forwards;
     }
 
-    .tab-content.active { display: block; }
+    .tab-content.active {
+      display: block;
+    }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* Pillars */
@@ -426,11 +463,13 @@
       border: 3px solid #FFFFFF;
       border-radius: 50%;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       transition: var(--transition);
     }
 
-    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
 
     .results-panel {
       background: var(--bg-main);
@@ -470,8 +509,13 @@
       line-height: 1.1;
     }
 
-    .roi-stat-num.highlight { color: var(--primary); }
-    .roi-stat-num.success { color: var(--success); }
+    .roi-stat-num.highlight {
+      color: var(--primary);
+    }
+
+    .roi-stat-num.success {
+      color: var(--success);
+    }
 
     .chart-box {
       background: var(--bg-surface);
@@ -523,7 +567,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       padding-bottom: 12px;
       margin-bottom: 16px;
       font-size: 0.85rem;
@@ -546,7 +590,11 @@
       margin-bottom: 8px;
     }
 
-    .dish-title { font-weight: 800; font-size: 1.1rem; }
+    .dish-title {
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
     .cal-badge {
       background: #EF4444;
       color: #FFFFFF;
@@ -604,8 +652,17 @@
       margin: 0 auto 12px;
     }
 
-    .flow-step-title { font-weight: 800; font-size: 1rem; margin-bottom: 8px; }
-    .flow-step-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.45; }
+    .flow-step-title {
+      font-weight: 800;
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+
+    .flow-step-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.45;
+    }
 
     /* Side Drawer */
     .drawer-overlay {
@@ -619,7 +676,10 @@
       transition: opacity 0.3s ease;
     }
 
-    .drawer-overlay.active { opacity: 1; pointer-events: auto; }
+    .drawer-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
 
     .details-drawer {
       position: fixed;
@@ -629,7 +689,7 @@
       width: 520px;
       max-width: 90vw;
       background: var(--bg-surface);
-      box-shadow: -10px 0 40px rgba(0,0,0,0.15);
+      box-shadow: -10px 0 40px rgba(0, 0, 0, 0.15);
       z-index: 101;
       transform: translateX(100%);
       transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
@@ -639,7 +699,9 @@
       padding: 36px;
     }
 
-    .details-drawer.active { transform: translateX(0); }
+    .details-drawer.active {
+      transform: translateX(0);
+    }
 
     .drawer-close-btn {
       align-self: flex-end;
@@ -657,7 +719,11 @@
       margin-bottom: 20px;
     }
 
-    .drawer-close-btn:hover { background: var(--primary-light); color: var(--primary); }
+    .drawer-close-btn:hover {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
     .drawer-tag {
       display: inline-block;
       font-size: 0.75rem;
@@ -670,11 +736,41 @@
       text-transform: uppercase;
     }
 
-    .drawer-title { font-size: 1.7rem; font-weight: 900; margin-bottom: 14px; line-height: 1.2; }
-    .drawer-body { font-size: 0.95rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 24px; }
-    .drawer-features-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
-    .drawer-features-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.9rem; font-weight: 600; }
-    .drawer-check-icon { color: var(--success); font-size: 1.1rem; line-height: 1; }
+    .drawer-title {
+      font-size: 1.7rem;
+      font-weight: 900;
+      margin-bottom: 14px;
+      line-height: 1.2;
+    }
+
+    .drawer-body {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 24px;
+    }
+
+    .drawer-features-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .drawer-features-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .drawer-check-icon {
+      color: var(--success);
+      font-size: 1.1rem;
+      line-height: 1;
+    }
 
     .drawer-cta-btn {
       width: 100%;
@@ -693,25 +789,59 @@
       margin-top: auto;
     }
 
-    .drawer-cta-btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
+    .drawer-cta-btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
 
     @media (max-width: 900px) {
-      .hero-title { font-size: 2rem; }
-      .hero-metrics-bar { grid-template-columns: repeat(2, 1fr); }
-      .pillars-grid { grid-template-columns: 1fr; }
-      .simulator-container { grid-template-columns: 1fr; }
-      .eat-fit-wrapper { grid-template-columns: 1fr; }
-      .flow-grid { grid-template-columns: repeat(2, 1fr); }
-      .tabs-nav { flex-wrap: wrap; border-radius: var(--radius-md); }
+      .hero-title {
+        font-size: 2rem;
+      }
+
+      .hero-metrics-bar {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .pillars-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .simulator-container {
+        grid-template-columns: 1fr;
+      }
+
+      .eat-fit-wrapper {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .tabs-nav {
+        flex-wrap: wrap;
+        border-radius: var(--radius-md);
+      }
     }
 
     @media (max-width: 600px) {
-      .hero-metrics-bar { grid-template-columns: 1fr; }
-      .flow-grid { grid-template-columns: 1fr; }
-      .top-nav { flex-direction: column; align-items: flex-start; }
+      .hero-metrics-bar {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .top-nav {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
   </style>
 </head>
+
 <body>
 
   <!-- ========================================================================
@@ -722,7 +852,8 @@
       <div class="brand-logo-pill">
         <span>⚡ SMART REVIEW AI</span>
       </div>
-      <a id="navBranchBadge" href="#" target="_blank" rel="noopener noreferrer" class="branch-badge" title="Open Live Client Interactive Demonstration">
+      <a id="navBranchBadge" href="#" target="_blank" rel="noopener noreferrer" class="branch-badge"
+        title="Open Live Client Interactive Demonstration">
         <span>📍 Bo's Coffee • Mall of Qatar</span>
         <span style="font-size: 0.8rem; margin-left: 2px;">↗</span>
       </a>
@@ -743,10 +874,14 @@
       Exclusive Strategic Proposal • Qutoof Al Majed For Restaurants
     </div>
     <h1 class="hero-title">
-      Turn Every <span id="heroTitleRestaurant">Bo’s Coffee</span> Guest into a <span>5-Star Google Review</span>, VIP Repeat Visitor & Instant Direct Revenue.
+      Turn Every <span id="heroTitleRestaurant">Bo’s Coffee</span> Guest into a <span>5-Star Google Review</span>, VIP
+      Repeat Visitor & Instant Direct Revenue.
     </h1>
     <p class="hero-subtitle" id="heroSubtitle">
-      A frictionless dine-in hospitality and table-ordering engine built for high-traffic Doha destinations (Mall of Qatar, Lusail, The Pearl). Zero app downloads. Guests sit down comfortably, scan, and order at their own pace without standing in long queues or dealing with crowded kiosks. 100% compliant with Qatar Central Bank (QCB) direct settlement standards.
+      A frictionless dine-in hospitality and table-ordering engine built for high-traffic Doha destinations (Mall of
+      Qatar, Lusail, The Pearl). Zero app downloads. Guests sit down comfortably, scan, and order at their own pace
+      without standing in long queues or dealing with crowded kiosks. 100% compliant with Qatar Central Bank (QCB)
+      direct settlement standards.
     </p>
 
     <!-- Key Impact Metrics -->
@@ -796,7 +931,7 @@
          ====================================================================== -->
     <section id="tab-pillars" class="tab-content active">
       <div class="pillars-grid">
-        
+
         <!-- Pillar 1 -->
         <article class="pillar-card" onclick="openDrawer('reviews')">
           <div>
@@ -806,13 +941,16 @@
             </div>
             <h3 class="pillar-title">1. Frictionless 5★ Google Review Engine</h3>
             <p class="pillar-desc">
-              Outrank competitors across Doha on Google Maps. The gamified Spin & Win wheel engages guests right at peak dining satisfaction, generating verified authentic 5-star reviews in under 30 seconds.
+              Outrank competitors across Doha on Google Maps. The gamified Spin & Win wheel engages guests right at peak
+              dining satisfaction, generating verified authentic 5-star reviews in under 30 seconds.
             </p>
           </div>
           <div>
             <div class="pillar-kpi-row">
               <div class="pillar-kpi">Table Conversion: <strong>25% to 40%</strong></div>
-              <div class="pillar-kpi">Review Time: <strong>< 30 seconds</strong></div>
+              <div class="pillar-kpi">Review Time: <strong>
+                  < 30 seconds</strong>
+              </div>
             </div>
             <div class="card-click-hint">Click to inspect strategic details &rarr;</div>
           </div>
@@ -827,7 +965,9 @@
             </div>
             <h3 class="pillar-title">2. Relaxed Table Ordering & Zero Counter Queues</h3>
             <p class="pillar-desc">
-              Say goodbye to bulky fast-food touch kiosks where customers stand in crowded queues blocking walkways. Guests relax at their table, explore the mouth-watering photo menu, and order handcrafted brews on their phone. During weekend mall rushes or staff shortages, orders go straight to the barista KDS without delay.
+              Say goodbye to bulky fast-food touch kiosks where customers stand in crowded queues blocking walkways.
+              Guests relax at their table, explore the mouth-watering photo menu, and order handcrafted brews on their
+              phone. During weekend mall rushes or staff shortages, orders go straight to the barista KDS without delay.
             </p>
           </div>
           <div>
@@ -848,7 +988,9 @@
             </div>
             <h3 class="pillar-title">3. "Eat & Fit" : Guilt-Free Dining Innovation</h3>
             <p class="pillar-desc">
-              The guest snaps a photo of their artisanal pastry or Froccino. Our Multimodal Vision AI instantly calculates calories and sends a personalized, equipment-free 12-minute home workout directly on WhatsApp to burn it guilt-free.
+              The guest snaps a photo of their artisanal pastry or Froccino. Our Multimodal Vision AI instantly
+              calculates calories and sends a personalized, equipment-free 12-minute home workout directly on WhatsApp
+              to burn it guilt-free.
             </p>
           </div>
           <div>
@@ -869,7 +1011,8 @@
             </div>
             <h3 class="pillar-title">4. WhatsApp VIP Pass & Automated Re-engagement</h3>
             <p class="pillar-desc">
-              No plastic loyalty cards or cumbersome mobile app downloads. Guests keep their live digital VIP pass inside WhatsApp. Automated smart campaigns re-engage guests during quiet mall hours (weekday mornings).
+              No plastic loyalty cards or cumbersome mobile app downloads. Guests keep their live digital VIP pass
+              inside WhatsApp. Automated smart campaigns re-engage guests during quiet mall hours (weekday mornings).
             </p>
           </div>
           <div>
@@ -893,7 +1036,8 @@
         <div class="controls-panel">
           <div>
             <h3 style="font-size: 1.4rem; font-weight: 900; margin-bottom: 6px;">Financial Impact Simulator</h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">Adjust operational variables to forecast your branch returns in Qatari Riyals (QAR).</p>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Adjust operational variables to forecast your branch
+              returns in Qatari Riyals (QAR).</p>
           </div>
 
           <div class="control-group">
@@ -920,8 +1064,10 @@
             <input type="range" id="inputConversion" min="5" max="50" step="1" value="25">
           </div>
 
-          <div style="background: var(--bg-main); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 0.8rem; color: var(--text-muted);">
-            💡 <strong>Forecast Model:</strong> Evaluates table turn acceleration (+18% seating capacity absorbed without extra labor) + average check increase (+15% upsell from visual food & drink recommendations).
+          <div
+            style="background: var(--bg-main); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 0.8rem; color: var(--text-muted);">
+            💡 <strong>Forecast Model:</strong> Evaluates table turn acceleration (+18% seating capacity absorbed
+            without extra labor) + average check increase (+15% upsell from visual food & drink recommendations).
           </div>
         </div>
 
@@ -949,7 +1095,8 @@
           <div class="chart-box">
             <div class="chart-title">
               <span>📈 6-Month Projected Google Review Trajectory</span>
-              <span style="color: var(--primary); font-size: 0.8rem; font-weight: 800;">● Smart Review vs Standard QR</span>
+              <span style="color: var(--primary); font-size: 0.8rem; font-weight: 800;">● Smart Review vs Standard
+                QR</span>
             </div>
             <canvas id="growthChart"></canvas>
           </div>
@@ -968,12 +1115,17 @@
             Guilt-Free Dining Powered by <span style="color: var(--primary);">Multimodal Vision AI</span>
           </h2>
           <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.6; margin-bottom: 20px;">
-            Doha's clientele is deeply passionate about premium fitness, wellness, and cutting-edge lifestyle experiences. Bo's Coffee can be the first coffeehouse in Qatar to integrate this AI perk directly into its digital guest pass.
+            Doha's clientele is deeply passionate about premium fitness, wellness, and cutting-edge lifestyle
+            experiences. Bo's Coffee can be the first coffeehouse in Qatar to integrate this AI perk directly into its
+            digital guest pass.
           </p>
           <ul class="drawer-features-list">
-            <li><span class="drawer-check-icon">✔</span> <strong>Instant Visual Food Recognition:</strong> Powered by Gemini 3.1 Multimodal to detect pastries, sandwiches, and handcrafted coffees.</li>
-            <li><span class="drawer-check-icon">✔</span> <strong>Accurate Caloric & Macro Breakdown:</strong> Calibrated specifically to gourmet coffeehouse portion sizes.</li>
-            <li><span class="drawer-check-icon">✔</span> <strong>12-Minute Bodyweight Routine via WhatsApp:</strong> Customized, equipment-free workout to offset calories with fun and ease.</li>
+            <li><span class="drawer-check-icon">✔</span> <strong>Instant Visual Food Recognition:</strong> Powered by
+              Gemini 3.1 Multimodal to detect pastries, sandwiches, and handcrafted coffees.</li>
+            <li><span class="drawer-check-icon">✔</span> <strong>Accurate Caloric & Macro Breakdown:</strong> Calibrated
+              specifically to gourmet coffeehouse portion sizes.</li>
+            <li><span class="drawer-check-icon">✔</span> <strong>12-Minute Bodyweight Routine via WhatsApp:</strong>
+              Customized, equipment-free workout to offset calories with fun and ease.</li>
           </ul>
           <button class="btn-primary" onclick="openDrawer('eatfit')">
             📱 Explore the Complete AI Flow &rarr;
@@ -1011,15 +1163,18 @@
          ====================================================================== -->
     <section id="tab-payments" class="tab-content">
       <div class="hero-container" style="margin-top: 0; margin-bottom: 24px;">
-        <h2 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 8px;">Direct Financial Settlement • 100% QCB Compliant</h2>
-        <p style="color: var(--text-muted); font-size: 0.95rem;">Zero third-party escrow. Funds settle directly into Qutoof Al Majed's commercial banking merchant account.</p>
+        <h2 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 8px;">Direct Financial Settlement • 100% QCB
+          Compliant</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Zero third-party escrow. Funds settle directly into
+          Qutoof Al Majed's commercial banking merchant account.</p>
       </div>
 
       <div class="flow-grid">
         <div class="flow-step-card">
           <div class="step-number">1</div>
           <h4 class="flow-step-title">Table QR Scan</h4>
-          <p class="flow-step-desc">Table QR opens the high-speed digital menu instantly. Zero app downloads required.</p>
+          <p class="flow-step-desc">Table QR opens the high-speed digital menu instantly. Zero app downloads required.
+          </p>
         </div>
         <div class="flow-step-card">
           <div class="step-number">2</div>
@@ -1034,7 +1189,8 @@
         <div class="flow-step-card">
           <div class="step-number">4</div>
           <h4 class="flow-step-title">Direct IBAN Payout</h4>
-          <p class="flow-step-desc">Instant kitchen KDS chime + 100% net QAR settlement into the corporate company bank account.</p>
+          <p class="flow-step-desc">Instant kitchen KDS chime + 100% net QAR settlement into the corporate company bank
+            account.</p>
         </div>
       </div>
 
@@ -1052,7 +1208,7 @@
   <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
   <aside class="details-drawer" id="detailsDrawer">
     <button class="drawer-close-btn" onclick="closeDrawer()" title="Close">&times;</button>
-    
+
     <span class="drawer-tag" id="drawerTag">Module Overview</span>
     <h3 class="drawer-title" id="drawerTitle">Module Title</h3>
     <p class="drawer-body" id="drawerBody">Detailed explanations loaded dynamically.</p>
@@ -1139,7 +1295,7 @@
         title: "Gemini AI 'Eat & Fit' : Guilt-Free Dining",
         body: "An exclusive milestone in the GCC coffeehouse market. By snapping a photo of their dessert or specialty beverage, guests discover their caloric balance and receive a custom 12-minute home workout via WhatsApp to burn off the calories guilt-free. Creates viral social buzz and organic brand advocacy.",
         features: [
-          "Next-generation Multimodal Vision AI (Gemini 3.1) offering swift, accurate food identification.",
+          "Next-generation AI Coach offering swift, accurate food identification.",
           "Equipment-free 12-minute fitness circuit designed specifically for coffeehouse portions.",
           "Zero app download: 100% native WhatsApp experience for effortless guest delight.",
           "Viral reach: guests share their 'Guilt-Free Bo's Coffee Badge' on Instagram Stories and TikTok."
@@ -1240,7 +1396,7 @@
       const newReviews = Math.round(monthlyGuests * conversion);
       const newLeads = Math.round(monthlyGuests * (conversion * 1.2));
       const monthlyRevenue = monthlyGuests * ticket;
-      
+
       // Table turn acceleration gain (+18% capacity absorbed without extra labor)
       const tableTurnGain = Math.round(monthlyRevenue * 0.18);
       // Upsell check gain (+15% average order value increase)
@@ -1349,4 +1505,5 @@
     });
   </script>
 </body>
+
 </html>
