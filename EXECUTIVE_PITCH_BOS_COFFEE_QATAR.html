@@ -1,0 +1,1336 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Présentation Exécutive & Simulateur de ROI - Smart Review AI pour Bo's Coffee Qatar (Groupe Al Majed)">
+  <title>Smart Review AI • Présentation Exécutive | Bo's Coffee Qatar</title>
+  <style>
+    /* ==========================================================================
+       1. CHARTE GRAPHIQUE BO'S COFFEE QATAR
+       ========================================================================== */
+    :root {
+      --primary: #C8102E;         /* Rouge Crimson Signature Bo's */
+      --primary-dark: #8F0B20;    /* Crimson Intense */
+      --primary-light: #FDE8EA;   /* Voile Rouge Léger */
+      --accent: #D4A373;          /* Caramel Torréfié / Or Doux */
+      --accent-dark: #A67245;     /* Or Foncé Torréfié */
+      --accent-light: #FBF4ED;    /* Crème Latte / Mousse */
+      --bg-main: #FAF8F5;         /* Fond Papier Ivoire Chaud */
+      --bg-surface: #FFFFFF;      /* Surface Blanche */
+      --border: #E8DDD0;          /* Bordure Douce Latte */
+      --text-main: #241712;       /* Grain de Café Foncé */
+      --text-muted: #6E5C53;      /* Gris Chaud Atténué */
+      --success: #10B981;
+      --shadow-sm: 0 2px 8px rgba(36, 23, 18, 0.04);
+      --shadow-md: 0 8px 24px rgba(36, 23, 18, 0.08);
+      --shadow-lg: 0 16px 40px rgba(36, 23, 18, 0.12);
+      --radius-sm: 10px;
+      --radius-md: 18px;
+      --radius-lg: 26px;
+      --radius-full: 9999px;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      line-height: 1.5;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { text-decoration: none; color: inherit; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+    /* Barre de navigation */
+    .top-nav {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--primary-light);
+      border: 1px solid rgba(200, 16, 46, 0.2);
+      border-radius: var(--radius-full);
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: var(--primary);
+    }
+
+    .branch-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: var(--accent-light);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--accent-dark);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .branch-badge:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--primary-light);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      padding: 9px 20px;
+      border-radius: var(--radius-full);
+      font-size: 0.85rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px rgba(200, 16, 46, 0.28);
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(200, 16, 46, 0.38);
+    }
+
+    /* Hero */
+    .hero-container {
+      max-width: 1200px;
+      margin: 32px auto 20px;
+      padding: 0 24px;
+      text-align: center;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 16px;
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: -0.8px;
+      line-height: 1.18;
+      max-width: 960px;
+      margin: 0 auto 16px;
+      color: var(--text-main);
+    }
+
+    .hero-title span {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 840px;
+      margin: 0 auto 28px;
+      font-weight: 500;
+    }
+
+    .hero-metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      max-width: 1040px;
+      margin: 0 auto 36px;
+    }
+
+    .metric-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 20px;
+      text-align: left;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      cursor: pointer;
+    }
+
+    .metric-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .metric-value {
+      font-size: 1.7rem;
+      font-weight: 900;
+      color: var(--primary);
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+
+    .metric-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Onglets */
+    .tabs-wrapper {
+      max-width: 1200px;
+      margin: 0 auto 24px;
+      padding: 0 24px;
+    }
+
+    .tabs-nav {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(232, 221, 208, 0.45);
+      padding: 6px;
+      border-radius: var(--radius-full);
+      width: fit-content;
+      margin: 0 auto 32px;
+      border: 1px solid var(--border);
+    }
+
+    .tab-btn {
+      padding: 10px 22px;
+      border-radius: var(--radius-full);
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      transition: var(--transition);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tab-btn:hover { color: var(--text-main); }
+
+    .tab-btn.active {
+      background: var(--bg-surface);
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .tab-content {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out forwards;
+    }
+
+    .tab-content.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Piliers */
+    .pillars-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .pillar-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .pillar-card:hover {
+      border-color: var(--primary);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-3px);
+    }
+
+    .pillar-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .pillar-icon {
+      width: 54px;
+      height: 54px;
+      border-radius: var(--radius-md);
+      background: var(--primary-light);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      border: 1px solid rgba(200, 16, 46, 0.2);
+    }
+
+    .pillar-badge {
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      background: var(--accent-light);
+      color: var(--accent-dark);
+      border: 1px solid var(--border);
+    }
+
+    .pillar-title {
+      font-size: 1.35rem;
+      font-weight: 900;
+      margin-bottom: 8px;
+      color: var(--text-main);
+    }
+
+    .pillar-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+      margin-bottom: 20px;
+    }
+
+    .pillar-kpi-row {
+      display: flex;
+      gap: 16px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--border);
+    }
+
+    .pillar-kpi {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .pillar-kpi strong {
+      color: var(--primary);
+      font-size: 0.95rem;
+      display: block;
+    }
+
+    .card-click-hint {
+      margin-top: 16px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: var(--primary);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Simulateur */
+    .simulator-container {
+      display: grid;
+      grid-template-columns: 1fr 1.25fr;
+      gap: 32px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 40px;
+    }
+
+    .controls-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .control-label-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .control-value-badge {
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 2px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.9rem;
+      font-weight: 900;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 8px;
+      background: var(--border);
+      border-radius: var(--radius-full);
+      outline: none;
+      transition: var(--transition);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      background: var(--primary);
+      border: 3px solid #FFFFFF;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      transition: var(--transition);
+    }
+
+    input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+
+    .results-panel {
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .roi-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    .roi-stat-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .roi-stat-title {
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+    }
+
+    .roi-stat-num {
+      font-size: 1.65rem;
+      font-weight: 900;
+      color: var(--text-main);
+    }
+
+    .roi-stat-num.highlight { color: var(--primary); }
+    .roi-stat-num.success { color: var(--success); }
+
+    .chart-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      position: relative;
+    }
+
+    .chart-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: 180px !important;
+      display: block;
+    }
+
+    /* Eat & Fit */
+    .eat-fit-wrapper {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: center;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 40px;
+    }
+
+    .eat-fit-preview {
+      background: #14161F;
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      color: #FFFFFF;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+    }
+
+    .phone-mockup-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #10B981;
+    }
+
+    .dish-sample-card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .dish-info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .dish-title { font-weight: 800; font-size: 1.1rem; }
+    .cal-badge {
+      background: #EF4444;
+      color: #FFFFFF;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 900;
+    }
+
+    .workout-plan-box {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      font-size: 0.85rem;
+    }
+
+    .workout-step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      color: #D1D5DB;
+    }
+
+    /* Flux de paiements */
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 40px;
+      position: relative;
+    }
+
+    .flow-step-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .step-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 0.85rem;
+      margin: 0 auto 12px;
+    }
+
+    .flow-step-title { font-weight: 800; font-size: 1rem; margin-bottom: 8px; }
+    .flow-step-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.45; }
+
+    /* Volet coulissant */
+    .drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(36, 23, 18, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .drawer-overlay.active { opacity: 1; pointer-events: auto; }
+
+    .details-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 520px;
+      max-width: 90vw;
+      background: var(--bg-surface);
+      box-shadow: -10px 0 40px rgba(0,0,0,0.15);
+      z-index: 101;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 36px;
+    }
+
+    .details-drawer.active { transform: translateX(0); }
+
+    .drawer-close-btn {
+      align-self: flex-end;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--bg-main);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      color: var(--text-main);
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+
+    .drawer-close-btn:hover { background: var(--primary-light); color: var(--primary); }
+    .drawer-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: var(--radius-full);
+      background: var(--accent-light);
+      color: var(--accent-dark);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    .drawer-title { font-size: 1.7rem; font-weight: 900; margin-bottom: 14px; line-height: 1.2; }
+    .drawer-body { font-size: 0.95rem; color: var(--text-muted); line-height: 1.65; margin-bottom: 24px; }
+    .drawer-features-list { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+    .drawer-features-list li { display: flex; align-items: flex-start; gap: 10px; font-size: 0.9rem; font-weight: 600; }
+    .drawer-check-icon { color: var(--success); font-size: 1.1rem; line-height: 1; }
+
+    .drawer-cta-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: var(--radius-md);
+      background: var(--primary);
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(200, 16, 46, 0.3);
+      transition: var(--transition);
+      margin-top: auto;
+    }
+
+    .drawer-cta-btn:hover { background: var(--primary-dark); transform: translateY(-2px); }
+
+    @media (max-width: 900px) {
+      .hero-title { font-size: 2rem; }
+      .hero-metrics-bar { grid-template-columns: repeat(2, 1fr); }
+      .pillars-grid { grid-template-columns: 1fr; }
+      .simulator-container { grid-template-columns: 1fr; }
+      .eat-fit-wrapper { grid-template-columns: 1fr; }
+      .flow-grid { grid-template-columns: repeat(2, 1fr); }
+      .tabs-nav { flex-wrap: wrap; border-radius: var(--radius-md); }
+    }
+
+    @media (max-width: 600px) {
+      .hero-metrics-bar { grid-template-columns: 1fr; }
+      .flow-grid { grid-template-columns: 1fr; }
+      .top-nav { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================================
+       BARRE DE NAVIGATION SUPÉRIEURE (100% QATAR)
+       ======================================================================== -->
+  <header class="top-nav">
+    <div class="nav-brand">
+      <div class="brand-logo-pill">
+        <span>⚡ SMART REVIEW AI</span>
+      </div>
+      <a id="navBranchBadge" href="#" target="_blank" rel="noopener noreferrer" class="branch-badge" title="Ouvrir la Landing Page Client en direct">
+        <span>📍 Bo's Coffee • Mall of Qatar</span>
+        <span style="font-size: 0.8rem; margin-left: 2px;">↗</span>
+      </a>
+    </div>
+
+    <div class="nav-actions">
+      <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" id="pilotCtaBtn">
+        <span>💬 Proposer un Pilote 30 Jours (WhatsApp)</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       SECTION HERO D'ACCROCHE BO'S COFFEE QATAR
+       ======================================================================== -->
+  <section class="hero-container">
+    <div class="hero-tag" id="heroTag">
+      Proposition Stratégique Exclusive • Qutoof Al Majed For Restaurants
+    </div>
+    <h1 class="hero-title">
+      Transformez chaque client de <span id="heroTitleRestaurant">Bo’s Coffee</span> en un <span>Avis Google 5 Étoiles</span>, Client Fidèle VIP & Revenu Direct.
+    </h1>
+    <p class="hero-subtitle" id="heroSubtitle">
+      Un moteur d'hospitalité et de fidélisation sans friction conçu pour les pôles majeurs de Doha (Mall of Qatar, Lusail, The Pearl). Zéro application à télécharger. 100% natif WhatsApp. Conforme aux règlements directs de la Banque Centrale du Qatar (QCB).
+    </p>
+
+    <!-- Métriques Clés -->
+    <div class="hero-metrics-bar">
+      <div class="metric-card" onclick="openDrawer('google')">
+        <div class="metric-value">+350%</div>
+        <div class="metric-label">Avis Google 5★ / Mois</div>
+      </div>
+      <div class="metric-card" onclick="openDrawer('whatsapp')">
+        <div class="metric-value">100%</div>
+        <div class="metric-label">Contacts WhatsApp Qualifiés</div>
+      </div>
+      <div class="metric-card" onclick="openDrawer('eatfit')">
+        <div class="metric-value">12 Min</div>
+        <div class="metric-label">Séance Fitness IA "Guilt-Free"</div>
+      </div>
+      <div class="metric-card" onclick="openDrawer('payments')">
+        <div class="metric-value">0%</div>
+        <div class="metric-label">Commission Agrégateur Tiers</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       ONGLETS DE NAVIGATION INTERACTIFS
+       ======================================================================== -->
+  <main class="tabs-wrapper">
+    <div class="tabs-nav">
+      <button class="tab-btn active" data-tab="pillars">
+        🏛️ Les 4 Piliers de Croissance
+      </button>
+      <button class="tab-btn" data-tab="simulator">
+        📊 Simulateur & Calculateur ROI
+      </button>
+      <button class="tab-btn" data-tab="eatfit">
+        🥗 L'Innovation IA "Eat & Fit"
+      </button>
+      <button class="tab-btn" data-tab="payments">
+        💳 Flux de Paiements Conforme QCB
+      </button>
+    </div>
+
+    <!-- ======================================================================
+         ONGLET 1 : LES 4 PILIERS STRATÉGIQUES
+         ====================================================================== -->
+    <section id="tab-pillars" class="tab-content active">
+      <div class="pillars-grid">
+        
+        <!-- Pilier 1 -->
+        <div class="pillar-card" onclick="openDrawer('google')">
+          <div>
+            <div class="pillar-header">
+              <div class="pillar-icon">⭐</div>
+              <span class="pillar-badge">Suprématie SEO</span>
+            </div>
+            <h3 class="pillar-title">1. Accélérateur d'Avis Google 5 Étoiles</h3>
+            <p class="pillar-desc" id="pillar1Desc">
+              Les clients scannent et enregistrent une note vocale de 5 secondes sur WhatsApp ou notent directement en 5 étoiles. Propulse Bo's Coffee en tête des résultats Google Maps à Doha face à % Arabica, Starbucks et Flat White.
+            </p>
+          </div>
+          <div>
+            <div class="pillar-kpi-row">
+              <div class="pillar-kpi">Taux de conversion : <strong>48% vs 2% standard</strong></div>
+              <div class="pillar-kpi">Délai de dépôt : <strong>< 8 Secondes</strong></div>
+            </div>
+            <span class="card-click-hint">Cliquer pour voir l'architecture & la démo &rarr;</span>
+          </div>
+        </div>
+
+        <!-- Pilier 2 -->
+        <div class="pillar-card" onclick="openDrawer('whatsapp')">
+          <div>
+            <div class="pillar-header">
+              <div class="pillar-icon">📲</div>
+              <span class="pillar-badge">CRM Propriétaire</span>
+            </div>
+            <h3 class="pillar-title">2. Fidélité VIP & CRM Direct WhatsApp</h3>
+            <p class="pillar-desc" id="pillar2Desc">
+              Zéro application à télécharger. Les clients reçoivent automatiquement leur carte à tampons digitale sur WhatsApp (ex: 10ème Froccino offert). Constitue une base de données qualifiée pour le marketing de Qutoof Al Majed.
+            </p>
+          </div>
+          <div>
+            <div class="pillar-kpi-row">
+              <div class="pillar-kpi">Taux d'ouverture WhatsApp : <strong>96,8%</strong></div>
+              <div class="pillar-kpi">Revisites fidélisées : <strong>+32% en 60 jours</strong></div>
+            </div>
+            <span class="card-click-hint">Cliquer pour voir l'architecture & la démo &rarr;</span>
+          </div>
+        </div>
+
+        <!-- Pilier 3 -->
+        <div class="pillar-card" onclick="openDrawer('eatfit')">
+          <div>
+            <div class="pillar-header">
+              <div class="pillar-icon">🥗</div>
+              <span class="pillar-badge">Exclusivité Vision 2030</span>
+            </div>
+            <h3 class="pillar-title">3. "Eat & Fit" Vision IA (Dîner Sans Culpabilité)</h3>
+            <p class="pillar-desc">
+              Une innovation lifestyle unique : le client prend en photo sa pâtisserie, son sandwich ou son Froccino. L'IA Vision évalue les calories et lui envoie instantanément une séance de fitness de 12 min personnalisée sur WhatsApp.
+            </p>
+          </div>
+          <div>
+            <div class="pillar-kpi-row">
+              <div class="pillar-kpi">Partage viral social : <strong>+45% de contenu UGC</strong></div>
+              <div class="pillar-kpi">Image de marque : <strong>Bien-être & Modernité</strong></div>
+            </div>
+            <span class="card-click-hint">Cliquer pour voir l'architecture & la démo &rarr;</span>
+          </div>
+        </div>
+
+        <!-- Pilier 4 -->
+        <div class="pillar-card" onclick="openDrawer('payments')">
+          <div>
+            <div class="pillar-header">
+              <div class="pillar-icon">💳</div>
+              <span class="pillar-badge" id="pillar4Badge">Règlement Direct QAR</span>
+            </div>
+            <h3 class="pillar-title">4. Commande QR à Table & Règlements Directs QCB</h3>
+            <p class="pillar-desc" id="pillar4Desc">
+              Les clients scannent le QR de leur table, commandent et paient en 1 clic via Apple Pay ou cartes bancaires locales. Les fonds sont versés directement sur l'IBAN d'entreprise de Qutoof Al Majed via SkipCash / QNB avec affichage KDS en cuisine.
+            </p>
+          </div>
+          <div>
+            <div class="pillar-kpi-row">
+              <div class="pillar-kpi" id="pillar4Commission">Commissions agrégateurs : <strong>0% (vs 22% Talabat)</strong></div>
+              <div class="pillar-kpi">Rotation des tables : <strong>+18 minutes plus rapide</strong></div>
+            </div>
+            <span class="card-click-hint">Cliquer pour voir l'architecture & la démo &rarr;</span>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         ONGLET 2 : SIMULATEUR INTERACTIF & CALCULATEUR ROI (EN QAR)
+         ====================================================================== -->
+    <section id="tab-simulator" class="tab-content">
+      <div class="simulator-container">
+        <!-- Panneau des Paramètres -->
+        <div class="controls-panel">
+          <h3 style="font-size: 1.3rem; font-weight: 900;">Ajustez les Chiffres de votre Établissement :</h3>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span>Clients / Couverts par jour :</span>
+              <span class="control-value-badge" id="valCovers">350 clients/jour</span>
+            </div>
+            <input type="range" id="inputCovers" min="100" max="1500" step="50" value="350">
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span id="labelTicket">Ticket Moyen par Client (QAR) :</span>
+              <span class="control-value-badge" id="valTicket">45 QAR</span>
+            </div>
+            <input type="range" id="inputTicket" min="15" max="150" step="5" value="45">
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span>Taux de Conversion en Avis (%) :</span>
+              <span class="control-value-badge" id="valConversion">25 %</span>
+            </div>
+            <input type="range" id="inputConversion" min="5" max="50" step="5" value="25">
+          </div>
+
+          <div style="background: var(--accent-light); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border); font-size: 0.85rem; color: var(--text-muted);">
+            💡 <strong>Pourquoi c'est décisif :</strong> À Mall of Qatar, passer de 250 avis Google à plus de 1 500 avis 5 étoiles augmente le flux naturel de touristes et de résidents d'environ <strong>+28% en 90 jours</strong>.
+          </div>
+        </div>
+
+        <!-- Résultats Calculés en Direct -->
+        <div class="results-panel">
+          <div class="roi-grid">
+            <div class="roi-stat-box">
+              <div class="roi-stat-title">Nouveaux Avis 5★ / Mois</div>
+              <div class="roi-stat-num highlight" id="statReviews">2 625</div>
+            </div>
+            <div class="roi-stat-box">
+              <div class="roi-stat-title">Contacts WhatsApp CRM / Mois</div>
+              <div class="roi-stat-num" id="statLeads">3 150</div>
+            </div>
+            <div class="roi-stat-box">
+              <div class="roi-stat-title">Commissions Économisées / Mois</div>
+              <div class="roi-stat-num success" id="statSavings">85 050 QAR</div>
+            </div>
+            <div class="roi-stat-box">
+              <div class="roi-stat-title">Revenu de Revisites Fidélisées / Mois</div>
+              <div class="roi-stat-num" id="statRepeat">42 525 QAR</div>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <div class="chart-title">
+              <span>📈 Croissance Projetée des Avis Google à 6 Mois</span>
+              <span style="color: var(--primary); font-size: 0.8rem; font-weight: 800;">● Smart Review vs QR Standard</span>
+            </div>
+            <canvas id="growthChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         ONGLET 3 : INNOVATION "EAT & FIT" IA
+         ====================================================================== -->
+    <section id="tab-eatfit" class="tab-content">
+      <div class="eat-fit-wrapper">
+        <div>
+          <span class="pillar-badge" style="margin-bottom: 12px; display: inline-block;">Première Mondiale F&B</span>
+          <h2 style="font-size: 2rem; font-weight: 900; line-height: 1.2; margin-bottom: 16px;">
+            Déguster Sans Culpabilité grâce à <span style="color: var(--primary);">l'IA Vision Nutrition & Fitness</span>
+          </h2>
+          <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.6; margin-bottom: 20px;">
+            La clientèle de Doha est passionnée de fitness, de bien-être et de technologies de pointe. Bo's Coffee peut devenir le premier coffee-shop du Qatar à intégrer cette fonctionnalité IA directement dans son pass digital.
+          </p>
+          <ul class="drawer-features-list">
+            <li><span class="drawer-check-icon">✔</span> <strong>Reconnaissance Visuelle Instantanée :</strong> Propulsée par Gemini 3.1 Multimodal pour analyser pâtisseries, sandwiches et boissons.</li>
+            <li><span class="drawer-check-icon">✔</span> <strong>Estimation Précise des Calories & Macros :</strong> Étalonnée sur les portions réelles des cafés gourmets.</li>
+            <li><span class="drawer-check-icon">✔</span> <strong>Séance Fitness de 12 min sur WhatsApp :</strong> Protocole sur-mesure au poids du corps pour éliminer les calories sans matériel.</li>
+          </ul>
+          <button class="btn-primary" onclick="openDrawer('eatfit')">
+            📱 Explorer le flux complet de l'IA &rarr;
+          </button>
+        </div>
+
+        <div class="eat-fit-preview">
+          <div class="phone-mockup-header">
+            <span>🟢 PLAT DÉTECTÉ PAR L'IA</span>
+            <span>BO'S COFFEE V4</span>
+          </div>
+          <div class="dish-sample-card">
+            <div class="dish-info-row">
+              <span class="dish-title">Froccino Mocha Signature</span>
+              <span class="cal-badge">🔥 380 Kcal</span>
+            </div>
+            <p style="font-size: 0.8rem; color: #9CA3AF;">Gâteau Alfonso Mango Cream • Fraîchement Préparé</p>
+          </div>
+          <div class="workout-plan-box">
+            <strong style="color: #10B981;">⚡ Votre Protocole 12-Min Brûle-Calories :</strong>
+            <div class="workout-step">1. 3 min de Montées de Genoux & Corde à sauter simulée</div>
+            <div class="workout-step">2. 4 min de Squats au poids du corps & Mollets</div>
+            <div class="workout-step">3. 3 min de Mountain Climbers & Gainage dynamique</div>
+            <div class="workout-step">4. 2 min d'Étirements & Retour au calme</div>
+            <div style="margin-top: 10px; font-size: 0.75rem; color: #6EE7B7;">
+              📲 Fiche d'exercices complète & vidéo envoyées sur votre WhatsApp !
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         ONGLET 4 : CONFORMITÉ BANCAIRE QATAR QCB
+         ====================================================================== -->
+    <section id="tab-payments" class="tab-content">
+      <div class="hero-container" style="margin-top: 0; margin-bottom: 24px;">
+        <h2 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 8px;">Circuit Financier Direct & 100% Conforme aux Normes QCB</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Zéro intermédiaire opaque. Les fonds sont versés directement sur le compte bancaire commercial de Qutoof Al Majed.</p>
+      </div>
+
+      <div class="flow-grid">
+        <div class="flow-step-card">
+          <div class="step-number">1</div>
+          <h4 class="flow-step-title">Scan du QR Code</h4>
+          <p class="flow-step-desc">Le QR de table ouvre le menu digital instantané. Zéro téléchargement d'application.</p>
+        </div>
+        <div class="flow-step-card">
+          <div class="step-number">2</div>
+          <h4 class="flow-step-title">Règlement Apple Pay</h4>
+          <p class="flow-step-desc">Cartes de débit locales NAPS & Apple Pay avec validation biométrique en 1 seconde.</p>
+        </div>
+        <div class="flow-step-card">
+          <div class="step-number">3</div>
+          <h4 class="flow-step-title">Passerelle Agréée QCB</h4>
+          <p class="flow-step-desc">Transaction sécurisée traitée via SkipCash ou QNB Merchant e-Commerce.</p>
+        </div>
+        <div class="flow-step-card">
+          <div class="step-number">4</div>
+          <h4 class="flow-step-title">Versement IBAN Direct</h4>
+          <p class="flow-step-desc">Alerte sonore KDS en cuisine + versement intégral en QAR sur l'IBAN de la société.</p>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 40px;">
+        <button class="btn-primary" onclick="openDrawer('payments')">
+          📑 Consulter les Spécifications de Sécurité & Conformité &rarr;
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========================================================================
+       VOLET COULISSANT DÉTAILLÉ (DRAWER)
+       ======================================================================== -->
+  <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+  <aside class="details-drawer" id="detailsDrawer">
+    <button class="drawer-close-btn" onclick="closeDrawer()" title="Fermer">&times;</button>
+    
+    <span class="drawer-tag" id="drawerTag">Détails du Module</span>
+    <h3 class="drawer-title" id="drawerTitle">Titre du Module</h3>
+    <p class="drawer-body" id="drawerBody">Explications détaillées chargées dynamiquement.</p>
+
+    <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Bénéfices Clés pour Bo's Coffee Qatar :</h4>
+    <ul class="drawer-features-list" id="drawerList"></ul>
+
+    <a href="#" target="_blank" rel="noopener noreferrer" class="drawer-cta-btn" id="drawerCtaBtn">
+      <span>💬 Demander une Démo en Point de Vente (WhatsApp)</span>
+    </a>
+  </aside>
+
+  <!-- ========================================================================
+       LOGIQUE JAVASCRIPT & CONFIGURATION DYNAMIQUE BO'S COFFEE QATAR
+       ======================================================================== -->
+  <script>
+    // ==========================================================================
+    // ⚙️ CONFIGURATION RAPIDE BO'S COFFEE (MODIFIABLE À TOUT MOMENT)
+    // ==========================================================================
+    const CONFIG = {
+      nomRestaurant: "Bo's Coffee",
+      enseigneOuGroupe: "Qutoof Al Majed For Restaurants",
+      emplacement: "Mall of Qatar",
+      badgeEmplacement: "📍 Bo's Coffee • Mall of Qatar",
+      heroTag: "Proposition Stratégique Exclusive • Qutoof Al Majed For Restaurants",
+      heroSubtitle: "Un moteur d'hospitalité et de fidélisation sans friction conçu pour les pôles majeurs de Doha (Mall of Qatar, Lusail, The Pearl). Zéro application à télécharger. 100% natif WhatsApp. Conforme aux règlements directs de la Banque Centrale du Qatar (QCB).",
+      concurrents: "% Arabica, Starbucks et Flat White",
+      devise: "QAR",
+      ticketMoyenDefaut: 45,
+      couvertsDefaut: 350,
+      tauxCommission: 22,
+      nomAgregateurs: "Talabat / Snoonu (22%)",
+      passerellesBancaires: "SkipCash & QNB Merchant",
+      normeBancaire: "Règlements Directs Banque Centrale du Qatar (QCB)",
+      lienLP: "https://smart-review-v4-lifestyle-vision2030.jdaproai.com/spin/bos_cafe_moq",
+      telephoneWhatsapp: "33767803233",
+      msgWhatsapp: "Bonjour Abdel, j'ai consulté la présentation interactive Smart Review AI pour Bo's Coffee Qatar et je souhaiterais échanger sur le lancement d'un pilote de 30 jours."
+    };
+
+    function initPage() {
+      // Configuration des liens
+      const navBadge = document.getElementById('navBranchBadge');
+      navBadge.href = CONFIG.lienLP;
+      navBadge.innerHTML = `<span>${CONFIG.badgeEmplacement}</span><span style="font-size: 0.8rem; margin-left: 2px;">↗</span>`;
+
+      const whatsappUrl = `https://wa.me/${CONFIG.telephoneWhatsapp}?text=${encodeURIComponent(CONFIG.msgWhatsapp)}`;
+      document.getElementById('pilotCtaBtn').href = whatsappUrl;
+      document.getElementById('drawerCtaBtn').href = whatsappUrl;
+
+      // Valeurs par défaut des contrôles
+      inputTicket.value = CONFIG.ticketMoyenDefaut;
+      inputCovers.value = CONFIG.couvertsDefaut;
+
+      updateCalculations();
+    }
+
+    // Gestion des onglets
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetTab = btn.getAttribute('data-tab');
+        tabBtns.forEach(b => b.classList.remove('active'));
+        tabContents.forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(`tab-${targetTab}`).classList.add('active');
+
+        if (targetTab === 'simulator') {
+          setTimeout(renderChart, 50);
+        }
+      });
+    });
+
+    // Données du volet coulissant (Drawer)
+    const drawerData = {
+      google: {
+        tag: "Suprématie SEO • Google Maps Qatar",
+        title: "Machine d'Acquisition d'Avis Vocaux Google 5★",
+        body: "Les QR codes traditionnels échouent à récolter des avis car taper sur un petit écran mobile est fastidieux. Smart Review AI intègre un protocole d'enregistrement vocal de 5 secondes directement via WhatsApp. L'IA transcrit, synthétise et guide le client pour déposer son avis officiel 5 étoiles sur la fiche Google Maps de Bo's Coffee.",
+        features: [
+          "Zéro application à installer : Ouverture directe en 1 clic sur WhatsApp.",
+          "IA de transcription vocale multilingue en temps réel.",
+          "Filtre les remarques constructives en privé au manager avant toute publication publique négative.",
+          "Positionne Bo's Coffee en tête des résultats Google Maps à Mall of Qatar, Lusail et Doha."
+        ]
+      },
+      whatsapp: {
+        tag: "Actif Marketing Propriétaire • Sans Application",
+        title: "Carte de Fidélité VIP & Pass WhatsApp",
+        body: "Ne laissez plus les plateformes de livraison externes (Talabat / Snoonu) garder vos données clients. À chaque visite et avis déposé, le numéro de téléphone du client est automatiquement intégré à votre programme VIP. Les cartes de fidélité à tampons sont remises directement sur WhatsApp avec des relances automatisées.",
+        features: [
+          "100% de numéros de mobiles clients vérifiés et capturés.",
+          "Carte à tampons digitale (ex: 10ème Froccino offert) validée instantanément au comptoir.",
+          "96,8% de taux d'ouverture sur WhatsApp, contre moins de 15% pour les newsletters traditionnelles.",
+          "Canal de diffusion direct pour les campagnes promotionnelles du groupe Qutoof Al Majed."
+        ]
+      },
+      eatfit: {
+        tag: "Innovation Lifestyle Exclusive • Vision 2030",
+        title: "Eat & Fit : Vision IA & Dégustation Sans Culpabilité",
+        body: "Un atout concurrentiel inédit conçu sur-mesure pour la clientèle de Doha soucieuse de sa forme physique. En dégustant leur café ou pâtisserie, les clients prennent simplement leur assiette en photo. L'IA multimodale reconnaît le plat, calcule l'apport calorique et transmet une séance fitness adaptée de 12 minutes sur WhatsApp.",
+        features: [
+          "Fort coefficient de viralité sur les réseaux sociaux (Instagram Stories & TikTok UGC).",
+          "Incitation à la commande de desserts et de boissons signature sans sentiment de culpabilité.",
+          "Entraînements ciblés au poids du corps ne nécessitant aucun équipement.",
+          "Positionne Bo's Coffee comme le café de spécialité le plus innovant et lifestyle de Doha."
+        ]
+      },
+      payments: {
+        tag: "Versements 100% Directs • Agréé Banque Centrale du Qatar",
+        title: "Commande QR à Table & Règlements Directs en QAR",
+        body: "Commande à table 100% digitalisée avec zéro investissement matériel. S'intègre directement avec les passerelles de paiement approuvées par la Banque Centrale du Qatar (SkipCash, QNB Merchant e-Commerce). Les fonds sont versés directement sur l'IBAN commercial de Qutoof Al Majed, sans commission intermédiaire de 22%.",
+        features: [
+          "Validation en 1 clic via Apple Pay et cartes de débit locales NAPS.",
+          "Écran de cuisine KDS en temps réel avec signal sonore pour les baristas.",
+          "Export immédiat des rapports de vente en Excel/CSV par table, article et horaire.",
+          "Accélération de la rotation des tables de 18 minutes pendant les heures de pointe du centre commercial."
+        ]
+      }
+    };
+
+    const drawerOverlay = document.getElementById('drawerOverlay');
+    const detailsDrawer = document.getElementById('detailsDrawer');
+    const drawerTag = document.getElementById('drawerTag');
+    const drawerTitle = document.getElementById('drawerTitle');
+    const drawerBody = document.getElementById('drawerBody');
+    const drawerList = document.getElementById('drawerList');
+
+    function openDrawer(key) {
+      const data = drawerData[key];
+      if (!data) return;
+
+      drawerTag.innerText = data.tag;
+      drawerTitle.innerText = data.title;
+      drawerBody.innerText = data.body;
+
+      drawerList.innerHTML = data.features.map(f => `
+        <li><span class="drawer-check-icon">✔</span> <span>${f}</span></li>
+      `).join('');
+
+      drawerOverlay.classList.add('active');
+      detailsDrawer.classList.add('active');
+    }
+
+    function closeDrawer() {
+      drawerOverlay.classList.remove('active');
+      detailsDrawer.classList.remove('active');
+    }
+
+    // Calculs du simulateur
+    const inputCovers = document.getElementById('inputCovers');
+    const inputTicket = document.getElementById('inputTicket');
+    const inputConversion = document.getElementById('inputConversion');
+
+    const valCovers = document.getElementById('valCovers');
+    const valTicket = document.getElementById('valTicket');
+    const valConversion = document.getElementById('valConversion');
+
+    const statReviews = document.getElementById('statReviews');
+    const statLeads = document.getElementById('statLeads');
+    const statSavings = document.getElementById('statSavings');
+    const statRepeat = document.getElementById('statRepeat');
+
+    function updateCalculations() {
+      const covers = parseInt(inputCovers.value, 10);
+      const ticket = parseInt(inputTicket.value, 10);
+      const conversion = parseInt(inputConversion.value, 10) / 100;
+
+      valCovers.innerText = `${covers} clients/jour`;
+      valTicket.innerText = `${ticket} QAR`;
+      valConversion.innerText = `${Math.round(conversion * 100)} %`;
+
+      const monthlyGuests = covers * 30;
+      const newReviews = Math.round(monthlyGuests * conversion);
+      const newLeads = Math.round(monthlyGuests * (conversion * 1.2));
+      const monthlyRevenue = monthlyGuests * ticket;
+      
+      const commissionSaved = Math.round(monthlyRevenue * 0.18);
+      const repeatRevenue = Math.round(monthlyRevenue * 0.09);
+
+      statReviews.innerText = newReviews.toLocaleString('fr-FR');
+      statLeads.innerText = newLeads.toLocaleString('fr-FR');
+      statSavings.innerText = `${commissionSaved.toLocaleString('fr-FR')} QAR`;
+      statRepeat.innerText = `${repeatRevenue.toLocaleString('fr-FR')} QAR`;
+
+      renderChart();
+    }
+
+    inputCovers.addEventListener('input', updateCalculations);
+    inputTicket.addEventListener('input', updateCalculations);
+    inputConversion.addEventListener('input', updateCalculations);
+
+    // Graphique Canvas
+    const chartCanvas = document.getElementById('growthChart');
+    const ctx = chartCanvas.getContext('2d');
+
+    function renderChart() {
+      if (!chartCanvas) return;
+      const dpr = window.devicePixelRatio || 1;
+      const rect = chartCanvas.getBoundingClientRect();
+      chartCanvas.width = rect.width * dpr;
+      chartCanvas.height = rect.height * dpr;
+      ctx.resetTransform();
+      ctx.scale(dpr, dpr);
+
+      const w = rect.width;
+      const h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+
+      const covers = parseInt(inputCovers.value, 10);
+      const conversion = parseInt(inputConversion.value, 10) / 100;
+      const monthlyReviewGain = (covers * 30 * conversion);
+
+      const months = ['Mois 1', 'Mois 2', 'Mois 3', 'Mois 4', 'Mois 5', 'Mois 6'];
+      const standardGrowth = [120, 140, 160, 185, 210, 240];
+      const smartReviewGrowth = [
+        120,
+        Math.round(120 + monthlyReviewGain * 0.9),
+        Math.round(120 + monthlyReviewGain * 1.9),
+        Math.round(120 + monthlyReviewGain * 3.0),
+        Math.round(120 + monthlyReviewGain * 4.2),
+        Math.round(120 + monthlyReviewGain * 5.5)
+      ];
+
+      const maxVal = Math.max(...smartReviewGrowth) * 1.15;
+      const paddingX = 44;
+      const paddingY = 24;
+      const chartW = w - paddingX * 2;
+      const chartH = h - paddingY * 2;
+
+      ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 3; i++) {
+        const y = paddingY + (chartH / 3) * i;
+        ctx.beginPath();
+        ctx.moveTo(paddingX, y);
+        ctx.lineTo(w - paddingX, y);
+        ctx.stroke();
+      }
+
+      function drawLine(data, color, isDashed = false) {
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 3;
+        if (isDashed) ctx.setLineDash([5, 5]);
+        else ctx.setLineDash([]);
+
+        data.forEach((val, i) => {
+          const x = paddingX + (chartW / (data.length - 1)) * i;
+          const y = paddingY + chartH - (val / maxVal) * chartH;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.stroke();
+
+        data.forEach((val, i) => {
+          const x = paddingX + (chartW / (data.length - 1)) * i;
+          const y = paddingY + chartH - (val / maxVal) * chartH;
+          ctx.beginPath();
+          ctx.fillStyle = color;
+          ctx.arc(x, y, 4, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      drawLine(standardGrowth, '#9CA3AF', true);
+      drawLine(smartReviewGrowth, '#C8102E');
+
+      ctx.fillStyle = '#6E5C53';
+      ctx.font = '10px -apple-system, sans-serif';
+      ctx.textAlign = 'center';
+      months.forEach((m, i) => {
+        const x = paddingX + (chartW / (months.length - 1)) * i;
+        ctx.fillText(m, x, h - 6);
+      });
+    }
+
+    window.addEventListener('load', () => {
+      initPage();
+      window.addEventListener('resize', renderChart);
+    });
+  </script>
+</body>
+</html>
