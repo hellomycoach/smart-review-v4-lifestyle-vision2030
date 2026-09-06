@@ -1,26 +1,26 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Présentation Exécutive & Simulateur de ROI - Smart Review AI pour Bo's Coffee Qatar (Groupe Al Majed)">
-  <title>Smart Review AI • Présentation Exécutive | Bo's Coffee Qatar</title>
+  <meta name="description" content="Executive Pitch & ROI Simulator - Smart Review AI for Bo's Coffee Qatar (Qutoof Al Majed For Restaurants)">
+  <title>Smart Review AI • Executive Presentation | Bo's Coffee Qatar</title>
   <style>
     /* ==========================================================================
-       1. CHARTE GRAPHIQUE BO'S COFFEE QATAR
+       1. BO'S COFFEE SIGNATURE DESIGN TOKENS (CRIMSON RED, CARAMEL & LATTE)
        ========================================================================== */
     :root {
-      --primary: #C8102E;         /* Rouge Crimson Signature Bo's */
-      --primary-dark: #8F0B20;    /* Crimson Intense */
-      --primary-light: #FDE8EA;   /* Voile Rouge Léger */
-      --accent: #D4A373;          /* Caramel Torréfié / Or Doux */
-      --accent-dark: #A67245;     /* Or Foncé Torréfié */
-      --accent-light: #FBF4ED;    /* Crème Latte / Mousse */
-      --bg-main: #FAF8F5;         /* Fond Papier Ivoire Chaud */
-      --bg-surface: #FFFFFF;      /* Surface Blanche */
-      --border: #E8DDD0;          /* Bordure Douce Latte */
-      --text-main: #241712;       /* Grain de Café Foncé */
-      --text-muted: #6E5C53;      /* Gris Chaud Atténué */
+      --primary: #C8102E;         /* Signature Bo's Crimson Red */
+      --primary-dark: #8F0B20;    /* Deep Roasted Crimson */
+      --primary-light: #FDE8EA;   /* Soft Rose Foam Tint */
+      --accent: #D4A373;          /* Warm Roasted Caramel / Soft Gold */
+      --accent-dark: #A67245;     /* Dark Caramel / Espresso */
+      --accent-light: #FBF4ED;    /* Cream Latte / Warm Ivory */
+      --bg-main: #FAF8F5;         /* Warm Ivory Paper Background */
+      --bg-surface: #FFFFFF;      /* Clean White Card Surface */
+      --border: #E8DDD0;          /* Subtle Latte Foam Border */
+      --text-main: #241712;       /* Dark Roasted Coffee Bean */
+      --text-muted: #6E5C53;      /* Warm Charcoal Body Text */
       --success: #10B981;
       --shadow-sm: 0 2px 8px rgba(36, 23, 18, 0.04);
       --shadow-md: 0 8px 24px rgba(36, 23, 18, 0.08);
@@ -47,7 +47,7 @@
     a { text-decoration: none; color: inherit; }
     button { font-family: inherit; cursor: pointer; border: none; background: none; }
 
-    /* Barre de navigation */
+    /* Top Navigation */
     .top-nav {
       position: sticky;
       top: 0;
@@ -213,7 +213,7 @@
       letter-spacing: 0.5px;
     }
 
-    /* Onglets */
+    /* Tabs */
     .tabs-wrapper {
       max-width: 1200px;
       margin: 0 auto 24px;
@@ -264,7 +264,7 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Piliers */
+    /* Pillars */
     .pillars-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -366,7 +366,7 @@
       gap: 4px;
     }
 
-    /* Simulateur */
+    /* Simulator */
     .simulator-container {
       display: grid;
       grid-template-columns: 1fr 1.25fr;
@@ -452,23 +452,22 @@
       background: var(--bg-surface);
       border: 1px solid var(--border);
       border-radius: var(--radius-md);
-      padding: 16px;
-      box-shadow: var(--shadow-sm);
+      padding: 18px;
     }
 
     .roi-stat-title {
-      font-size: 0.75rem;
-      font-weight: 800;
+      font-size: 0.78rem;
+      font-weight: 700;
       color: var(--text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
     }
 
     .roi-stat-num {
-      font-size: 1.65rem;
+      font-size: 1.6rem;
       font-weight: 900;
       color: var(--text-main);
+      line-height: 1.1;
     }
 
     .roi-stat-num.highlight { color: var(--primary); }
@@ -573,7 +572,7 @@
       color: #D1D5DB;
     }
 
-    /* Flux de paiements */
+    /* Financial & Direct Settlement Flow */
     .flow-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -608,7 +607,7 @@
     .flow-step-title { font-weight: 800; font-size: 1rem; margin-bottom: 8px; }
     .flow-step-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.45; }
 
-    /* Volet coulissant */
+    /* Side Drawer */
     .drawer-overlay {
       position: fixed;
       inset: 0;
@@ -716,14 +715,14 @@
 <body>
 
   <!-- ========================================================================
-       BARRE DE NAVIGATION SUPÉRIEURE (100% QATAR)
+       TOP NAVIGATION BAR (100% QATAR & BO'S COFFEE)
        ======================================================================== -->
   <header class="top-nav">
     <div class="nav-brand">
       <div class="brand-logo-pill">
         <span>⚡ SMART REVIEW AI</span>
       </div>
-      <a id="navBranchBadge" href="#" target="_blank" rel="noopener noreferrer" class="branch-badge" title="Ouvrir la Landing Page Client en direct">
+      <a id="navBranchBadge" href="#" target="_blank" rel="noopener noreferrer" class="branch-badge" title="Open Live Client Interactive Demonstration">
         <span>📍 Bo's Coffee • Mall of Qatar</span>
         <span style="font-size: 0.8rem; margin-left: 2px;">↗</span>
       </a>
@@ -731,221 +730,226 @@
 
     <div class="nav-actions">
       <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" id="pilotCtaBtn">
-        <span>💬 Proposer un Pilote 30 Jours (WhatsApp)</span>
+        <span>💬 Request 30-Day Branch Pilot (WhatsApp)</span>
       </a>
     </div>
   </header>
 
   <!-- ========================================================================
-       SECTION HERO D'ACCROCHE BO'S COFFEE QATAR
+       HERO HOOK SECTION (BO'S COFFEE QATAR)
        ======================================================================== -->
   <section class="hero-container">
     <div class="hero-tag" id="heroTag">
-      Proposition Stratégique Exclusive • Qutoof Al Majed For Restaurants
+      Exclusive Strategic Proposal • Qutoof Al Majed For Restaurants
     </div>
     <h1 class="hero-title">
-      Transformez chaque client de <span id="heroTitleRestaurant">Bo’s Coffee</span> en un <span>Avis Google 5 Étoiles</span>, Client Fidèle VIP & Revenu Direct.
+      Turn Every <span id="heroTitleRestaurant">Bo’s Coffee</span> Guest into a <span>5-Star Google Review</span>, VIP Repeat Visitor & Instant Direct Revenue.
     </h1>
     <p class="hero-subtitle" id="heroSubtitle">
-      Un moteur d'hospitalité et de fidélisation sans friction conçu pour les pôles majeurs de Doha (Mall of Qatar, Lusail, The Pearl). Zéro application à télécharger. 100% natif WhatsApp. Conforme aux règlements directs de la Banque Centrale du Qatar (QCB).
+      A frictionless dine-in hospitality and table-ordering engine built for high-traffic Doha destinations (Mall of Qatar, Lusail, The Pearl). Zero app downloads. Guests sit down comfortably, scan, and order at their own pace without standing in long queues or dealing with crowded kiosks. 100% compliant with Qatar Central Bank (QCB) direct settlement standards.
     </p>
 
-    <!-- Métriques Clés -->
+    <!-- Key Impact Metrics -->
     <div class="hero-metrics-bar">
-      <div class="metric-card" onclick="openDrawer('google')">
-        <div class="metric-value">+350%</div>
-        <div class="metric-label">Avis Google 5★ / Mois</div>
+      <div class="metric-card" onclick="openDrawer('reviews')">
+        <div class="metric-value">+450%</div>
+        <div class="metric-label">5★ Google Review Velocity</div>
       </div>
-      <div class="metric-card" onclick="openDrawer('whatsapp')">
+      <div class="metric-card" onclick="openDrawer('vip')">
         <div class="metric-value">100%</div>
-        <div class="metric-label">Contacts WhatsApp Qualifiés</div>
+        <div class="metric-label">Owned CRM Guest Data</div>
+      </div>
+      <div class="metric-card" onclick="openDrawer('tableordering')">
+        <div class="metric-value">+30%</div>
+        <div class="metric-label">Service Speed & Table Turns</div>
       </div>
       <div class="metric-card" onclick="openDrawer('eatfit')">
-        <div class="metric-value">12 Min</div>
-        <div class="metric-label">Séance Fitness IA "Guilt-Free"</div>
-      </div>
-      <div class="metric-card" onclick="openDrawer('payments')">
-        <div class="metric-value">0%</div>
-        <div class="metric-label">Commission Agrégateur Tiers</div>
+        <div class="metric-value">Exclusive</div>
+        <div class="metric-label">AI Guilt-Free Dining</div>
       </div>
     </div>
   </section>
 
   <!-- ========================================================================
-       ONGLETS DE NAVIGATION INTERACTIFS
+       TABBED PRESENTATION NAVIGATION
        ======================================================================== -->
-  <main class="tabs-wrapper">
-    <div class="tabs-nav">
-      <button class="tab-btn active" data-tab="pillars">
-        🏛️ Les 4 Piliers de Croissance
+  <div class="tabs-wrapper">
+    <nav class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('pillars')">
+        <span>🏛️ 4 Strategic Pillars</span>
       </button>
-      <button class="tab-btn" data-tab="simulator">
-        📊 Simulateur & Calculateur ROI
+      <button class="tab-btn" onclick="switchTab('simulator')">
+        <span>📊 Interactive ROI Simulator</span>
       </button>
-      <button class="tab-btn" data-tab="eatfit">
-        🥗 L'Innovation IA "Eat & Fit"
+      <button class="tab-btn" onclick="switchTab('eatfit')">
+        <span>🥗 "Eat & Fit" AI Innovation</span>
       </button>
-      <button class="tab-btn" data-tab="payments">
-        💳 Flux de Paiements Conforme QCB
+      <button class="tab-btn" onclick="switchTab('payments')">
+        <span>💳 Financial Flow & QCB</span>
       </button>
-    </div>
+    </nav>
+  </div>
 
+  <main class="tabs-wrapper">
     <!-- ======================================================================
-         ONGLET 1 : LES 4 PILIERS STRATÉGIQUES
+         TAB 1 : 4 STRATEGIC PILLARS (BO'S COFFEE QATAR)
          ====================================================================== -->
     <section id="tab-pillars" class="tab-content active">
       <div class="pillars-grid">
         
-        <!-- Pilier 1 -->
-        <div class="pillar-card" onclick="openDrawer('google')">
+        <!-- Pillar 1 -->
+        <article class="pillar-card" onclick="openDrawer('reviews')">
           <div>
             <div class="pillar-header">
               <div class="pillar-icon">⭐</div>
-              <span class="pillar-badge">Suprématie SEO</span>
+              <span class="pillar-badge">Local Dominance</span>
             </div>
-            <h3 class="pillar-title">1. Accélérateur d'Avis Google 5 Étoiles</h3>
-            <p class="pillar-desc" id="pillar1Desc">
-              Les clients scannent et enregistrent une note vocale de 5 secondes sur WhatsApp ou notent directement en 5 étoiles. Propulse Bo's Coffee en tête des résultats Google Maps à Doha face à % Arabica, Starbucks et Flat White.
-            </p>
-          </div>
-          <div>
-            <div class="pillar-kpi-row">
-              <div class="pillar-kpi">Taux de conversion : <strong>48% vs 2% standard</strong></div>
-              <div class="pillar-kpi">Délai de dépôt : <strong>< 8 Secondes</strong></div>
-            </div>
-            <span class="card-click-hint">Cliquer pour voir l'architecture & la démo &rarr;</span>
-          </div>
-        </div>
-
-        <!-- Pilier 2 -->
-        <div class="pillar-card" onclick="openDrawer('whatsapp')">
-          <div>
-            <div class="pillar-header">
-              <div class="pillar-icon">📲</div>
-              <span class="pillar-badge">CRM Propriétaire</span>
-            </div>
-            <h3 class="pillar-title">2. Fidélité VIP & CRM Direct WhatsApp</h3>
-            <p class="pillar-desc" id="pillar2Desc">
-              Zéro application à télécharger. Les clients reçoivent automatiquement leur carte à tampons digitale sur WhatsApp (ex: 10ème Froccino offert). Constitue une base de données qualifiée pour le marketing de Qutoof Al Majed.
-            </p>
-          </div>
-          <div>
-            <div class="pillar-kpi-row">
-              <div class="pillar-kpi">Taux d'ouverture WhatsApp : <strong>96,8%</strong></div>
-              <div class="pillar-kpi">Revisites fidélisées : <strong>+32% en 60 jours</strong></div>
-            </div>
-            <span class="card-click-hint">Cliquer pour voir l'architecture & la démo &rarr;</span>
-          </div>
-        </div>
-
-        <!-- Pilier 3 -->
-        <div class="pillar-card" onclick="openDrawer('eatfit')">
-          <div>
-            <div class="pillar-header">
-              <div class="pillar-icon">🥗</div>
-              <span class="pillar-badge">Exclusivité Vision 2030</span>
-            </div>
-            <h3 class="pillar-title">3. "Eat & Fit" Vision IA (Dîner Sans Culpabilité)</h3>
+            <h3 class="pillar-title">1. Frictionless 5★ Google Review Engine</h3>
             <p class="pillar-desc">
-              Une innovation lifestyle unique : le client prend en photo sa pâtisserie, son sandwich ou son Froccino. L'IA Vision évalue les calories et lui envoie instantanément une séance de fitness de 12 min personnalisée sur WhatsApp.
+              Outrank competitors across Doha on Google Maps. The gamified Spin & Win wheel engages guests right at peak dining satisfaction, generating verified authentic 5-star reviews in under 30 seconds.
             </p>
           </div>
           <div>
             <div class="pillar-kpi-row">
-              <div class="pillar-kpi">Partage viral social : <strong>+45% de contenu UGC</strong></div>
-              <div class="pillar-kpi">Image de marque : <strong>Bien-être & Modernité</strong></div>
+              <div class="pillar-kpi">Table Conversion: <strong>25% to 40%</strong></div>
+              <div class="pillar-kpi">Review Time: <strong>< 30 seconds</strong></div>
             </div>
-            <span class="card-click-hint">Cliquer pour voir l'architecture & la démo &rarr;</span>
+            <div class="card-click-hint">Click to inspect strategic details &rarr;</div>
           </div>
-        </div>
+        </article>
 
-        <!-- Pilier 4 -->
-        <div class="pillar-card" onclick="openDrawer('payments')">
+        <!-- Pillar 2 -->
+        <article class="pillar-card" onclick="openDrawer('tableordering')">
           <div>
             <div class="pillar-header">
-              <div class="pillar-icon">💳</div>
-              <span class="pillar-badge" id="pillar4Badge">Règlement Direct QAR</span>
+              <div class="pillar-icon">🛎️</div>
+              <span class="pillar-badge">No Cluttered Kiosks</span>
             </div>
-            <h3 class="pillar-title">4. Commande QR à Table & Règlements Directs QCB</h3>
-            <p class="pillar-desc" id="pillar4Desc">
-              Les clients scannent le QR de leur table, commandent et paient en 1 clic via Apple Pay ou cartes bancaires locales. Les fonds sont versés directement sur l'IBAN d'entreprise de Qutoof Al Majed via SkipCash / QNB avec affichage KDS en cuisine.
+            <h3 class="pillar-title">2. Relaxed Table Ordering & Zero Counter Queues</h3>
+            <p class="pillar-desc">
+              Say goodbye to bulky fast-food touch kiosks where customers stand in crowded queues blocking walkways. Guests relax at their table, explore the mouth-watering photo menu, and order handcrafted brews on their phone. During weekend mall rushes or staff shortages, orders go straight to the barista KDS without delay.
             </p>
           </div>
           <div>
             <div class="pillar-kpi-row">
-              <div class="pillar-kpi" id="pillar4Commission">Commissions agrégateurs : <strong>0% (vs 22% Talabat)</strong></div>
-              <div class="pillar-kpi">Rotation des tables : <strong>+18 minutes plus rapide</strong></div>
+              <div class="pillar-kpi">Order Placement: <strong>Instant & queue-free</strong></div>
+              <div class="pillar-kpi">Peak Rush Resilience: <strong>Zero missed tables</strong></div>
             </div>
-            <span class="card-click-hint">Cliquer pour voir l'architecture & la démo &rarr;</span>
+            <div class="card-click-hint">Click to inspect operational details &rarr;</div>
           </div>
-        </div>
+        </article>
+
+        <!-- Pillar 3 -->
+        <article class="pillar-card" onclick="openDrawer('eatfit')">
+          <div>
+            <div class="pillar-header">
+              <div class="pillar-icon">🏋️‍♂️</div>
+              <span class="pillar-badge">AI World-First</span>
+            </div>
+            <h3 class="pillar-title">3. "Eat & Fit" : Guilt-Free Dining Innovation</h3>
+            <p class="pillar-desc">
+              The guest snaps a photo of their artisanal pastry or Froccino. Our Multimodal Vision AI instantly calculates calories and sends a personalized, equipment-free 12-minute home workout directly on WhatsApp to burn it guilt-free.
+            </p>
+          </div>
+          <div>
+            <div class="pillar-kpi-row">
+              <div class="pillar-kpi">Social Viral Shares: <strong>3x on Instagram</strong></div>
+              <div class="pillar-kpi">Brand Engagement: <strong>+82% interaction</strong></div>
+            </div>
+            <div class="card-click-hint">Click to inspect innovation details &rarr;</div>
+          </div>
+        </article>
+
+        <!-- Pillar 4 -->
+        <article class="pillar-card" onclick="openDrawer('vip')">
+          <div>
+            <div class="pillar-header">
+              <div class="pillar-icon">💎</div>
+              <span class="pillar-badge">VIP Retention</span>
+            </div>
+            <h3 class="pillar-title">4. WhatsApp VIP Pass & Automated Re-engagement</h3>
+            <p class="pillar-desc">
+              No plastic loyalty cards or cumbersome mobile app downloads. Guests keep their live digital VIP pass inside WhatsApp. Automated smart campaigns re-engage guests during quiet mall hours (weekday mornings).
+            </p>
+          </div>
+          <div>
+            <div class="pillar-kpi-row">
+              <div class="pillar-kpi">WhatsApp Open Rate: <strong>98% in Qatar</strong></div>
+              <div class="pillar-kpi">Repeat Visits: <strong>+22% within 60 days</strong></div>
+            </div>
+            <div class="card-click-hint">Click to inspect retention details &rarr;</div>
+          </div>
+        </article>
 
       </div>
     </section>
 
     <!-- ======================================================================
-         ONGLET 2 : SIMULATEUR INTERACTIF & CALCULATEUR ROI (EN QAR)
+         TAB 2 : INTERACTIVE ROI SIMULATOR (QAR)
          ====================================================================== -->
     <section id="tab-simulator" class="tab-content">
       <div class="simulator-container">
-        <!-- Panneau des Paramètres -->
+        <!-- Controls -->
         <div class="controls-panel">
-          <h3 style="font-size: 1.3rem; font-weight: 900;">Ajustez les Chiffres de votre Établissement :</h3>
-
-          <div class="control-group">
-            <div class="control-label-row">
-              <span>Clients / Couverts par jour :</span>
-              <span class="control-value-badge" id="valCovers">350 clients/jour</span>
-            </div>
-            <input type="range" id="inputCovers" min="100" max="1500" step="50" value="350">
+          <div>
+            <h3 style="font-size: 1.4rem; font-weight: 900; margin-bottom: 6px;">Financial Impact Simulator</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Adjust operational variables to forecast your branch returns in Qatari Riyals (QAR).</p>
           </div>
 
           <div class="control-group">
             <div class="control-label-row">
-              <span id="labelTicket">Ticket Moyen par Client (QAR) :</span>
+              <span>Daily Covers / Guests:</span>
+              <span class="control-value-badge" id="valCovers">350 guests/day</span>
+            </div>
+            <input type="range" id="inputCovers" min="100" max="1000" step="25" value="350">
+          </div>
+
+          <div class="control-group">
+            <div class="control-label-row">
+              <span>Average Ticket per Guest (QAR):</span>
               <span class="control-value-badge" id="valTicket">45 QAR</span>
             </div>
-            <input type="range" id="inputTicket" min="15" max="150" step="5" value="45">
+            <input type="range" id="inputTicket" min="20" max="150" step="5" value="45">
           </div>
 
           <div class="control-group">
             <div class="control-label-row">
-              <span>Taux de Conversion en Avis (%) :</span>
+              <span>Opt-in / Table Interaction Rate:</span>
               <span class="control-value-badge" id="valConversion">25 %</span>
             </div>
-            <input type="range" id="inputConversion" min="5" max="50" step="5" value="25">
+            <input type="range" id="inputConversion" min="5" max="50" step="1" value="25">
           </div>
 
-          <div style="background: var(--accent-light); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border); font-size: 0.85rem; color: var(--text-muted);">
-            💡 <strong>Pourquoi c'est décisif :</strong> À Mall of Qatar, passer de 250 avis Google à plus de 1 500 avis 5 étoiles augmente le flux naturel de touristes et de résidents d'environ <strong>+28% en 90 jours</strong>.
+          <div style="background: var(--bg-main); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 0.8rem; color: var(--text-muted);">
+            💡 <strong>Forecast Model:</strong> Evaluates table turn acceleration (+18% seating capacity absorbed without extra labor) + average check increase (+15% upsell from visual food & drink recommendations).
           </div>
         </div>
 
-        <!-- Résultats Calculés en Direct -->
+        <!-- Financial Results -->
         <div class="results-panel">
           <div class="roi-grid">
             <div class="roi-stat-box">
-              <div class="roi-stat-title">Nouveaux Avis 5★ / Mois</div>
-              <div class="roi-stat-num highlight" id="statReviews">2 625</div>
+              <div class="roi-stat-title">New 5★ Reviews / Month</div>
+              <div class="roi-stat-num highlight" id="statReviews">2,625</div>
             </div>
             <div class="roi-stat-box">
-              <div class="roi-stat-title">Contacts WhatsApp CRM / Mois</div>
-              <div class="roi-stat-num" id="statLeads">3 150</div>
+              <div class="roi-stat-title">WhatsApp CRM Contacts / Month</div>
+              <div class="roi-stat-num" id="statLeads">3,150</div>
             </div>
             <div class="roi-stat-box">
-              <div class="roi-stat-title">Commissions Économisées / Mois</div>
-              <div class="roi-stat-num success" id="statSavings">85 050 QAR</div>
+              <div class="roi-stat-title">Table Turn Velocity Gain / Month</div>
+              <div class="roi-stat-num success" id="statSavings">85,050 QAR</div>
             </div>
             <div class="roi-stat-box">
-              <div class="roi-stat-title">Revenu de Revisites Fidélisées / Mois</div>
-              <div class="roi-stat-num" id="statRepeat">42 525 QAR</div>
+              <div class="roi-stat-title">Upsell Average Check Gain / Month</div>
+              <div class="roi-stat-num" id="statRepeat">70,875 QAR</div>
             </div>
           </div>
 
           <div class="chart-box">
             <div class="chart-title">
-              <span>📈 Croissance Projetée des Avis Google à 6 Mois</span>
-              <span style="color: var(--primary); font-size: 0.8rem; font-weight: 800;">● Smart Review vs QR Standard</span>
+              <span>📈 6-Month Projected Google Review Trajectory</span>
+              <span style="color: var(--primary); font-size: 0.8rem; font-weight: 800;">● Smart Review vs Standard QR</span>
             </div>
             <canvas id="growthChart"></canvas>
           </div>
@@ -954,48 +958,48 @@
     </section>
 
     <!-- ======================================================================
-         ONGLET 3 : INNOVATION "EAT & FIT" IA
+         TAB 3 : "EAT & FIT" AI INNOVATION
          ====================================================================== -->
     <section id="tab-eatfit" class="tab-content">
       <div class="eat-fit-wrapper">
         <div>
-          <span class="pillar-badge" style="margin-bottom: 12px; display: inline-block;">Première Mondiale F&B</span>
+          <span class="pillar-badge" style="margin-bottom: 12px; display: inline-block;">F&B Global First</span>
           <h2 style="font-size: 2rem; font-weight: 900; line-height: 1.2; margin-bottom: 16px;">
-            Déguster Sans Culpabilité grâce à <span style="color: var(--primary);">l'IA Vision Nutrition & Fitness</span>
+            Guilt-Free Dining Powered by <span style="color: var(--primary);">Multimodal Vision AI</span>
           </h2>
           <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.6; margin-bottom: 20px;">
-            La clientèle de Doha est passionnée de fitness, de bien-être et de technologies de pointe. Bo's Coffee peut devenir le premier coffee-shop du Qatar à intégrer cette fonctionnalité IA directement dans son pass digital.
+            Doha's clientele is deeply passionate about premium fitness, wellness, and cutting-edge lifestyle experiences. Bo's Coffee can be the first coffeehouse in Qatar to integrate this AI perk directly into its digital guest pass.
           </p>
           <ul class="drawer-features-list">
-            <li><span class="drawer-check-icon">✔</span> <strong>Reconnaissance Visuelle Instantanée :</strong> Propulsée par Gemini 3.1 Multimodal pour analyser pâtisseries, sandwiches et boissons.</li>
-            <li><span class="drawer-check-icon">✔</span> <strong>Estimation Précise des Calories & Macros :</strong> Étalonnée sur les portions réelles des cafés gourmets.</li>
-            <li><span class="drawer-check-icon">✔</span> <strong>Séance Fitness de 12 min sur WhatsApp :</strong> Protocole sur-mesure au poids du corps pour éliminer les calories sans matériel.</li>
+            <li><span class="drawer-check-icon">✔</span> <strong>Instant Visual Food Recognition:</strong> Powered by Gemini 3.1 Multimodal to detect pastries, sandwiches, and handcrafted coffees.</li>
+            <li><span class="drawer-check-icon">✔</span> <strong>Accurate Caloric & Macro Breakdown:</strong> Calibrated specifically to gourmet coffeehouse portion sizes.</li>
+            <li><span class="drawer-check-icon">✔</span> <strong>12-Minute Bodyweight Routine via WhatsApp:</strong> Customized, equipment-free workout to offset calories with fun and ease.</li>
           </ul>
           <button class="btn-primary" onclick="openDrawer('eatfit')">
-            📱 Explorer le flux complet de l'IA &rarr;
+            📱 Explore the Complete AI Flow &rarr;
           </button>
         </div>
 
         <div class="eat-fit-preview">
           <div class="phone-mockup-header">
-            <span>🟢 PLAT DÉTECTÉ PAR L'IA</span>
+            <span>🟢 AI MEAL DETECTED</span>
             <span>BO'S COFFEE V4</span>
           </div>
           <div class="dish-sample-card">
             <div class="dish-info-row">
-              <span class="dish-title">Froccino Mocha Signature</span>
+              <span class="dish-title">Signature Froccino Mocha</span>
               <span class="cal-badge">🔥 380 Kcal</span>
             </div>
-            <p style="font-size: 0.8rem; color: #9CA3AF;">Gâteau Alfonso Mango Cream • Fraîchement Préparé</p>
+            <p style="font-size: 0.8rem; color: #9CA3AF;">Alfonso Mango Cream Cake • Freshly Prepared</p>
           </div>
           <div class="workout-plan-box">
-            <strong style="color: #10B981;">⚡ Votre Protocole 12-Min Brûle-Calories :</strong>
-            <div class="workout-step">1. 3 min de Montées de Genoux & Corde à sauter simulée</div>
-            <div class="workout-step">2. 4 min de Squats au poids du corps & Mollets</div>
-            <div class="workout-step">3. 3 min de Mountain Climbers & Gainage dynamique</div>
-            <div class="workout-step">4. 2 min d'Étirements & Retour au calme</div>
+            <strong style="color: #10B981;">⚡ Your 12-Min Calorie-Burner Protocol:</strong>
+            <div class="workout-step">1. 3 min High Knees & Simulated Jump Rope</div>
+            <div class="workout-step">2. 4 min Bodyweight Squats & Calf Raises</div>
+            <div class="workout-step">3. 3 min Mountain Climbers & Dynamic Plank</div>
+            <div class="workout-step">4. 2 min Cool-down Stretches & Deep Breathing</div>
             <div style="margin-top: 10px; font-size: 0.75rem; color: #6EE7B7;">
-              📲 Fiche d'exercices complète & vidéo envoyées sur votre WhatsApp !
+              📲 Full exercise card & coaching video sent straight to your WhatsApp!
             </div>
           </div>
         </div>
@@ -1003,174 +1007,184 @@
     </section>
 
     <!-- ======================================================================
-         ONGLET 4 : CONFORMITÉ BANCAIRE QATAR QCB
+         TAB 4 : FINANCIAL FLOW & QCB REGULATORY COMPLIANCE
          ====================================================================== -->
     <section id="tab-payments" class="tab-content">
       <div class="hero-container" style="margin-top: 0; margin-bottom: 24px;">
-        <h2 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 8px;">Circuit Financier Direct & 100% Conforme aux Normes QCB</h2>
-        <p style="color: var(--text-muted); font-size: 0.95rem;">Zéro intermédiaire opaque. Les fonds sont versés directement sur le compte bancaire commercial de Qutoof Al Majed.</p>
+        <h2 style="font-size: 1.8rem; font-weight: 900; margin-bottom: 8px;">Direct Financial Settlement • 100% QCB Compliant</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">Zero third-party escrow. Funds settle directly into Qutoof Al Majed's commercial banking merchant account.</p>
       </div>
 
       <div class="flow-grid">
         <div class="flow-step-card">
           <div class="step-number">1</div>
-          <h4 class="flow-step-title">Scan du QR Code</h4>
-          <p class="flow-step-desc">Le QR de table ouvre le menu digital instantané. Zéro téléchargement d'application.</p>
+          <h4 class="flow-step-title">Table QR Scan</h4>
+          <p class="flow-step-desc">Table QR opens the high-speed digital menu instantly. Zero app downloads required.</p>
         </div>
         <div class="flow-step-card">
           <div class="step-number">2</div>
-          <h4 class="flow-step-title">Règlement Apple Pay</h4>
-          <p class="flow-step-desc">Cartes de débit locales NAPS & Apple Pay avec validation biométrique en 1 seconde.</p>
+          <h4 class="flow-step-title">One-Tap Apple Pay</h4>
+          <p class="flow-step-desc">Local NAPS debit cards & Apple Pay with 1-second biometric authentication.</p>
         </div>
         <div class="flow-step-card">
           <div class="step-number">3</div>
-          <h4 class="flow-step-title">Passerelle Agréée QCB</h4>
-          <p class="flow-step-desc">Transaction sécurisée traitée via SkipCash ou QNB Merchant e-Commerce.</p>
+          <h4 class="flow-step-title">QCB-Licensed Gateway</h4>
+          <p class="flow-step-desc">Secure checkout routed directly via SkipCash or QNB Merchant e-Commerce.</p>
         </div>
         <div class="flow-step-card">
           <div class="step-number">4</div>
-          <h4 class="flow-step-title">Versement IBAN Direct</h4>
-          <p class="flow-step-desc">Alerte sonore KDS en cuisine + versement intégral en QAR sur l'IBAN de la société.</p>
+          <h4 class="flow-step-title">Direct IBAN Payout</h4>
+          <p class="flow-step-desc">Instant kitchen KDS chime + 100% net QAR settlement into the corporate company bank account.</p>
         </div>
       </div>
 
       <div style="text-align: center; margin-bottom: 40px;">
         <button class="btn-primary" onclick="openDrawer('payments')">
-          📑 Consulter les Spécifications de Sécurité & Conformité &rarr;
+          📑 Review Security & QCB Compliance Specs &rarr;
         </button>
       </div>
     </section>
   </main>
 
   <!-- ========================================================================
-       VOLET COULISSANT DÉTAILLÉ (DRAWER)
+       EXPANDABLE SIDE DRAWER
        ======================================================================== -->
   <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
   <aside class="details-drawer" id="detailsDrawer">
-    <button class="drawer-close-btn" onclick="closeDrawer()" title="Fermer">&times;</button>
+    <button class="drawer-close-btn" onclick="closeDrawer()" title="Close">&times;</button>
     
-    <span class="drawer-tag" id="drawerTag">Détails du Module</span>
-    <h3 class="drawer-title" id="drawerTitle">Titre du Module</h3>
-    <p class="drawer-body" id="drawerBody">Explications détaillées chargées dynamiquement.</p>
+    <span class="drawer-tag" id="drawerTag">Module Overview</span>
+    <h3 class="drawer-title" id="drawerTitle">Module Title</h3>
+    <p class="drawer-body" id="drawerBody">Detailed explanations loaded dynamically.</p>
 
-    <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Bénéfices Clés pour Bo's Coffee Qatar :</h4>
+    <h4 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Strategic Value for Bo's Coffee Qatar:</h4>
     <ul class="drawer-features-list" id="drawerList"></ul>
 
     <a href="#" target="_blank" rel="noopener noreferrer" class="drawer-cta-btn" id="drawerCtaBtn">
-      <span>💬 Demander une Démo en Point de Vente (WhatsApp)</span>
+      <span>💬 Request Branch Demo Setup (WhatsApp)</span>
     </a>
   </aside>
 
   <!-- ========================================================================
-       LOGIQUE JAVASCRIPT & CONFIGURATION DYNAMIQUE BO'S COFFEE QATAR
+       JAVASCRIPT LOGIC & DYNAMIC CONFIGURATION (BO'S COFFEE QATAR)
        ======================================================================== -->
   <script>
     // ==========================================================================
-    // ⚙️ CONFIGURATION RAPIDE BO'S COFFEE (MODIFIABLE À TOUT MOMENT)
+    // ⚙️ QUICK CONFIGURATION FOR BO'S COFFEE QATAR (EASILY EDITABLE)
     // ==========================================================================
     const CONFIG = {
-      nomRestaurant: "Bo's Coffee",
-      enseigneOuGroupe: "Qutoof Al Majed For Restaurants",
-      emplacement: "Mall of Qatar",
-      badgeEmplacement: "📍 Bo's Coffee • Mall of Qatar",
-      heroTag: "Proposition Stratégique Exclusive • Qutoof Al Majed For Restaurants",
-      heroSubtitle: "Un moteur d'hospitalité et de fidélisation sans friction conçu pour les pôles majeurs de Doha (Mall of Qatar, Lusail, The Pearl). Zéro application à télécharger. 100% natif WhatsApp. Conforme aux règlements directs de la Banque Centrale du Qatar (QCB).",
-      concurrents: "% Arabica, Starbucks et Flat White",
-      devise: "QAR",
-      ticketMoyenDefaut: 45,
-      couvertsDefaut: 350,
-      tauxCommission: 22,
-      nomAgregateurs: "Talabat / Snoonu (22%)",
-      passerellesBancaires: "SkipCash & QNB Merchant",
-      normeBancaire: "Règlements Directs Banque Centrale du Qatar (QCB)",
-      lienLP: "https://smart-review-v4-lifestyle-vision2030.jdaproai.com/spin/bos_cafe_moq",
-      telephoneWhatsapp: "33767803233",
-      msgWhatsapp: "Bonjour Abdel, j'ai consulté la présentation interactive Smart Review AI pour Bo's Coffee Qatar et je souhaiterais échanger sur le lancement d'un pilote de 30 jours."
+      restaurantName: "Bo's Coffee",
+      corporateGroup: "Qutoof Al Majed For Restaurants",
+      location: "Mall of Qatar",
+      locationBadge: "📍 Bo's Coffee • Mall of Qatar",
+      heroTag: "Exclusive Strategic Proposal • Qutoof Al Majed For Restaurants",
+      heroSubtitle: "A frictionless dine-in hospitality and table-ordering engine built for high-traffic Doha destinations (Mall of Qatar, Lusail, The Pearl). Zero app downloads. Guests sit down comfortably, scan, and order at their own pace without standing in long queues or dealing with crowded kiosks. 100% compliant with Qatar Central Bank (QCB) direct settlement standards.",
+      competitors: "% Arabica, Starbucks, and Flat White",
+      currency: "QAR",
+      defaultTicket: 45,
+      defaultCovers: 350,
+      gainRotationPct: 18,
+      gainUpsellPct: 15,
+      paymentGateways: "SkipCash & QNB Merchant",
+      bankingStandard: "Direct Settlements • Qatar Central Bank (QCB) Standards",
+      liveDemoUrl: "https://smart-review-v4-lifestyle-vision2030.jdaproai.com/spin/bos_cafe_moq",
+      whatsappNumber: "33767803233",
+      whatsappMessage: "Hello Abdel, I reviewed the Smart Review AI executive presentation for Bo's Coffee Qatar and would like to discuss launching a 30-day pilot."
     };
 
     function initPage() {
-      // Configuration des liens
+      // Configure dynamic badge & buttons
       const navBadge = document.getElementById('navBranchBadge');
-      navBadge.href = CONFIG.lienLP;
-      navBadge.innerHTML = `<span>${CONFIG.badgeEmplacement}</span><span style="font-size: 0.8rem; margin-left: 2px;">↗</span>`;
+      navBadge.href = CONFIG.liveDemoUrl;
+      navBadge.innerHTML = `<span>${CONFIG.locationBadge}</span><span style="font-size: 0.8rem; margin-left: 2px;">↗</span>`;
 
-      const whatsappUrl = `https://wa.me/${CONFIG.telephoneWhatsapp}?text=${encodeURIComponent(CONFIG.msgWhatsapp)}`;
+      const whatsappUrl = `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(CONFIG.whatsappMessage)}`;
       document.getElementById('pilotCtaBtn').href = whatsappUrl;
       document.getElementById('drawerCtaBtn').href = whatsappUrl;
 
-      // Valeurs par défaut des contrôles
-      inputTicket.value = CONFIG.ticketMoyenDefaut;
-      inputCovers.value = CONFIG.couvertsDefaut;
+      // Initialize control values
+      inputTicket.value = CONFIG.defaultTicket;
+      inputCovers.value = CONFIG.defaultCovers;
 
       updateCalculations();
     }
 
-    // Gestion des onglets
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
-
-    tabBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const targetTab = btn.getAttribute('data-tab');
-        tabBtns.forEach(b => b.classList.remove('active'));
-        tabContents.forEach(c => c.classList.remove('active'));
-        btn.classList.add('active');
-        document.getElementById(`tab-${targetTab}`).classList.add('active');
-
-        if (targetTab === 'simulator') {
-          setTimeout(renderChart, 50);
-        }
-      });
-    });
-
-    // Données du volet coulissant (Drawer)
-    const drawerData = {
-      google: {
-        tag: "Suprématie SEO • Google Maps Qatar",
-        title: "Machine d'Acquisition d'Avis Vocaux Google 5★",
-        body: "Les QR codes traditionnels échouent à récolter des avis car taper sur un petit écran mobile est fastidieux. Smart Review AI intègre un protocole d'enregistrement vocal de 5 secondes directement via WhatsApp. L'IA transcrit, synthétise et guide le client pour déposer son avis officiel 5 étoiles sur la fiche Google Maps de Bo's Coffee.",
+    // Detailed drawer content
+    const DRAWER_DATA = {
+      reviews: {
+        tag: "Local Dominance & Reputation",
+        title: "High-Velocity 5★ Google Maps Reviews",
+        body: "In Qatar's competitive specialty coffee market, high ratings on Google Maps directly drive footfall from mall shoppers, tourists, and locals. Our gamified experience invites guests to leave a verified rating right when their coffee and pastry experience is at its peak.",
         features: [
-          "Zéro application à installer : Ouverture directe en 1 clic sur WhatsApp.",
-          "IA de transcription vocale multilingue en temps réel.",
-          "Filtre les remarques constructives en privé au manager avant toute publication publique négative.",
-          "Positionne Bo's Coffee en tête des résultats Google Maps à Mall of Qatar, Lusail et Doha."
+          "Instant one-tap redirection to verified Google Business Profile.",
+          "Smart sentiment filtering: constructive feedback (< 4★) is routed privately to management.",
+          "Demonstrated rating improvement (+0.5 to +0.8 stars) within 45 days.",
+          "Automated reward delivery to stimulate off-peak weekday afternoon visits."
         ]
       },
-      whatsapp: {
-        tag: "Actif Marketing Propriétaire • Sans Application",
-        title: "Carte de Fidélité VIP & Pass WhatsApp",
-        body: "Ne laissez plus les plateformes de livraison externes (Talabat / Snoonu) garder vos données clients. À chaque visite et avis déposé, le numéro de téléphone du client est automatiquement intégré à votre programme VIP. Les cartes de fidélité à tampons sont remises directement sur WhatsApp avec des relances automatisées.",
+      tableordering: {
+        tag: "Guest Experience & Operational Excellence",
+        title: "Relaxed Table Ordering vs Cluttered Kiosks",
+        body: "Unlike bulky fast-food touchscreens that force guests to stand in line, block walkways, and create an unappealing cafeteria atmosphere, Smart Review AI lets guests sit down comfortably at Bo's Coffee. They scan the table QR code and browse your full gourmet menu on their smartphone. During peak Mall of Qatar weekend rushes or when facing floor staff shortages, orders and payments flow immediately to the barista KDS without delay.",
         features: [
-          "100% de numéros de mobiles clients vérifiés et capturés.",
-          "Carte à tampons digitale (ex: 10ème Froccino offert) validée instantanément au comptoir.",
-          "96,8% de taux d'ouverture sur WhatsApp, contre moins de 15% pour les newsletters traditionnelles.",
-          "Canal de diffusion direct pour les campagnes promotionnelles du groupe Qutoof Al Majed."
+          "Premium guest comfort: guests order seated without standing in counter queues.",
+          "Under-staffing resilience: baristas receive tickets instantly even during floor staff shortages.",
+          "Faster table turnover: up to +25% quicker from seated arrival to preparation in kitchen/bar.",
+          "Automated check upsells (+15% to +20%) with high-res photo pairings of specialty blends and desserts.",
+          "Direct barista KDS chime: eliminates order scribbling and counter bottleneck mistakes."
         ]
       },
       eatfit: {
-        tag: "Innovation Lifestyle Exclusive • Vision 2030",
-        title: "Eat & Fit : Vision IA & Dégustation Sans Culpabilité",
-        body: "Un atout concurrentiel inédit conçu sur-mesure pour la clientèle de Doha soucieuse de sa forme physique. En dégustant leur café ou pâtisserie, les clients prennent simplement leur assiette en photo. L'IA multimodale reconnaît le plat, calcule l'apport calorique et transmet une séance fitness adaptée de 12 minutes sur WhatsApp.",
+        tag: "F&B World-First Innovation",
+        title: "Gemini AI 'Eat & Fit' : Guilt-Free Dining",
+        body: "An exclusive milestone in the GCC coffeehouse market. By snapping a photo of their dessert or specialty beverage, guests discover their caloric balance and receive a custom 12-minute home workout via WhatsApp to burn off the calories guilt-free. Creates viral social buzz and organic brand advocacy.",
         features: [
-          "Fort coefficient de viralité sur les réseaux sociaux (Instagram Stories & TikTok UGC).",
-          "Incitation à la commande de desserts et de boissons signature sans sentiment de culpabilité.",
-          "Entraînements ciblés au poids du corps ne nécessitant aucun équipement.",
-          "Positionne Bo's Coffee comme le café de spécialité le plus innovant et lifestyle de Doha."
+          "Next-generation Multimodal Vision AI (Gemini 3.1) offering swift, accurate food identification.",
+          "Equipment-free 12-minute fitness circuit designed specifically for coffeehouse portions.",
+          "Zero app download: 100% native WhatsApp experience for effortless guest delight.",
+          "Viral reach: guests share their 'Guilt-Free Bo's Coffee Badge' on Instagram Stories and TikTok."
+        ]
+      },
+      vip: {
+        tag: "Guest Retention & LTV",
+        title: "WhatsApp VIP Membership & Automated Re-engagement",
+        body: "WhatsApp boasts a 98% open rate in Qatar, drastically outperforming emails (18%) and SMS. Guests keep a live VIP pass on their phone without cluttering their device, receiving bespoke invitations and perks tailored to their visit frequency.",
+        features: [
+          "Zero plastic cards, zero tedious app downloads from the App Store.",
+          "Automated smart re-engagement campaigns during quiet weekday mall mornings.",
+          "Precise segmentation by average spend and favorite coffee beverage categories.",
+          "Measurable +22% repeat visit frequency achieved within 60 days of rollout."
         ]
       },
       payments: {
-        tag: "Versements 100% Directs • Agréé Banque Centrale du Qatar",
-        title: "Commande QR à Table & Règlements Directs en QAR",
-        body: "Commande à table 100% digitalisée avec zéro investissement matériel. S'intègre directement avec les passerelles de paiement approuvées par la Banque Centrale du Qatar (SkipCash, QNB Merchant e-Commerce). Les fonds sont versés directement sur l'IBAN commercial de Qutoof Al Majed, sans commission intermédiaire de 22%.",
+        tag: "QCB Compliance & Financial Flow",
+        title: "Direct Merchant Settlement • QCB Standards",
+        body: "All table transactions adhere to Qatar Central Bank electronic payment directives with strong biometric customer authentication (3D Secure). Qutoof Al Majed maintains full treasury autonomy with zero escrow delays.",
         features: [
-          "Validation en 1 clic via Apple Pay et cartes de débit locales NAPS.",
-          "Écran de cuisine KDS en temps réel avec signal sonore pour les baristas.",
-          "Export immédiat des rapports de vente en Excel/CSV par table, article et horaire.",
-          "Accélération de la rotation des tables de 18 minutes pendant les heures de pointe du centre commercial."
+          "Instant processing via SkipCash or QNB Merchant Gateway (NAPS, Visa, Mastercard).",
+          "Ultra-fast Apple Pay one-tap checkout with Touch ID / Face ID verification.",
+          "Direct automated settlements in QAR into Qutoof Al Majed's commercial bank account.",
+          "Automated e-receipts and VAT-compliant documentation delivered via WhatsApp."
         ]
       }
     };
 
+    // Tab switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+      event.currentTarget.classList.add('active');
+      const targetContent = document.getElementById(`tab-${tabId}`);
+      if (targetContent) {
+        targetContent.classList.add('active');
+        if (tabId === 'simulator') {
+          setTimeout(renderChart, 50);
+        }
+      }
+    }
+
+    // Side Drawer logic
     const drawerOverlay = document.getElementById('drawerOverlay');
     const detailsDrawer = document.getElementById('detailsDrawer');
     const drawerTag = document.getElementById('drawerTag');
@@ -1179,7 +1193,7 @@
     const drawerList = document.getElementById('drawerList');
 
     function openDrawer(key) {
-      const data = drawerData[key];
+      const data = DRAWER_DATA[key];
       if (!data) return;
 
       drawerTag.innerText = data.tag;
@@ -1199,7 +1213,7 @@
       detailsDrawer.classList.remove('active');
     }
 
-    // Calculs du simulateur
+    // Simulator calculations
     const inputCovers = document.getElementById('inputCovers');
     const inputTicket = document.getElementById('inputTicket');
     const inputConversion = document.getElementById('inputConversion');
@@ -1218,7 +1232,7 @@
       const ticket = parseInt(inputTicket.value, 10);
       const conversion = parseInt(inputConversion.value, 10) / 100;
 
-      valCovers.innerText = `${covers} clients/jour`;
+      valCovers.innerText = `${covers} guests/day`;
       valTicket.innerText = `${ticket} QAR`;
       valConversion.innerText = `${Math.round(conversion * 100)} %`;
 
@@ -1227,13 +1241,15 @@
       const newLeads = Math.round(monthlyGuests * (conversion * 1.2));
       const monthlyRevenue = monthlyGuests * ticket;
       
-      const commissionSaved = Math.round(monthlyRevenue * 0.18);
-      const repeatRevenue = Math.round(monthlyRevenue * 0.09);
+      // Table turn acceleration gain (+18% capacity absorbed without extra labor)
+      const tableTurnGain = Math.round(monthlyRevenue * 0.18);
+      // Upsell check gain (+15% average order value increase)
+      const upsellGain = Math.round(monthlyRevenue * 0.15);
 
-      statReviews.innerText = newReviews.toLocaleString('fr-FR');
-      statLeads.innerText = newLeads.toLocaleString('fr-FR');
-      statSavings.innerText = `${commissionSaved.toLocaleString('fr-FR')} QAR`;
-      statRepeat.innerText = `${repeatRevenue.toLocaleString('fr-FR')} QAR`;
+      statReviews.innerText = newReviews.toLocaleString('en-US');
+      statLeads.innerText = newLeads.toLocaleString('en-US');
+      statSavings.innerText = `${tableTurnGain.toLocaleString('en-US')} QAR`;
+      statRepeat.innerText = `${upsellGain.toLocaleString('en-US')} QAR`;
 
       renderChart();
     }
@@ -1242,7 +1258,7 @@
     inputTicket.addEventListener('input', updateCalculations);
     inputConversion.addEventListener('input', updateCalculations);
 
-    // Graphique Canvas
+    // Canvas Growth Chart
     const chartCanvas = document.getElementById('growthChart');
     const ctx = chartCanvas.getContext('2d');
 
@@ -1263,7 +1279,7 @@
       const conversion = parseInt(inputConversion.value, 10) / 100;
       const monthlyReviewGain = (covers * 30 * conversion);
 
-      const months = ['Mois 1', 'Mois 2', 'Mois 3', 'Mois 4', 'Mois 5', 'Mois 6'];
+      const months = ['Month 1', 'Month 2', 'Month 3', 'Month 4', 'Month 5', 'Month 6'];
       const standardGrowth = [120, 140, 160, 185, 210, 240];
       const smartReviewGrowth = [
         120,
