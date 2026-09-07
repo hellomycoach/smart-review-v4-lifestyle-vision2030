@@ -27,6 +27,7 @@ export interface MenuItem {
   isVegetarian?: boolean;
   isGlutenFree?: boolean;
   isAvailable?: boolean;
+  serviceHours?: string;
   optionGroups?: MenuItemOptionGroup[];
 }
 
@@ -335,10 +336,41 @@ export const BOS_CAFE_CATEGORIES: MenuCategory[] = [
   { id: "combos", name: { ar: "وجبات اقتصادية وعروض", fr: "Formules & Combos", en: "Value Meals & Combos" }, icon: "UtensilsCrossed" }
 ];
 
+// --- CATALOGUE SPÉCIFIQUE RIWAQ RESTAURANT - QATAR NATIONAL LIBRARY (riwaq_qnl) ---
+export const RIWAQ_CATEGORIES: MenuCategory[] = [
+  { id: "all", name: { ar: "الكل (68)", fr: "Tout le menu (68)", en: "All Menu (68)" }, icon: "Utensils" },
+  { id: "breakfast", name: { ar: "الفطور الصباحي (08:00 - 11:00)", fr: "Petit-Déjeuner (08h-11h)", en: "Breakfast (08:00 - 11:00)" }, icon: "Sparkles" },
+  { id: "appetizers", name: { ar: "المقبلات السريعة (دائماً من 11:00)", fr: "Entrées & Tapas (Dès 11h)", en: "Appetizers (From 11:00)" }, icon: "Flame" },
+  { id: "salads_wraps", name: { ar: "السلطات واللفائف (من 10:00)", fr: "Salades & Wraps (Dès 10h)", en: "Salads & Wraps (From 10:00)" }, icon: "Utensils" },
+  { id: "pizzas", name: { ar: "البيتزا 12 إنش (من 11:00)", fr: "Pizzas 12\" (Dès 11h)", en: "Pizzas 12\" (From 11:00)" }, icon: "Flame" },
+  { id: "mains", name: { ar: "الأطباق الرئيسية (من 11:00)", fr: "Plats Principaux (Dès 11h)", en: "Main Courses (From 11:00)" }, icon: "UtensilsCrossed" },
+  { id: "burgers_pasta", name: { ar: "البرجر والباستا (من 11:00)", fr: "Burgers & Pâtes (Dès 11h)", en: "Burgers & Pasta (From 11:00)" }, icon: "UtensilsCrossed" },
+  { id: "desserts", name: { ar: "الحلويات الشرقية والغربية", fr: "Desserts & Pâtisseries", en: "Desserts" }, icon: "Cake" },
+  { id: "beverages", name: { ar: "المشروبات والقهوة والعصائر", fr: "Boissons & Cafés", en: "Coffee & Drinks" }, icon: "Coffee" }
+];
+
 import bosCafeMenuJson from './data/menus/bos_cafe_moq.json';
+import riwaqMenuJson from './data/menus/riwaq_qnl.json';
 
 export function getMenuForInstance(instanceName: string) {
   const clean = (instanceName || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+  if (clean.includes('riwaq') || clean.includes('qnl')) {
+    return {
+      categories: RIWAQ_CATEGORIES,
+      items: riwaqMenuJson as MenuItem[],
+      restaurantInfo: {
+        name: "RIWAQ Restaurant - Qatar National Library",
+        city: "Doha",
+        country: "Qatar",
+        currency: "QAR",
+        taxRate: 0.0,
+        totalTables: 30,
+        coverImage: "/images/restaurants/riwaq/beverages_assortment.jpg"
+      }
+    };
+  }
+
   if (clean.includes('bos') || clean.includes('moq') || clean.includes('bocafe')) {
     return {
       categories: BOS_CAFE_CATEGORIES,
@@ -369,3 +401,4 @@ export function getMenuForInstance(instanceName: string) {
     }
   };
 }
+

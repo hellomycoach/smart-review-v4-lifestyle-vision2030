@@ -39,7 +39,7 @@ export interface CartItem {
   itemTotal: number;
 }
 
-export default function TableOrderingPage() {
+function TableOrderingContent() {
   const params = useParams();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -790,8 +790,9 @@ export default function TableOrderingPage() {
                         className={`w-full h-full object-cover transition-transform duration-500 ${!isOutOfStock ? 'group-hover:scale-108' : 'grayscale-[50%]'}`}
                       />
                       {isOutOfStock ? (
-                        <span className="absolute inset-0 bg-black/60 backdrop-blur-[1px] flex items-center justify-center text-white text-[11px] font-black px-2 text-center leading-tight">
-                          {t.outOfStock}
+                        <span className="absolute inset-0 bg-black/65 backdrop-blur-[2px] flex flex-col items-center justify-center text-white text-[10px] font-bold px-2 text-center leading-tight">
+                          <Clock className="w-3.5 h-3.5 mb-1 text-[#E5BA73]" />
+                          <span>{item.serviceHours || t.outOfStock}</span>
                         </span>
                       ) : (
                         item.isChefPick && (
@@ -1593,5 +1594,13 @@ export default function TableOrderingPage() {
         <p className="text-[10px] opacity-75">© {new Date().getFullYear()} {restaurant.name} • Smart Review v5.0</p>
       </footer>
     </div>
+  );
+}
+
+export default function TableOrderingPage() {
+  return (
+    <React.Suspense fallback={<div className="min-h-screen bg-[#FAF8F5] flex items-center justify-center text-[#2E2722] font-bold">جاري تحميل القائمة...</div>}>
+      <TableOrderingContent />
+    </React.Suspense>
   );
 }

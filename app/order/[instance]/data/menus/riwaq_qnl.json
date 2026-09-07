@@ -1,0 +1,1593 @@
+[
+  {
+    "id": "rw-bf-1",
+    "categoryId": "breakfast",
+    "name": {
+      "ar": "اختيار البيض (بيضتان)",
+      "fr": "Sélection d'Œufs au Choix (2 œufs)",
+      "en": "Choice of Egg (Two Eggs)"
+    },
+    "description": {
+      "ar": "يُطهى حسب الرغبة، يُقدَّم مع لحم مقدد أو النقانق، بطاطس محموسة، يُقدَّم مع خبز أبيض أو أسمر.",
+      "fr": "Préparés selon votre goût, servis avec bacon ou saucisse, galette de pommes de terre rissolées, pain blanc ou complet.",
+      "en": "Cooked to your preference, served with bacon or sausage, hash brown potatoes, served either white or brown bread."
+    },
+    "price": 18,
+    "calories": 150,
+    "prepTime": "8-10 min",
+    "image": "/images/restaurants/riwaq/choice_of_egg.jpg",
+    "isPopular": true,
+    "isChefPick": true,
+    "optionGroups": [
+      {
+        "id": "egg_style",
+        "name": {
+          "ar": "طريقة طهي البيض",
+          "fr": "Cuisson des œufs",
+          "en": "Egg Style"
+        },
+        "required": true,
+        "options": [
+          {
+            "id": "scrambled",
+            "name": {
+              "ar": "مخفوق (Scrambled)",
+              "fr": "Brouillés",
+              "en": "Scrambled"
+            },
+            "price": 0
+          },
+          {
+            "id": "sunny",
+            "name": {
+              "ar": "عيون (Sunny Side Up)",
+              "fr": "Au plat",
+              "en": "Sunny Side Up"
+            },
+            "price": 0
+          },
+          {
+            "id": "omelette",
+            "name": {
+              "ar": "أومليت (Omelette)",
+              "fr": "Omelette",
+              "en": "Omelette"
+            },
+            "price": 0
+          }
+        ]
+      },
+      {
+        "id": "side_meat",
+        "name": {
+          "ar": "المقبل الإضافي",
+          "fr": "Accompagnement",
+          "en": "Side Choice"
+        },
+        "required": true,
+        "options": [
+          {
+            "id": "bacon",
+            "name": {
+              "ar": "لحم مقدد (Bacon)",
+              "fr": "Bacon de bœuf",
+              "en": "Beef Bacon"
+            },
+            "price": 0
+          },
+          {
+            "id": "sausage",
+            "name": {
+              "ar": "نقانق (Sausage)",
+              "fr": "Saucisse",
+              "en": "Sausage"
+            },
+            "price": 0
+          }
+        ]
+      },
+      {
+        "id": "bread_type",
+        "name": {
+          "ar": "نوع الخبز",
+          "fr": "Type de pain",
+          "en": "Bread Choice"
+        },
+        "required": true,
+        "options": [
+          {
+            "id": "white",
+            "name": {
+              "ar": "خبز أبيض",
+              "fr": "Pain blanc",
+              "en": "White Bread"
+            },
+            "price": 0
+          },
+          {
+            "id": "brown",
+            "name": {
+              "ar": "خبز أسمر",
+              "fr": "Pain complet",
+              "en": "Brown Bread"
+            },
+            "price": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rw-bf-2",
+    "categoryId": "breakfast",
+    "name": {
+      "ar": "فول مدمس",
+      "fr": "Foul Medames Traditionnel",
+      "en": "Foul Medames"
+    },
+    "description": {
+      "ar": "طبق غني من الفول العربي الأصيل بزيت الزيتون والكمون، يُقدَّم مع خبز عربي دافئ.",
+      "fr": "Fèves mijotées à l'orientale, huile d'olive et cumin doux, servies avec pain arabe chaud.",
+      "en": "A hearty Middle Eastern fava bean dish with olive oil and cumin, served with warm Arabic bread."
+    },
+    "price": 18,
+    "calories": 400,
+    "prepTime": "5-7 min",
+    "image": "/images/restaurants/riwaq/foul_medames.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-bf-3",
+    "categoryId": "breakfast",
+    "name": {
+      "ar": "بانكيك (3 قطع)",
+      "fr": "Pancakes Moelleux (3 pcs)",
+      "en": "Pancakes (3 pcs)"
+    },
+    "description": {
+      "ar": "بانكيك طري وهش مع شراب البانكيك الذهبي. إمكانية إضافة شراب التوت أو صوص الشوكولاتة.",
+      "fr": "Pancakes dorés et légers servis avec sirop de pancake. Suppléments coulis disponibles.",
+      "en": "Fluffy golden pancakes drizzled with pancake syrup. Topping add-ons available."
+    },
+    "price": 20,
+    "calories": 450,
+    "prepTime": "8 min",
+    "image": "/images/restaurants/riwaq/pancakes.jpg",
+    "isPopular": true,
+    "optionGroups": [
+      {
+        "id": "sauce_addon",
+        "name": {
+          "ar": "إضافات الصوص (+5 ر.ق)",
+          "fr": "Coulis en supplément (+5 QR)",
+          "en": "Sauce Add-on (+5 QR)"
+        },
+        "required": false,
+        "options": [
+          {
+            "id": "blueberry",
+            "name": {
+              "ar": "شراب التوت الأزرق",
+              "fr": "Sirop Myrtille Sauvage",
+              "en": "Blueberry Syrup"
+            },
+            "price": 5
+          },
+          {
+            "id": "choco",
+            "name": {
+              "ar": "صوص الشوكولاتة الفاخر",
+              "fr": "Sauce Chocolat Gourmande",
+              "en": "Chocolate Sauce"
+            },
+            "price": 5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rw-bf-4",
+    "categoryId": "breakfast",
+    "name": {
+      "ar": "توست فرنسي ذهبي",
+      "fr": "Pain Perdu French Toast",
+      "en": "French Toast"
+    },
+    "description": {
+      "ar": "توست ذهبي محمص مع سكر بودرة ناعم، يُقدَّم مع زبدة طازجة وعسل طبيعي.",
+      "fr": "Pain perdu brioché doré saupoudré de sucre glace, servi avec beurre doux et miel pur.",
+      "en": "Golden-brown toast dusted with icing sugar, served with butter and honey."
+    },
+    "price": 20,
+    "calories": 480,
+    "prepTime": "8 min",
+    "image": "/images/restaurants/riwaq/french_toast.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-bf-5",
+    "categoryId": "breakfast",
+    "name": {
+      "ar": "اختيار البراتا - ألو بالزبادي",
+      "fr": "Paratha Aloo & Yaourt Frais",
+      "en": "Choice of Paratha - Aloo with Yoghurt"
+    },
+    "description": {
+      "ar": "باراتا محشوة بالبطاطس المهروسة المتبلة ومطهوة حتى تصبح مقرمشة، تُقدَّم مع الزبادي الطازج.",
+      "fr": "Paratha croustillante farcie aux pommes de terre épicées, servie avec yaourt crémeux frais.",
+      "en": "Stuffed paratha with spiced mashed potatoes and cooked until crispy, served with fresh yogurt."
+    },
+    "price": 14,
+    "calories": 730,
+    "prepTime": "10 min",
+    "image": "/images/restaurants/riwaq/paratha_aloo.jpg"
+  },
+  {
+    "id": "rw-bf-6",
+    "categoryId": "breakfast",
+    "name": {
+      "ar": "باراثا نوتيلا",
+      "fr": "Paratha Gourmande Nutella",
+      "en": "Nutella Paratha"
+    },
+    "description": {
+      "ar": "باراثا مقرمشة محشوة بالنوتيلا الذائبة ومطهوة بلون ذهبي شهي.",
+      "fr": "Paratha croustillante et dorée généreusement garnie de Nutella fondu.",
+      "en": "Golden crispy paratha layered with warm melted Nutella."
+    },
+    "price": 15,
+    "calories": 730,
+    "prepTime": "6 min",
+    "image": "/images/restaurants/riwaq/paratha_nutella.jpg"
+  },
+  {
+    "id": "rw-bf-7",
+    "categoryId": "breakfast",
+    "name": {
+      "ar": "باراثا بيسكوف لوتس",
+      "fr": "Paratha Lotus Biscoff",
+      "en": "Biscoff Paratha"
+    },
+    "description": {
+      "ar": "باراثا مقرمشة محشوة بكريمة بسكويت بيسكوف الشهيرة ومطهوة بدقة.",
+      "fr": "Paratha croustillante étalée de crème de spéculoos Lotus Biscoff fondante.",
+      "en": "Crispy paratha filled with warm melted Biscoff spread."
+    },
+    "price": 16,
+    "calories": 900,
+    "prepTime": "6 min",
+    "image": "/images/restaurants/riwaq/paratha_biscoff.jpg"
+  },
+  {
+    "id": "rw-bf-8",
+    "categoryId": "breakfast",
+    "name": {
+      "ar": "باراثا بالبيض والجبن",
+      "fr": "Paratha Œuf & Fromage Fondu",
+      "en": "Egg and Cheese Paratha"
+    },
+    "description": {
+      "ar": "باراثا مطهوة مع بيضة طازجة ورشة جبن غنية تذوب داخل العجينة الذهبية.",
+      "fr": "Paratha chaude cuite avec œuf frais et fromage fondant savoureux.",
+      "en": "Egg cracked on the paratha, sprinkled with cheese, folded and cooked until golden."
+    },
+    "price": 18,
+    "calories": 690,
+    "prepTime": "7 min",
+    "image": "/images/restaurants/riwaq/paratha_egg_cheese.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-bf-9",
+    "categoryId": "breakfast",
+    "name": {
+      "ar": "بارفيه الشوفان والفواكه",
+      "fr": "Parfait d'Avoine & Fruits Frais",
+      "en": "Oatmeal Parfait"
+    },
+    "description": {
+      "ar": "طبقات من الشوفان، الزبادي، والفواكه الطازجة في كوب، مع المكسرات والعسل الطبيعي.",
+      "fr": "Couches d'avoine, yaourt onctueux, fruits de saison croquants, noix et miel.",
+      "en": "Layer oatmeal, yogurt, and fresh fruits in a glass, topped with nuts and honey."
+    },
+    "price": 18,
+    "calories": 390,
+    "prepTime": "4 min",
+    "image": "/images/restaurants/riwaq/oatmeal_parfait.jpg"
+  },
+  {
+    "id": "rw-bf-10",
+    "categoryId": "breakfast",
+    "name": {
+      "ar": "بارفيه الزبادي اليوناني مع العسل والمكسرات",
+      "fr": "Parfait Yaourt Grec, Miel & Noix",
+      "en": "Greek Yogurt Parfait with Honey and Nuts"
+    },
+    "description": {
+      "ar": "زبادي يوناني أصيل مع عسل طبيعي، مكسرات مقرمشة وتوت طازج مغذي ولذيذ.",
+      "fr": "Véritable yaourt grec, miel doré d'abeilles, mélange de noix croquantes et baies.",
+      "en": "Greek yogurt with natural honey, crunchy roasted nuts, and fresh berries."
+    },
+    "price": 18,
+    "calories": 490,
+    "prepTime": "4 min",
+    "image": "/images/restaurants/riwaq/greek_yogurt_parfait.jpg"
+  },
+  {
+    "id": "rw-bf-11",
+    "categoryId": "breakfast",
+    "name": {
+      "ar": "توست الأفوكادو على خبز الساوردو",
+      "fr": "Avocado Toast sur Pain Sourdough",
+      "en": "Avocado Toast on Sourdough"
+    },
+    "description": {
+      "ar": "خبز ساوردو مقرمش، أفوكادو طازج مهروس بعصير الليمون، حبوب الرمان والبهارات.",
+      "fr": "Tranche de pain au levain grillée, purée d'avocat frais au citron vert, graines et herbes.",
+      "en": "Toasted sourdough bread, fresh mashed avocado with lime, seasoning, and gourmet garnish."
+    },
+    "price": 22,
+    "calories": 450,
+    "prepTime": "6 min",
+    "image": "/images/restaurants/riwaq/avocado_toast.jpg",
+    "isChefPick": true,
+    "isPopular": true
+  },
+  {
+    "id": "rw-bf-12",
+    "categoryId": "breakfast",
+    "name": {
+      "ar": "شكشوكة بالبيض العربية",
+      "fr": "Chakchouka Traditionnelle aux Œufs",
+      "en": "Egg Shakshouka"
+    },
+    "description": {
+      "ar": "بيض مطهو برفق في صلصة طماطم مطبوخة على نار هادئة مع البصل والفلفل والتوابل العربية.",
+      "fr": "Œufs pochés dans une compotée mijotée de tomates, poivrons doux, oignons et épices.",
+      "en": "Eggs gently poached in a slow-simmered tomato sauce with capsicum, garlic, and mild spices."
+    },
+    "price": 17,
+    "calories": 400,
+    "prepTime": "10 min",
+    "image": "/images/restaurants/riwaq/egg_shakshouka.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-app-1",
+    "categoryId": "appetizers",
+    "name": {
+      "ar": "كبة مقلية باللحم والصنوبر (6 قطع)",
+      "fr": "Kibbeh Doré Viande & Pignons (6 pcs)",
+      "en": "Kibbeh (6 pcs)"
+    },
+    "description": {
+      "ar": "قشور القمح المجروشة المقلية المقرمشة المحشوة باللحم المتبل الفاخر والصنوبر.",
+      "fr": "Kebbés dorés et croustillants au blé concassé farcis de viande hachée épicée et pignons.",
+      "en": "Deep-fried cracked wheat shells stuffed with seasoned meat and pine nuts."
+    },
+    "price": 22,
+    "calories": 580,
+    "prepTime": "10 min",
+    "image": "/images/restaurants/riwaq/kibbeh.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-app-2",
+    "categoryId": "appetizers",
+    "name": {
+      "ar": "سمبوسك عربي مقرمش (6 قطع)",
+      "fr": "Sambousek Croustillant (6 pcs)",
+      "en": "Arabic Sambousek (6 pcs)"
+    },
+    "description": {
+      "ar": "معجنات ذهبية مقلية محشوة بحشوة غنية من الجبن الذائب أو الدجاج المتبل.",
+      "fr": "Petits chaussons feuilletés croustillants au choix fromage fondant ou poulet parfumé.",
+      "en": "Golden-fried pastries filled with choice of melted cheese or seasoned chicken."
+    },
+    "price": 18,
+    "calories": 560,
+    "prepTime": "8 min",
+    "image": "/images/restaurants/riwaq/arabic_sambousek.jpg",
+    "optionGroups": [
+      {
+        "id": "sambousek_fill",
+        "name": {
+          "ar": "الحشوة المختارة",
+          "fr": "Garniture",
+          "en": "Filling Choice"
+        },
+        "required": true,
+        "options": [
+          {
+            "id": "cheese",
+            "name": {
+              "ar": "جبن عكاوي مشكل",
+              "fr": "Fromage fondant",
+              "en": "Cheese"
+            },
+            "price": 0
+          },
+          {
+            "id": "chicken",
+            "name": {
+              "ar": "دجاج بالأعشاب",
+              "fr": "Poulet assaisonné",
+              "en": "Chicken"
+            },
+            "price": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rw-app-3",
+    "categoryId": "appetizers",
+    "name": {
+      "ar": "أجنحة دجاج بالباربيكيو المدخن",
+      "fr": "Wings BBQ Fumés & Frites",
+      "en": "BBQ Chicken Wings"
+    },
+    "description": {
+      "ar": "أجنحة دجاج مقلية مقرمشة ومغطاة بصلصة الباربيكيو المدخنة، تقدم مع البطاطس المقلية.",
+      "fr": "Ailes de poulet croustillantes enrobées d'une riche sauce barbecue fumée, servies avec frites.",
+      "en": "Crispy fried wings coated in smoky BBQ sauce, served with golden fries."
+    },
+    "price": 35,
+    "calories": 730,
+    "prepTime": "12 min",
+    "image": "/images/restaurants/riwaq/bbq_chicken_wings.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-app-4",
+    "categoryId": "appetizers",
+    "name": {
+      "ar": "دجاج دايناميت المقرمش",
+      "fr": "Dynamite Chicken Epicé Maison",
+      "en": "Dynamite Chicken"
+    },
+    "description": {
+      "ar": "قطع دجاج مقرمشة بفتات البانكيك ومغطاة بصلصة الدايناميت الحارة واللذيذة المحضرة منزلياً.",
+      "fr": "Bouchées de poulet panées au panko, enrobées de sauce dynamite épicée et onctueuse.",
+      "en": "Crispy panko-coated chicken tossed in spicy homemade dynamite sauce."
+    },
+    "price": 32,
+    "calories": 500,
+    "prepTime": "10 min",
+    "image": "/images/restaurants/riwaq/dynamite_chicken.jpg",
+    "isChefPick": true,
+    "isSpicy": true
+  },
+  {
+    "id": "rw-sw-1",
+    "categoryId": "salads_wraps",
+    "name": {
+      "ar": "سلطة سيزر بالدجاج المشوي",
+      "fr": "Salade César au Poulet Grillé",
+      "en": "Chicken Caesar Salad"
+    },
+    "description": {
+      "ar": "دجاج مشوي متبل بالأعشاب فوق خس روماني مقرمش مع جبن البارميزان وقطع الخبز وصلصة سيزر.",
+      "fr": "Poulet mariné grillé aux herbes, cœurs de romaine croquants, copeaux de parmesan et croûtons dorés.",
+      "en": "Grilled herb-marinated chicken over crisp romaine with parmesan, croutons, and Caesar dressing."
+    },
+    "price": 25,
+    "calories": 100,
+    "prepTime": "8 min",
+    "image": "/images/restaurants/riwaq/chicken_caesar_salad.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-sw-2",
+    "categoryId": "salads_wraps",
+    "name": {
+      "ar": "سلطة يونانية أصيلة",
+      "fr": "Salade Grecque Feta & Olives",
+      "en": "Greek Salad"
+    },
+    "description": {
+      "ar": "خيار وطماطم وفلفل رومي وبصل أحمر وزيتون وجبن فيتا مع زيت الزيتون البكر والأوريجانو.",
+      "fr": "Concombres croquants, tomates mûres, poivrons, oignon rouge, olives de Kalamata et feta AOP.",
+      "en": "Fresh cucumbers, tomatoes, bell peppers, red onion, olives, and feta cheese with olive oil."
+    },
+    "price": 18,
+    "calories": 170,
+    "prepTime": "6 min",
+    "image": "/images/restaurants/riwaq/greek_salad.jpg",
+    "isVegetarian": true
+  },
+  {
+    "id": "rw-sw-3",
+    "categoryId": "salads_wraps",
+    "name": {
+      "ar": "سلطة الدجاج المشوي بالبيستو",
+      "fr": "Salade Poulet Grillé Pesto & Sumac",
+      "en": "Grilled Chicken Pesto Salad"
+    },
+    "description": {
+      "ar": "خليط خضار طازج مع طماطم وخيار وفجل ودجاج مشوي وقطع خبز بيتا مقرمشة بتتبيلة السماق والبيستو.",
+      "fr": "Mélange de jeunes pousses, tomates, concombres, poulet tendre et pita croustillant au sumac.",
+      "en": "Crisp mixed greens, tomatoes, cucumbers, radishes, grilled chicken, and toasted pita with pesto."
+    },
+    "price": 25,
+    "calories": 120,
+    "prepTime": "8 min",
+    "image": "/images/restaurants/riwaq/grilled_chicken_pesto_salad.jpg"
+  },
+  {
+    "id": "rw-sw-4",
+    "categoryId": "salads_wraps",
+    "name": {
+      "ar": "سلطة فتوش طازجة",
+      "fr": "Salade Fattouche Libanaise",
+      "en": "Fattoush Salad"
+    },
+    "description": {
+      "ar": "خضروات طازجة مقرمشة مع الطماطم والخيار والنعناع وقطع خبز البيتا المقرمشة بدبس الرمان والسماق.",
+      "fr": "Salade printanière croquante, radis, concombres, tomates, menthe fraîche et pain pita frit au sumac.",
+      "en": "Crisp mixed greens, tomatoes, cucumbers, radishes, and toasted pita pieces with tangy sumac."
+    },
+    "price": 18,
+    "calories": 60,
+    "prepTime": "6 min",
+    "image": "/images/restaurants/riwaq/fattoush_salad.jpg",
+    "isVegetarian": true
+  },
+  {
+    "id": "rw-sw-5",
+    "categoryId": "salads_wraps",
+    "name": {
+      "ar": "لفافة شيش طاووق",
+      "fr": "Wrap Shish Taouk Authentique",
+      "en": "Chicken Shish Tawook Wrap"
+    },
+    "description": {
+      "ar": "دجاج متبل بالثوم والليمون، ملفوف في خبز عربي دافئ مع سلطة طازجة وصلصة الثوم الكريمية.",
+      "fr": "Brochettes de poulet mariné au citron et ail, enroulées dans un pain libanais chaud et crème toum.",
+      "en": "Grilled garlic-lemon marinated chicken in warm Arabic bread with fresh salad and garlic sauce."
+    },
+    "price": 26,
+    "calories": 170,
+    "prepTime": "10 min",
+    "image": "/images/restaurants/riwaq/chicken_shish_tawook_wrap.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-sw-6",
+    "categoryId": "salads_wraps",
+    "name": {
+      "ar": "لفافة شاورما الدجاج",
+      "fr": "Wrap Shawarma Poulet Maison",
+      "en": "Chicken Shawarma Wrap"
+    },
+    "description": {
+      "ar": "دجاج مشوي على السيخ ومتبل، يلف في خبز عربي دافئ مع صلصة الثوم والمخللات المقرمشة.",
+      "fr": "Émincé de poulet rôti aux épices douces, crème d'ail parfumée et cornichons libanais.",
+      "en": "Marinated chicken roasted on spit, sliced in warm Arabic bread with garlic sauce and pickles."
+    },
+    "price": 22,
+    "calories": 160,
+    "prepTime": "8 min",
+    "image": "/images/restaurants/riwaq/chicken_shawarma_wrap.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-sw-7",
+    "categoryId": "salads_wraps",
+    "name": {
+      "ar": "لفافة شاورما لحم بقر",
+      "fr": "Wrap Shawarma Bœuf & Tahina",
+      "en": "Beef Shawarma Wrap"
+    },
+    "description": {
+      "ar": "لحم بقر متبل ومشوي على الشواية، ملفوف في خبز عربي طري مع صلصة الطحينة والبصل والمخللات.",
+      "fr": "Fines tranches de bœuf mariné rôti, sauce onctueuse tahina, oignons au sumac et pickles.",
+      "en": "Spiced shaved beef in soft Arabic bread with authentic tahini sauce, sumac onions, and pickles."
+    },
+    "price": 26,
+    "calories": 180,
+    "prepTime": "8 min",
+    "image": "/images/restaurants/riwaq/beef_shawarma_wrap.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-sw-8",
+    "categoryId": "salads_wraps",
+    "name": {
+      "ar": "ساندويش الروبيان المقرمش مع الأفوكادو",
+      "fr": "Sandwich Crevettes Croustillantes & Avocat",
+      "en": "Crumb Fried Shrimps and Avocado Sandwich"
+    },
+    "description": {
+      "ar": "روبيان مقرمش بتتبيلة الكاجون مع جبن شيدر ذائب ومايونيز بيستو الريحان وأفوكادو كريمي.",
+      "fr": "Crevettes croustillantes épices cajun, cheddar fondant, crème d'avocat et mayo basilic.",
+      "en": "Cajun-marinated prawns with melted cheddar, basil pesto mayo, and creamy avocado slices."
+    },
+    "price": 29,
+    "calories": 570,
+    "prepTime": "10 min",
+    "image": "/images/restaurants/riwaq/crumb_fried_shrimps_sandwich.jpg",
+    "isChefPick": true
+  },
+  {
+    "id": "rw-sw-9",
+    "categoryId": "salads_wraps",
+    "name": {
+      "ar": "ساندويش صدر دجاج مشوي",
+      "fr": "Sandwich Poitrine de Poulet Grillé",
+      "en": "Grilled Chicken Breast Sandwich"
+    },
+    "description": {
+      "ar": "صدر دجاج مشوي مع فلفل حلو وفطر وجبنة شيدر ومايونيز أيولي الفاخر.",
+      "fr": "Poitrine de poulet tendre, poivrons fondants, champignons de Paris sautés et cheddar.",
+      "en": "Juicy grilled chicken breast with bell pepper, mushroom, cheddar, and garlic aioli."
+    },
+    "price": 22,
+    "calories": 380,
+    "prepTime": "9 min",
+    "image": "/images/restaurants/riwaq/grilled_chicken_breast_wrap.jpg"
+  },
+  {
+    "id": "rw-sw-10",
+    "categoryId": "salads_wraps",
+    "name": {
+      "ar": "لفافة ستيك فاخرة بالروكا",
+      "fr": "Wrap Steak Black Angus & Roquette",
+      "en": "Ultimate Steak Wrap"
+    },
+    "description": {
+      "ar": "ستيك لحم مشوي طري مع بصل مكرمل وفطر وموزاريلا ومايونيز أيولي على أوراق روكا طازجة.",
+      "fr": "Lamelles de steak tendre, oignons caramélisés, champignons, mozzarella fondante et roquette.",
+      "en": "Tender grilled steak with onion, bell pepper, mushroom, mozzarella, and aioli on fresh Rocca."
+    },
+    "price": 25,
+    "calories": 410,
+    "prepTime": "10 min",
+    "image": "/images/restaurants/riwaq/ultimate_steak_wrap.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-sw-11",
+    "categoryId": "salads_wraps",
+    "name": {
+      "ar": "دجاج مشوي ملفوف بخبز أفغاني",
+      "fr": "Wrap Poulet au Pain Afghan Traditionnel",
+      "en": "Grilled Chicken Wrapped with Afghan Bread"
+    },
+    "description": {
+      "ar": "صدر دجاج مشوي مع هالابينو وشيدر وخس ومخلل وصوص خاص في خبز أفغاني مخبوز طازجاً.",
+      "fr": "Poulet grillé juteux, piments jalapeños, cheddar et sauce gourmande dans un pain afghan.",
+      "en": "Grilled chicken breast with jalapeno, cheddar, lettuce, pickle, and flavorful sauce."
+    },
+    "price": 22,
+    "calories": 410,
+    "prepTime": "10 min",
+    "image": "/images/restaurants/riwaq/grilled_chicken_afghan_bread.jpg"
+  },
+  {
+    "id": "rw-sw-12",
+    "categoryId": "salads_wraps",
+    "name": {
+      "ar": "دجاج تويستر ملفوف بخبز التورتيلا",
+      "fr": "Twister Chicken Croustillant Tortilla",
+      "en": "Twister Chicken Dressed in Tortilla Bread"
+    },
+    "description": {
+      "ar": "شرائح دجاج مقلية مقرمشة مع خس وفلفل حلو ومخلل وصلصة رانش ومايونيز ثوم.",
+      "fr": "Tenders de poulet ultra croustillants, salade fraîche, cornichons, sauce ranch et aïoli.",
+      "en": "Crispy fried chicken strips with lettuce, bell pepper, pickle, ranch, and garlic mayo."
+    },
+    "price": 24,
+    "calories": 410,
+    "prepTime": "9 min",
+    "image": "/images/restaurants/riwaq/twister_chicken_tortilla.jpg"
+  },
+  {
+    "id": "rw-sw-13",
+    "categoryId": "salads_wraps",
+    "name": {
+      "ar": "راب خضار نباتي مشوي مع الحمص",
+      "fr": "Wrap Végétarien Légumes Grillés & Houmous",
+      "en": "Grilled Vegetarian Wrap with Hummus"
+    },
+    "description": {
+      "ar": "خضار مشوية مختارة ملفوفة في خبز التورتيلا مع حمص حريري ناعم، يقدم مع سلطة خضراء.",
+      "fr": "Assortiment de légumes du soleil grillés, houmous onctueux maison et salade fraîche.",
+      "en": "Assorted grilled seasonal vegetables in a tortilla with hummus, served warm with salad."
+    },
+    "price": 22,
+    "calories": 290,
+    "prepTime": "8 min",
+    "image": "/images/restaurants/riwaq/grilled_vegetarian_wrap.jpg",
+    "isVegetarian": true
+  },
+  {
+    "id": "rw-sw-14",
+    "categoryId": "salads_wraps",
+    "name": {
+      "ar": "راب حلوم مشوي مع صلصة البيستو",
+      "fr": "Wrap Halloumi Grillé au Pesto",
+      "en": "Grilled Halloumi & Pesto Wrap"
+    },
+    "description": {
+      "ar": "جبن حلوم مشوي حتى يصبح ذهبياً مع صوص بيستو الريحان وطماطم وخس طازج.",
+      "fr": "Fromage halloumi grillé doré, sauce pesto au basilic frais, tomates douces et salade.",
+      "en": "Golden grilled halloumi with basil pesto, fresh lettuce, and ripe tomatoes in a wrap."
+    },
+    "price": 22,
+    "calories": 640,
+    "prepTime": "8 min",
+    "image": "/images/restaurants/riwaq/grilled_halloumi_pesto_wrap.jpg",
+    "isVegetarian": true
+  },
+  {
+    "id": "rw-sw-15",
+    "categoryId": "salads_wraps",
+    "name": {
+      "ar": "لفافة ستيك وفطر مع التورتيلا",
+      "fr": "Wrap Bœuf Émincé & Champignons",
+      "en": "Steak & Mushroom Wrap with Tortilla"
+    },
+    "description": {
+      "ar": "لحم بقر مشوي مع بصل مكرمل وفطر طازج وخس ميسكلون ومايونيز خردل ديجون.",
+      "fr": "Bœuf émincé grillé, oignons confits, champignons sautés, mesclun et sauce moutarde douce.",
+      "en": "Grilled beef with caramelized onion, mushroom, mesclun lettuce, and mustard aioli."
+    },
+    "price": 26,
+    "calories": 340,
+    "prepTime": "9 min",
+    "image": "/images/restaurants/riwaq/steak_mushroom_wrap.jpg"
+  },
+  {
+    "id": "rw-pz-1",
+    "categoryId": "pizzas",
+    "name": {
+      "ar": "بيتزا مارغريتا كلاسيكية (12 إنش)",
+      "fr": "Pizza Margherita Italienne (12\")",
+      "en": "Pizza Margherita (12 inch)"
+    },
+    "description": {
+      "ar": "بيتزا إيطالية كلاسيكية مع موزاريلا طازجة وطماطم وريحان على عجينة مقرمشة وهشة.",
+      "fr": "Sauce tomate San Marzano, mozzarella fior di latte fondante et basilic frais sur pâte croustillante.",
+      "en": "Classic 12-inch Italian pizza with fresh mozzarella, tomatoes, and basil on crispy crust."
+    },
+    "price": 35,
+    "calories": 1970,
+    "prepTime": "14 min",
+    "image": "/images/restaurants/riwaq/pizza_margherita.jpg",
+    "isPopular": true,
+    "isVegetarian": true
+  },
+  {
+    "id": "rw-pz-2",
+    "categoryId": "pizzas",
+    "name": {
+      "ar": "بيتزا دجاج حار رانش (12 إنش)",
+      "fr": "Pizza Poulet Épicé Ranch (12\")",
+      "en": "Spicy Chicken Ranch Pizza"
+    },
+    "description": {
+      "ar": "دجاج حار متبل مع صوص رانش كريمي وموزاريلا وفيرة على عجينة مخبوزة بالحطب.",
+      "fr": "Poulet mariné épicé, sauce ranch crémeuse maison et généreuse mozzarella filante.",
+      "en": "Bold 12-inch pizza with spicy chicken, creamy ranch dressing, and gooey mozzarella."
+    },
+    "price": 38,
+    "calories": 2340,
+    "prepTime": "15 min",
+    "image": "/images/restaurants/riwaq/spicy_chicken_ranch.jpg",
+    "isSpicy": true,
+    "isPopular": true
+  },
+  {
+    "id": "rw-pz-3",
+    "categoryId": "pizzas",
+    "name": {
+      "ar": "بيتزا فارمهاوس ديلايت بالخضار (12 إنش)",
+      "fr": "Pizza Végétale Farmhouse (12\")",
+      "en": "Farmhouse Delight Veggie Pizza"
+    },
+    "description": {
+      "ar": "بيتزا غنية بالخضار مع فلفل حلو وفطر وبصل وزيتون على قاعدة جبنية لذيذة.",
+      "fr": "Assortiment généreux de champignons frais, poivrons colorés et oignons rouges caramélisés.",
+      "en": "Veggie-packed pizza featuring bell peppers, mushrooms, and onions on a cheesy base."
+    },
+    "price": 36,
+    "calories": 2300,
+    "prepTime": "14 min",
+    "image": "/images/restaurants/riwaq/farmhouse_delight.jpg",
+    "isVegetarian": true
+  },
+  {
+    "id": "rw-pz-4",
+    "categoryId": "pizzas",
+    "name": {
+      "ar": "بيتزا الدجاج والذرة بولو إي مايس (12 إنش)",
+      "fr": "Pizza Pollo e Mais (12\")",
+      "en": "Pollo e Mais Pizza"
+    },
+    "description": {
+      "ar": "مزيج حلو ومالح من دجاج طري وذرة حلوة مع خليط غني من الجبن الذائب.",
+      "fr": "Morceaux de poulet rôti tendre et maïs doux doré sur un lit de fromages fondants.",
+      "en": "Savory-sweet mix of tender chicken and sweet corn with a rich cheese blend."
+    },
+    "price": 36,
+    "calories": 2240,
+    "prepTime": "14 min",
+    "image": "/images/restaurants/riwaq/pollo_e_mais.jpg"
+  },
+  {
+    "id": "rw-pz-5",
+    "categoryId": "pizzas",
+    "name": {
+      "ar": "بيتزا بيبروني فاخرة (12 إنش)",
+      "fr": "Pizza Pepperoni Gourmande (12\")",
+      "en": "Pepperoni Pizza (12 inch)"
+    },
+    "description": {
+      "ar": "شرائح بيبروني بقري متبل حار ومقرمش مع موزاريلا ذائبة وصلصة الطماطم الإيطالية.",
+      "fr": "Généreuses tranches de pepperoni de bœuf épicé, mozzarella fondue et origan sauvage.",
+      "en": "Spicy pepperoni slices layered generously over melted mozzarella and tomato sauce."
+    },
+    "price": 40,
+    "calories": 2340,
+    "prepTime": "14 min",
+    "image": "/images/restaurants/riwaq/pizza_pepperoni.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-pz-6",
+    "categoryId": "pizzas",
+    "name": {
+      "ar": "بيتزا دجاج تيكا الهندية (12 إنش)",
+      "fr": "Pizza Fusion Poulet Tikka (12\")",
+      "en": "Chicken Tikka Pizza (12 inch)"
+    },
+    "description": {
+      "ar": "دجاج تيكا المدخن مع بصل وفلفل أخضر وكزبرة وتوابل تيكا على عجينة متبلة ومقرمشة.",
+      "fr": "Poulet mariné aux épices tikka tandoori, poivrons verts, oignons et mozzarella.",
+      "en": "Fusion delight with smoky chicken tikka, onions, and green peppers on spiced crust."
+    },
+    "price": 38,
+    "calories": 2160,
+    "prepTime": "15 min",
+    "image": "/images/restaurants/riwaq/chicken_tikka_pizza.jpg",
+    "isSpicy": true
+  },
+  {
+    "id": "rw-pz-7",
+    "categoryId": "pizzas",
+    "name": {
+      "ar": "بيتزا خالية من الجلوتين (12 إنش)",
+      "fr": "Pizza Sans Gluten Artisanale (12\")",
+      "en": "Gluten Free Pizza"
+    },
+    "description": {
+      "ar": "عجينة خاصة خالية من الجلوتين مقرمشة ولذيذة مع صلصة الطماطم وجبنة الموزاريلا.",
+      "fr": "Pâte sans gluten croustillante élaborée avec soin, sauce tomate et mozzarella pure.",
+      "en": "Crisp gluten-free crust topped with classic tomato sauce and melted mozzarella."
+    },
+    "price": 45,
+    "calories": 1850,
+    "prepTime": "15 min",
+    "image": "/images/restaurants/riwaq/gluten_free_pizza.jpg",
+    "isGlutenFree": true
+  },
+  {
+    "id": "rw-mn-1",
+    "categoryId": "mains",
+    "name": {
+      "ar": "سمك السلمون المشوي مع صلصة الشبت والليمون",
+      "fr": "Pavé de Saumon Grillé Aneth & Citron",
+      "en": "Grilled Salmon with Dill & Lemon Butter"
+    },
+    "description": {
+      "ar": "شريحة سلمون طازجة مشوية مع صلصة زبدة الليمون والشبت العطرية، تقدم مع طبقين جانبيين من اختيارك.",
+      "fr": "Filet de saumon frais saisi, nappé d'un beurre citronné à l'aneth fraîche. 2 accompagnements au choix.",
+      "en": "Juicy grilled salmon with rich dill lemon butter sauce. Served with choice of 2 side dishes."
+    },
+    "price": 49,
+    "calories": 530,
+    "prepTime": "16 min",
+    "image": "/images/restaurants/riwaq/grilled_salmon_dill.jpg",
+    "isChefPick": true,
+    "isPopular": true,
+    "optionGroups": [
+      {
+        "id": "sides_choice",
+        "name": {
+          "ar": "اختر طبقين جانبيين",
+          "fr": "Choisissez 2 accompagnements",
+          "en": "Choice of 2 Sides"
+        },
+        "required": true,
+        "options": [
+          {
+            "id": "mash_pot",
+            "name": {
+              "ar": "بطاطس مهروسة (Mashed Potatoes)",
+              "fr": "Purée maison",
+              "en": "Mashed Potatoes"
+            },
+            "price": 0
+          },
+          {
+            "id": "french_fries",
+            "name": {
+              "ar": "بطاطس مقلية (French Fries)",
+              "fr": "Frites croustillantes",
+              "en": "French Fries"
+            },
+            "price": 0
+          },
+          {
+            "id": "steam_veg",
+            "name": {
+              "ar": "خضار مطهية على البخار",
+              "fr": "Légumes vapeur",
+              "en": "Steamed Vegetables"
+            },
+            "price": 0
+          },
+          {
+            "id": "steam_rice",
+            "name": {
+              "ar": "أرز مطهو على البخار",
+              "fr": "Riz blanc vapeur",
+              "en": "Steamed Rice"
+            },
+            "price": 0
+          },
+          {
+            "id": "green_salad",
+            "name": {
+              "ar": "سلطة خضراء طازجة",
+              "fr": "Salade verte",
+              "en": "Green Salad"
+            },
+            "price": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rw-mn-2",
+    "categoryId": "mains",
+    "name": {
+      "ar": "سمك السلمون المشوي مع كريمة البيستو",
+      "fr": "Saumon Grillé à la Crème de Pesto",
+      "en": "Grilled Salmon with Pesto Cream Drizzle"
+    },
+    "description": {
+      "ar": "سلمون مشوي بعناية مع صلصة كريمية غنية بريحان البيستو الإيطالي، مع طبقين جانبيين.",
+      "fr": "Pavé de saumon cuit à cœur, émulsion crémeuse au pesto de basilic. 2 accompagnements au choix.",
+      "en": "Perfectly grilled salmon drizzled with creamy basil pesto sauce. Choice of 2 sides."
+    },
+    "price": 49,
+    "calories": 620,
+    "prepTime": "16 min",
+    "image": "/images/restaurants/riwaq/grilled_salmon_pesto.jpg"
+  },
+  {
+    "id": "rw-mn-3",
+    "categoryId": "mains",
+    "name": {
+      "ar": "سمك السلمون الآسيوي بخمسة توابل",
+      "fr": "Saumon Grillé aux Cinq Épices Asiatiques",
+      "en": "Asian Five-Spice Grilled Salmon"
+    },
+    "description": {
+      "ar": "سلمون مشوي متبل بالبهارات الآسيوية الخمسة وصويا غنية، يقدم مع طبقين جانبيين.",
+      "fr": "Saumon mariné aux 5 épices d'Asie et soja doux, grillé à la perfection.",
+      "en": "Flavorful salmon infused with aromatic five-spice seasoning and grilled. Choice of 2 sides."
+    },
+    "price": 49,
+    "calories": 540,
+    "prepTime": "16 min",
+    "image": "/images/restaurants/riwaq/asian_five_spice_salmon.jpg"
+  },
+  {
+    "id": "rw-mn-4",
+    "categoryId": "mains",
+    "name": {
+      "ar": "شرائح لحم الضأن المتبلة بالأعشاب والزعتر",
+      "fr": "Côtelettes d'Agneau en Croûte d'Herbes",
+      "en": "Herb-Crusted Lamb Chops with Thyme Mint Sauce"
+    },
+    "description": {
+      "ar": "ريش لحم ضأن طرية مغطاة بقشرة الأعشاب الفواحة وصلصة الزعتر والنعناع المنعشة، مع طبقين جانبيين.",
+      "fr": "Côtelettes d'agneau tendres dorées en croûte d'herbes fraîches, jus réduit au thym et menthe.",
+      "en": "Tender lamb chops coated in fragrant herb crust, served with thyme mint sauce and 2 sides."
+    },
+    "price": 60,
+    "calories": 1010,
+    "prepTime": "18 min",
+    "image": "/images/restaurants/riwaq/herb_crusted_lamb_chops.jpg",
+    "isChefPick": true,
+    "isPopular": true
+  },
+  {
+    "id": "rw-mn-5",
+    "categoryId": "mains",
+    "name": {
+      "ar": "فطيرة لحم الضأن المشوية مع صلصة تزاتزيكي",
+      "fr": "Steak Haché d'Agneau Grillé & Tzatziki",
+      "en": "Grilled Lamb Mince Patty with Tzatziki"
+    },
+    "description": {
+      "ar": "فطيرة لحم ضأن مفروم متبل ومشوي على اللهب، تقدم مع صلصة تزاتزيكي الباردة وطبقين جانبيين.",
+      "fr": "Palet d'agneau haché parfumé aux herbes, grillé et servi avec tzatziki frais au concombre.",
+      "en": "Succulent lamb mince patty grilled and paired with creamy tzatziki sauce and 2 sides."
+    },
+    "price": 32,
+    "calories": 600,
+    "prepTime": "14 min",
+    "image": "/images/restaurants/riwaq/grilled_lamb_patty.jpg"
+  },
+  {
+    "id": "rw-mn-6",
+    "categoryId": "mains",
+    "name": {
+      "ar": "شريحة لحم بقري تندرلوين مع صلصة الفلفل الأسود",
+      "fr": "Filet Mignon de Bœuf Sauce Poivre Noir",
+      "en": "Beef Tenderloin Steak with Peppercorn Sauce"
+    },
+    "description": {
+      "ar": "قطعة لحم بقري فاخرة مشوية حسب رغبتك ومغطاة بصلصة الفلفل الأسود القوية، مع طبقين جانبيين.",
+      "fr": "Cœur de filet de bœuf tendre saisi selon votre cuisson, sauce crémeuse au poivre concassé.",
+      "en": "Prime beef tenderloin grilled to preference, topped with bold peppercorn sauce and 2 sides."
+    },
+    "price": 55,
+    "calories": 510,
+    "prepTime": "18 min",
+    "image": "/images/restaurants/riwaq/beef_tenderloin_steak.jpg",
+    "isChefPick": true,
+    "isPopular": true
+  },
+  {
+    "id": "rw-mn-7",
+    "categoryId": "mains",
+    "name": {
+      "ar": "كفتة لحم مشوية مع صلصة تزاتزيكي",
+      "fr": "Brochettes de Kefta Bœuf Grillé",
+      "en": "Grilled Beef Kofta with Tzatziki"
+    },
+    "description": {
+      "ar": "أسياخ كفتة لحم البقر المفروم والمتبل، تقدم مع صوص تزاتزيكي منعش وخيار ومخلل وطبقين جانبيين.",
+      "fr": "Brochettes de bœuf haché assaisonné aux épices d'Orient, sauce tzatziki et 2 accompagnements.",
+      "en": "Juicy beef kofta skewers, served with cooling tzatziki dip and choice of 2 sides."
+    },
+    "price": 32,
+    "calories": 490,
+    "prepTime": "14 min",
+    "image": "/images/restaurants/riwaq/grilled_beef_kofta.jpg"
+  },
+  {
+    "id": "rw-mn-8",
+    "categoryId": "mains",
+    "name": {
+      "ar": "دجاج مشوي على طريقة الشيف الخاصة",
+      "fr": "Poulet Sauté Signature du Chef",
+      "en": "Grilled Chicken Chef Style"
+    },
+    "description": {
+      "ar": "مزيج شهي من قطع الدجاج المشوي مع الخضروات وصلصات الشيف الخاصة والسرية، مع طبقين جانبيين.",
+      "fr": "Poêlée de poulet grillé et légumes de saison liée aux sauces secrètes du Chef.",
+      "en": "Mix of grilled chicken and veggies with chef special signature sauces. Choice of 2 sides."
+    },
+    "price": 39,
+    "calories": 800,
+    "prepTime": "15 min",
+    "image": "/images/restaurants/riwaq/grilled_chicken_chef_style.jpg"
+  },
+  {
+    "id": "rw-mn-9",
+    "categoryId": "mains",
+    "name": {
+      "ar": "دجاج مشوي مع الطماطم المجففة وكريمة الريحان",
+      "fr": "Suprême de Poulet Tomates Séchées & Basilic",
+      "en": "Grilled Chicken with Sundried Tomato & Basil Cream"
+    },
+    "description": {
+      "ar": "صدر دجاج مشوي يقدم مع صلصة كريمة لذيذة من الطماطم الإيطالية المجففة وأوراق الريحان الطازجة.",
+      "fr": "Blanc de poulet rôti nappé d'une sauce onctueuse aux tomates séchées et basilic doux.",
+      "en": "Grilled chicken breast with luscious sundried tomato and basil cream sauce. Choice of 2 sides."
+    },
+    "price": 35,
+    "calories": 440,
+    "prepTime": "15 min",
+    "image": "/images/restaurants/riwaq/grilled_chicken_sundried_tomato.jpg"
+  },
+  {
+    "id": "rw-mn-10",
+    "categoryId": "mains",
+    "name": {
+      "ar": "دجاج بجبنة الموزاريلا الذائبة",
+      "fr": "Poulet Gratiné à la Mozzarella",
+      "en": "Mozzarella Chicken"
+    },
+    "description": {
+      "ar": "صدور دجاج طرية مشوية مغطاة بطبقة وفيرة من جبنة الموزاريلا المذابة والتوابل الإيطالية.",
+      "fr": "Blancs de poulet gratinés au four sous un manteau de mozzarella fondue et herbes.",
+      "en": "Tender chicken breast smothered in melted mozzarella cheese and savory seasonings."
+    },
+    "price": 39,
+    "calories": 540,
+    "prepTime": "15 min",
+    "image": "/images/restaurants/riwaq/mozzarella_chicken.jpg"
+  },
+  {
+    "id": "rw-bg-1",
+    "categoryId": "burgers_pasta",
+    "name": {
+      "ar": "برجر دجاج محشو بالجبن (300 غرام)",
+      "fr": "Burger Poulet Cœur Fondant Fromage (300g)",
+      "en": "Cheese Stuffed Chicken Burger (300g)"
+    },
+    "description": {
+      "ar": "قطعة دجاج مفروم طرية محشوة بالجبن الذائب ومشوية، مع خس وطماطم وصوص يقدم مع بطاطس مقلية.",
+      "fr": "Steak de poulet façonné maison fourré au fromage fondant, crudités et frites dorées.",
+      "en": "Tender chicken patty filled with rich molten cheese, grilled, with toppings and fries."
+    },
+    "price": 32,
+    "calories": 700,
+    "prepTime": "12 min",
+    "image": "/images/restaurants/riwaq/cheese_stuffed_chicken_burger.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-bg-2",
+    "categoryId": "burgers_pasta",
+    "name": {
+      "ar": "برجر كفتة لحم بقري خاص من مقهى أنّاز (250 غرام)",
+      "fr": "Burger Kefta Bœuf Façon Orientale (250g)",
+      "en": "Café Anaaz Special Kofta Beef Burger (250g)"
+    },
+    "description": {
+      "ar": "برجر كفتة لحم بقري على الطريقة العربية متبل بخلطة بهارات أنّاز الفاخرة، يقدم مع بطاطس مقلية.",
+      "fr": "Pur bœuf haché façon kefta aux épices arabes, oignons rouges, sauce spéciale et frites.",
+      "en": "Juicy kofta beef patty infused with Arabic spices, grilled, with flavorful toppings and fries."
+    },
+    "price": 35,
+    "calories": 570,
+    "prepTime": "14 min",
+    "image": "/images/restaurants/riwaq/cafe_anaaz_kofta_beef_burger.jpg",
+    "isChefPick": true,
+    "isPopular": true
+  },
+  {
+    "id": "rw-bg-3",
+    "categoryId": "burgers_pasta",
+    "name": {
+      "ar": "برجر دجاج مقلي مقرمش مع صوص رانش",
+      "fr": "Crispy Chicken Burger Ranch",
+      "en": "Crispy Fried Chicken Burger"
+    },
+    "description": {
+      "ar": "صدر دجاج مقلي ومقرمش ذهبي مع جبنة شيدر وصوص رانش منعش يقدم مع البطاطس المقلية.",
+      "fr": "Filet de poulet pané extra croustillant, cheddar fondu et sauce ranch onctueuse.",
+      "en": "Crispy golden fried chicken topped with melted cheddar and cool Ranch dressing."
+    },
+    "price": 32,
+    "calories": 500,
+    "prepTime": "12 min",
+    "image": "/images/restaurants/riwaq/crispy_fried_chicken_burger.jpg"
+  },
+  {
+    "id": "rw-bg-4",
+    "categoryId": "burgers_pasta",
+    "name": {
+      "ar": "برجر لحم بقري محشو بالجبن الذائب (250 غرام)",
+      "fr": "Burger Bœuf Fourré au Fromage (250g)",
+      "en": "Cheese Stuffed Beef Burger (250g)"
+    },
+    "description": {
+      "ar": "قطعة لحم بقري غنية محشوة بالجبن الذائب ومشوية على اللهب، مع الخس والطماطم والمخلل والبطاطس.",
+      "fr": "Généreux steak de bœuf farci de fromage fondant à cœur, servi avec frites dorées.",
+      "en": "Succulent beef patty stuffed with gooey melted cheese, grilled, with classic toppings."
+    },
+    "price": 35,
+    "calories": 850,
+    "prepTime": "14 min",
+    "image": "/images/restaurants/riwaq/cheese_stuffed_beef_burger.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-bg-5",
+    "categoryId": "burgers_pasta",
+    "name": {
+      "ar": "معكرونة مباشرة كاستم (Live Pasta)",
+      "fr": "Pâtes Fraîches Live Cooking Sur-Mesure",
+      "en": "Live Pasta Station"
+    },
+    "description": {
+      "ar": "طبق مكرونة يُحضر مباشرة حسب ذوقك: اختر نوع المكرونة، الصوص (ألفريدو، أجبان، بيستو، طماطم)، والبروتين.",
+      "fr": "Pâtes sautées à la minute: choix des pâtes, de la sauce (Alfredo, 2 Fromages, Pesto, Tomate) et protéines.",
+      "en": "Custom live pasta made to order: choose pasta, sauce (Alfredo, Two Cheese, Pesto, Tomato), and protein."
+    },
+    "price": 26,
+    "calories": 480,
+    "prepTime": "12 min",
+    "image": "/images/restaurants/riwaq/beef_lasagna.jpg",
+    "isChefPick": true,
+    "optionGroups": [
+      {
+        "id": "pasta_shape",
+        "name": {
+          "ar": "نوع المكرونة",
+          "fr": "Type de pâtes",
+          "en": "Pasta Type"
+        },
+        "required": true,
+        "options": [
+          {
+            "id": "penne",
+            "name": {
+              "ar": "بيني (Penne)",
+              "fr": "Penne",
+              "en": "Penne"
+            },
+            "price": 0
+          },
+          {
+            "id": "spaghetti",
+            "name": {
+              "ar": "سباجيتي (Spaghetti)",
+              "fr": "Spaghetti",
+              "en": "Spaghetti"
+            },
+            "price": 0
+          },
+          {
+            "id": "fusilli",
+            "name": {
+              "ar": "فوسيلي (Fusilli)",
+              "fr": "Fusilli",
+              "en": "Fusilli"
+            },
+            "price": 0
+          },
+          {
+            "id": "farfalle",
+            "name": {
+              "ar": "فارفالي (Farfalle)",
+              "fr": "Farfalle",
+              "en": "Farfalle"
+            },
+            "price": 0
+          }
+        ]
+      },
+      {
+        "id": "pasta_sauce",
+        "name": {
+          "ar": "الصلصة المختارة",
+          "fr": "Sauce au choix",
+          "en": "Sauce Choice"
+        },
+        "required": true,
+        "options": [
+          {
+            "id": "alfredo",
+            "name": {
+              "ar": "ألفريدو الكريمة والفطر",
+              "fr": "Crème Alfredo & Champignons",
+              "en": "Alfredo Cream"
+            },
+            "price": 0
+          },
+          {
+            "id": "two_cheese",
+            "name": {
+              "ar": "صلصة الجبنة المزدوجة",
+              "fr": "Sauce Deux Fromages",
+              "en": "Two Cheese Sauce"
+            },
+            "price": 0
+          },
+          {
+            "id": "tomato_basil",
+            "name": {
+              "ar": "طماطم وريحان طازج",
+              "fr": "Tomate & Basilic Frais",
+              "en": "Tomato & Basil"
+            },
+            "price": 0
+          },
+          {
+            "id": "pesto",
+            "name": {
+              "ar": "بيستو الريحان الإيطالي",
+              "fr": "Pesto Genovese",
+              "en": "Basil Pesto"
+            },
+            "price": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "rw-bg-6",
+    "categoryId": "burgers_pasta",
+    "name": {
+      "ar": "لازانيا لحم البقر المخبوزة",
+      "fr": "Lasagne Maison au Ragoût de Bœuf",
+      "en": "Baked Beef Lasagna"
+    },
+    "description": {
+      "ar": "طبقات من معكرونة اللازانيا مع راجو لحم البقر الغني وصلصة البشاميل الحريرية والجبن المخبوز.",
+      "fr": "Feuillets de lasagnes fraîches, ragoût de bœuf mijoté, béchamel veloutée et mozzarella gratinée.",
+      "en": "Layers of pasta, rich beef ragu, creamy béchamel, and melted cheese, baked to perfection."
+    },
+    "price": 34,
+    "calories": 620,
+    "prepTime": "15 min",
+    "image": "/images/restaurants/riwaq/beef_lasagna.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-ds-1",
+    "categoryId": "desserts",
+    "name": {
+      "ar": "أم علي مخبوزة طازجة بالمكسرات",
+      "fr": "Oum Ali Royale Mûre & Pistaches",
+      "en": "Freshly Baked Umali"
+    },
+    "description": {
+      "ar": "حلوى شرق أوسطية تقليدية دافئة مصنوعة من المعجنات الهشة والحليب والسكر واللوز والفستق، تُخبز حتى تصبح ذهبية.",
+      "fr": "Dessert oriental chaud et réconfortant à la pâte feuilletée dorée, lait chaud infusé, amandes et pistaches.",
+      "en": "A warm traditional Middle Eastern dessert made with flaky pastry, milk, sugar, and nuts, baked golden."
+    },
+    "price": 18,
+    "calories": 540,
+    "prepTime": "8 min",
+    "image": "/images/restaurants/riwaq/freshly_baked_umali.jpg",
+    "isChefPick": true,
+    "isPopular": true
+  },
+  {
+    "id": "rw-ds-2",
+    "categoryId": "desserts",
+    "name": {
+      "ar": "براونيز الجوز مع صوص الشوكولاتة الساخن",
+      "fr": "Brownie Moelleux Noix & Chocolat Chaud",
+      "en": "Walnut Brownies with Hot Chocolate Sauce"
+    },
+    "description": {
+      "ar": "براونيز الجوز اللذيذ المخبوز طازجاً مع صوص الشوكولاتة الساخنة المخملية المنسكبة بسخاء.",
+      "fr": "Brownie fondant aux éclats de noix de Grenoble, nappé d'un coulis de chocolat noir chaud.",
+      "en": "Fudgy walnut brownies drizzled with warm, velvety chocolate sauce for an indulgent treat."
+    },
+    "price": 18,
+    "calories": 500,
+    "prepTime": "5 min",
+    "image": "/images/restaurants/riwaq/walnut_brownies.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-ds-3",
+    "categoryId": "desserts",
+    "name": {
+      "ar": "كيكة ريد فيلفيت المخملية",
+      "fr": "Red Velvet Cake & Glaçage Mascarpone",
+      "en": "Red Velvet Cake"
+    },
+    "description": {
+      "ar": "كيكة ناعمة ورطبة ذات لون أحمر نابض بالحياة، مقرونة بكريمة الجبن الغنية لتوازن مثالي.",
+      "fr": "Gâteau velouté rouge écarlate et son glaçage doux au fromage à la crème onctueux.",
+      "en": "Soft moist cake with vibrant red color, paired with rich cream cheese frosting."
+    },
+    "price": 18,
+    "calories": 470,
+    "prepTime": "4 min",
+    "image": "/images/restaurants/riwaq/red_velvet_cake.jpg"
+  },
+  {
+    "id": "rw-ds-4",
+    "categoryId": "desserts",
+    "name": {
+      "ar": "تشيز كيك نيويورك الكلاسيكي",
+      "fr": "Cheesecake Gourmand aux Fruits Rouges",
+      "en": "Artisanal Cheesecake"
+    },
+    "description": {
+      "ar": "حلوى كريمية ناعمة مصنوعة من حشوة الجبن الغنية على قاعدة بسكويت مقرمشة مع صوص التوت البري.",
+      "fr": "Appareil onctueux au cream cheese sur lit de spéculoos croquant, coulis de fruits rouges.",
+      "en": "Creamy smooth dessert on crunchy biscuit crust, topped with fruit coulis drizzle."
+    },
+    "price": 18,
+    "calories": 360,
+    "prepTime": "4 min",
+    "image": "/images/restaurants/riwaq/cheesecake.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-bv-1",
+    "categoryId": "beverages",
+    "name": {
+      "ar": "إسبريسو إيطالي مركز",
+      "fr": "Espresso Italien Intense",
+      "en": "Espresso"
+    },
+    "description": {
+      "ar": "إسبريسو غني برائحة قهوة أرابيكا الفاخرة وكريما ذهبية.",
+      "fr": "Espresso riche et corsé à la crème veloutée.",
+      "en": "Rich aromatic espresso with golden crema."
+    },
+    "price": 7,
+    "calories": 5,
+    "prepTime": "2 min",
+    "image": "/images/restaurants/riwaq/hot_beverage_espresso.jpg"
+  },
+  {
+    "id": "rw-bv-2",
+    "categoryId": "beverages",
+    "name": {
+      "ar": "كابتشينو كريمي",
+      "fr": "Cappuccino Mousse de Lait",
+      "en": "Cappuccino"
+    },
+    "description": {
+      "ar": "إسبريسو متوازن مع حليب مبخر ورغوة حليب ناعمة وغنية.",
+      "fr": "Espresso, lait chaud et mousse onctueuse veloutée.",
+      "en": "Rich espresso with steamed milk and velvety foam."
+    },
+    "price": 18,
+    "calories": 120,
+    "prepTime": "3 min",
+    "image": "/images/restaurants/riwaq/hot_beverage_espresso.jpg"
+  },
+  {
+    "id": "rw-bv-3",
+    "categoryId": "beverages",
+    "name": {
+      "ar": "كافيه لاتيه",
+      "fr": "Café Latte Doux",
+      "en": "Café Latte"
+    },
+    "description": {
+      "ar": "جرعة إسبريسو مع حليب ساخن ورغوة خفيفة.",
+      "fr": "Grand café au lait doux et équilibré.",
+      "en": "Fresh espresso with smooth steamed milk."
+    },
+    "price": 18,
+    "calories": 140,
+    "prepTime": "3 min",
+    "image": "/images/restaurants/riwaq/hot_beverage_espresso.jpg"
+  },
+  {
+    "id": "rw-bv-4",
+    "categoryId": "beverages",
+    "name": {
+      "ar": "سبانش لاتيه ساخن",
+      "fr": "Spanish Latte Chaud",
+      "en": "Hot Spanish Latte"
+    },
+    "description": {
+      "ar": "إسبريسو مدمج مع حليب مكثف محلى وحليب ساخن.",
+      "fr": "Espresso et lait chaud infusés au lait concentré doux.",
+      "en": "Espresso paired with sweetened condensed milk and steamed milk."
+    },
+    "price": 18,
+    "calories": 210,
+    "prepTime": "3 min",
+    "image": "/images/restaurants/riwaq/hot_beverage_espresso.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-bv-5",
+    "categoryId": "beverages",
+    "name": {
+      "ar": "آيس سبانش لاتيه بارد",
+      "fr": "Iced Spanish Latte Signature",
+      "en": "Ice Spanish Latte"
+    },
+    "description": {
+      "ar": "المشروب الأشهر: إسبريسو وحليب مكثف محلى وثلج منعش.",
+      "fr": "La boisson star: espresso frappé sur glace et lait doux sucré.",
+      "en": "Signature chilled drink with espresso, sweet condensed milk, and ice."
+    },
+    "price": 18,
+    "calories": 220,
+    "prepTime": "3 min",
+    "image": "/images/restaurants/riwaq/iced_latte.jpg",
+    "isPopular": true,
+    "isChefPick": true
+  },
+  {
+    "id": "rw-bv-6",
+    "categoryId": "beverages",
+    "name": {
+      "ar": "شاي مثلج بالليمون والنعناع المنعش",
+      "fr": "Iced Tea Citron & Menthe Fraîche",
+      "en": "Lemon Mint Ice Tea"
+    },
+    "description": {
+      "ar": "شاي مثلج محضر مع ليمون طازج وأوراق نعناع عطرة.",
+      "fr": "Thé glacé artisanal infusé au citron vert et menthe fraîche.",
+      "en": "Freshly brewed iced tea infused with lemon and mint leaves."
+    },
+    "price": 7,
+    "calories": 80,
+    "prepTime": "3 min",
+    "image": "/images/restaurants/riwaq/lemon_mint_ice_tea.jpg",
+    "isPopular": true
+  },
+  {
+    "id": "rw-bv-7",
+    "categoryId": "beverages",
+    "name": {
+      "ar": "عصير برتقال طازج معصور",
+      "fr": "Jus d'Orange Pur Frais Pressé",
+      "en": "Fresh Orange Juice"
+    },
+    "description": {
+      "ar": "برتقال طبيعي معصور 100% بدون إضافات.",
+      "fr": "100% pur jus d'oranges gorgées de soleil pressées à la commande.",
+      "en": "100% natural freshly squeezed orange juice."
+    },
+    "price": 7,
+    "calories": 110,
+    "prepTime": "3 min",
+    "image": "/images/restaurants/riwaq/lemon_mint_ice_tea.jpg"
+  },
+  {
+    "id": "rw-bv-8",
+    "categoryId": "beverages",
+    "name": {
+      "ar": "ميلك شيك الفراولة اللذيذ",
+      "fr": "Milkshake Fraise Crème Chantilly",
+      "en": "Strawberry Milkshake"
+    },
+    "description": {
+      "ar": "حليب مثلج مخلوط مع آيس كريم وفراولة طازجة وكريمة مخفوقة.",
+      "fr": "Fraises mixées avec glace artisanale vanille et crème fouettée.",
+      "en": "Creamy blend of fresh strawberries, ice cream, and whipped cream."
+    },
+    "price": 20,
+    "calories": 320,
+    "prepTime": "4 min",
+    "image": "/images/restaurants/riwaq/strawberry_milkshake.jpg"
+  },
+  {
+    "id": "rw-bv-9",
+    "categoryId": "beverages",
+    "name": {
+      "ar": "ميلك شيك الأفوكادو الملكي",
+      "fr": "Milkshake Royal Avocat & Miel",
+      "en": "Avocado Milkshake"
+    },
+    "description": {
+      "ar": "أفوكادو طازج مخلوط مع حليب وعسل طبيعي لمذاق غني وصحي.",
+      "fr": "Avocat frais crémeux mixé avec lait entier, miel pur et pistaches.",
+      "en": "Fresh avocado blended with rich milk and natural blossom honey."
+    },
+    "price": 20,
+    "calories": 380,
+    "prepTime": "4 min",
+    "image": "/images/restaurants/riwaq/avocado_milkshake.jpg",
+    "isChefPick": true
+  },
+  {
+    "id": "rw-bv-10",
+    "categoryId": "beverages",
+    "name": {
+      "ar": "موهيتو موكتيل الفواكه المنعش",
+      "fr": "Mojito Mocktail Glacé Citron Vert",
+      "en": "Mojito Mocktail"
+    },
+    "description": {
+      "ar": "ليمون ونعناع وصودا فوارة باردة مع لمسة توت منعشة.",
+      "fr": "Mocktail pétillant glacé au citron vert, menthe fraîche pilée et soda.",
+      "en": "Refreshing mocktail with fresh lime, crushed mint, and sparkling soda."
+    },
+    "price": 20,
+    "calories": 130,
+    "prepTime": "3 min",
+    "image": "/images/restaurants/riwaq/mojito_mocktail.jpg",
+    "isPopular": true
+  }
+]

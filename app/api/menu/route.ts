@@ -95,6 +95,58 @@ function checkStoreOpenStatus(isAcceptingOrders: any, openTimeStr?: string, clos
   };
 }
 
+// Vérifie les plages horaires spécifiques par catégorie (ex: Breakfast 08:00 - 11:00 à Riwaq)
+function getCategoryServiceHours(instance: string, categoryId: string, timezone: string = 'Asia/Qatar'): { isAvailable: boolean; serviceHours?: string } {
+  if (!instance.includes('riwaq') && !instance.includes('qnl')) {
+    return { isAvailable: true };
+  }
+
+  try {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+    const parts = formatter.format(new Date()).split(':').map(Number);
+    const currMin = parts[0] * 60 + parts[1];
+
+    if (categoryId === 'breakfast') {
+      const open = 8 * 60;
+      const close = 11 * 60;
+      const isOpen = currMin >= open && currMin < close;
+      return {
+        isAvailable: isOpen,
+        serviceHours: isOpen ? undefined : '08:00 - 11:00 AM'
+      };
+    }
+
+    if (categoryId === 'salads_wraps') {
+      const open = 10 * 60;
+      const close = 19 * 60;
+      const isOpen = currMin >= open && currMin < close;
+      return {
+        isAvailable: isOpen,
+        serviceHours: isOpen ? undefined : 'Dès 10:00 / From 10:00'
+      };
+    }
+
+    if (['appetizers', 'pizzas', 'mains', 'burgers_pasta'].includes(categoryId)) {
+      const open = 11 * 60;
+      const close = 19 * 60;
+      const isOpen = currMin >= open && currMin < close;
+      return {
+        isAvailable: isOpen,
+        serviceHours: isOpen ? undefined : 'Dès 11:00 / From 11:00'
+      };
+    }
+
+    return { isAvailable: true };
+  } catch (e) {
+    return { isAvailable: true };
+  }
+}
+
 // API Route dynamique connectée en direct à NocoDB avec fallback
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -113,7 +165,6 @@ export async function GET(request: NextRequest) {
 
   try {
     // 0. Récupérer les informations du restaurant et ses horaires dans NocoDB
-
     try {
       const restRes = await fetch(
         `http://${NOCODB_HOST}:${NOCODB_PORT}/api/v2/tables/${RESTAURANTS_TABLE_ID}/records?where=(instance_name,eq,${cleanInstance})&limit=1`,
@@ -166,14 +217,17 @@ export async function GET(request: NextRequest) {
       if (nocoList.length > 0) {
         const localMenu = getMenuForInstance(cleanInstance);
         
-        // Mapper les données NocoDB au format MenuItem
+        // Mapper les données NocoDB au format MenuItem avec gestion des plages horaires de catégorie
         const items: MenuItem[] = nocoList.map((row: any) => {
-          // Trouver les options de taille si existantes dans le template local
           const localItem = localMenu.items.find(i => i.id === row.item_id);
+          const catId = row.category || 'all';
+          const catSchedule = getCategoryServiceHours(cleanInstance, catId, storeStatus.timezone);
+          const rawAvailable = row.is_available !== 0 && row.is_available !== false;
+          const isItemAvailable = rawAvailable && catSchedule.isAvailable;
 
           return {
             id: row.item_id || `item-${row.Id}`,
-            categoryId: row.category || 'all',
+            categoryId: catId,
             name: {
               ar: row.name_ar || row.Title || '',
               fr: row.name_fr || row.Title || '',
@@ -190,7 +244,8 @@ export async function GET(request: NextRequest) {
             prepTime: row.prep_time || '3-5 min',
             isChefPick: row.is_chef_pick === 1 || row.is_chef_pick === true,
             isPopular: row.is_popular === 1 || row.is_popular === true,
-            isAvailable: row.is_available !== 0 && row.is_available !== false,
+            isAvailable: isItemAvailable,
+            serviceHours: catSchedule.serviceHours,
             optionGroups: localItem?.optionGroups
           };
         });
@@ -213,6 +268,15 @@ export async function GET(request: NextRequest) {
 
   // 2. Fallback local si NocoDB est vide ou indisponible
   const menuData = getMenuForInstance(cleanInstance);
+  const itemsWithSchedule = menuData.items.map(item => {
+    const catSchedule = getCategoryServiceHours(cleanInstance, item.categoryId, storeStatus.timezone);
+    return {
+      ...item,
+      isAvailable: (item.isAvailable !== false) && catSchedule.isAvailable,
+      serviceHours: catSchedule.serviceHours
+    };
+  });
+
   return NextResponse.json({
     success: true,
     source: 'local_fallback',
@@ -220,7 +284,7 @@ export async function GET(request: NextRequest) {
     storeStatus,
     restaurant: restaurantInfo ? { ...menuData.restaurantInfo, ...restaurantInfo, isOpen: storeStatus.isOpen } : menuData.restaurantInfo,
     categories: menuData.categories,
-    total_items: menuData.items.length,
-    items: menuData.items
+    total_items: itemsWithSchedule.length,
+    items: itemsWithSchedule
   });
 }

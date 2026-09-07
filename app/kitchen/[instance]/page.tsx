@@ -41,7 +41,7 @@ export interface KitchenOrder {
   elapsedMinutes?: number;
 }
 
-export default function KitchenDisplaySystemPage() {
+function KitchenDisplaySystemContent() {
   const params = useParams();
   const searchParams = useSearchParams();
 
@@ -1129,5 +1129,13 @@ export default function KitchenDisplaySystemPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function KitchenDisplaySystemPage() {
+  return (
+    <React.Suspense fallback={<div className="min-h-screen bg-[#1F1915] flex items-center justify-center text-[#FAF8F5] font-bold">Loading Kitchen OS...</div>}>
+      <KitchenDisplaySystemContent />
+    </React.Suspense>
   );
 }
