@@ -68,7 +68,7 @@
     }
 
     .brand-logo-pill {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 8px;
       padding: 6px 14px;
@@ -78,6 +78,14 @@
       font-weight: 800;
       font-size: 0.88rem;
       color: var(--primary);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .nav-brand-tools {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
 
     .nav-links {
@@ -94,6 +102,8 @@
       border-radius: var(--radius-full);
       padding: 3px;
       gap: 2px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .lang-btn {
@@ -103,6 +113,7 @@
       font-weight: 800;
       color: var(--text-muted);
       transition: var(--transition);
+      white-space: nowrap;
     }
 
     .lang-btn.active {
@@ -115,7 +126,7 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 6px 14px;
+      padding: 7px 16px;
       background: var(--accent-light);
       border: 1px solid var(--border);
       border-radius: var(--radius-full);
@@ -124,6 +135,8 @@
       color: var(--accent-dark);
       cursor: pointer;
       transition: var(--transition);
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .demo-pill-btn:hover {
@@ -145,6 +158,8 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .btn-primary:hover {
@@ -164,6 +179,8 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .btn-outline:hover {
@@ -1339,10 +1356,64 @@
       .tabs-nav { flex-wrap: wrap; border-radius: var(--radius-md); }
     }
 
+    @media (max-width: 768px) {
+      .top-nav {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 10px 14px;
+        gap: 8px;
+      }
+      .nav-brand {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .brand-logo-pill {
+        font-size: 0.8rem;
+        padding: 5px 11px;
+      }
+      .nav-brand-tools {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .lang-btn {
+        padding: 4px 8px;
+        font-size: 0.74rem;
+      }
+      .nav-login-btn {
+        padding: 5px 11px;
+        font-size: 0.78rem;
+      }
+      .nav-links {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .nav-links .demo-pill-btn,
+      .nav-links .btn-primary {
+        flex: 1;
+        justify-content: center;
+        text-align: center;
+        padding: 8px 10px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+        border-radius: var(--radius-full);
+      }
+      .whatsapp-widget-container {
+        bottom: 16px;
+        right: 14px;
+      }
+      .whatsapp-float-btn {
+        padding: 10px 16px;
+        font-size: 0.85rem;
+      }
+    }
+
     @media (max-width: 600px) {
       .hero-metrics-bar { grid-template-columns: 1fr; }
-      .top-nav { flex-direction: column; align-items: flex-start; }
-      .nav-links { width: 100%; justify-content: space-between; }
     }
   </style>
 </head>
@@ -1354,9 +1425,14 @@
       <div class="brand-logo-pill">
         <span>⚡ SMART REVIEW AI</span>
       </div>
-      <div class="lang-switcher">
-        <button class="lang-btn active" id="btnLangEN" onclick="setLanguage('en')">🇬🇧 EN</button>
-        <button class="lang-btn" id="btnLangFR" onclick="setLanguage('fr')">🇫🇷 FR</button>
+      <div class="nav-brand-tools">
+        <div class="lang-switcher">
+          <button class="lang-btn active" id="btnLangEN" onclick="setLanguage('en')">🇬🇧 EN</button>
+          <button class="lang-btn" id="btnLangFR" onclick="setLanguage('fr')">🇫🇷 FR</button>
+        </div>
+        <a href="/login" class="btn-outline nav-login-btn" id="navLoginBtn">
+          <span>🔐 Login</span>
+        </a>
       </div>
     </div>
 
@@ -1364,9 +1440,6 @@
       <a href="https://smart-review-v4-lifestyle-vision2030.jdaproai.com/spin/doha_pilot" target="_blank" rel="noopener noreferrer" class="demo-pill-btn" id="navDemoBtn" title="Launch live interactive guest experience">
         <span id="textNavDemo">📱 Try Live Demo</span>
         <span style="font-size: 0.8rem; margin-left: 2px;">↗</span>
-      </a>
-      <a href="/login" class="btn-outline" id="navLoginBtn">
-        <span>🔐 Login</span>
       </a>
       <a href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" id="navPilotBtn">
         <span id="textNavPilot">💬 30-Day Pilot</span>
