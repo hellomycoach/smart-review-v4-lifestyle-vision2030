@@ -247,6 +247,25 @@
       flex-wrap: wrap;
     }
 
+    .metrics-disclaimer-wrapper {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .metrics-disclaimer {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: #f1f5f9;
+      color: #64748b;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: 9999px;
+      border: 1px solid #e2e8f0;
+      letter-spacing: 0.02em;
+    }
+
     .hero-metrics-bar {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -1469,22 +1488,27 @@
     </div>
 
     <!-- Key Metrics Bar -->
+    <div class="metrics-disclaimer-wrapper">
+      <span class="metrics-disclaimer" id="metricsDisclaimer">
+        🎯 Target Benchmarks &amp; Performance Objectives for Pilot Establishments
+      </span>
+    </div>
     <div class="hero-metrics-bar">
       <div class="metric-card" onclick="openDrawer('reviews')">
-        <div class="metric-value">+450%</div>
-        <div class="metric-label" id="metricLabelReviews">5★ Review Velocity</div>
+        <div class="metric-value" id="metricValReviews">Up to +450%</div>
+        <div class="metric-label" id="metricLabelReviews">5★ Review Target</div>
       </div>
       <div class="metric-card" onclick="openDrawer('vip')">
-        <div class="metric-value">100%</div>
-        <div class="metric-label" id="metricLabelCRM">Owned Guest CRM</div>
+        <div class="metric-value" id="metricValCRM">100% Owned</div>
+        <div class="metric-label" id="metricLabelCRM">Direct Guest Data</div>
       </div>
       <div class="metric-card" onclick="openDrawer('tableordering')">
-        <div class="metric-value">+28%</div>
-        <div class="metric-label" id="metricLabelSpeed">Service Speed & Turns</div>
+        <div class="metric-value" id="metricValSpeed">+20% to +30%</div>
+        <div class="metric-label" id="metricLabelSpeed">Projected Table Turn Gain</div>
       </div>
       <div class="metric-card" onclick="openDrawer('eatfit')">
-        <div class="metric-value">Guilt-Free</div>
-        <div class="metric-label" id="metricLabelAI">AI Vision & Fitness</div>
+        <div class="metric-value" id="metricValAI">Guilt-Free AI</div>
+        <div class="metric-label" id="metricLabelAI">Viral Engagement Hook</div>
       </div>
     </div>
   </section>
@@ -1797,10 +1821,15 @@
         heroSubtitle: "The frictionless dine-in ordering and hospitality engine built for high-performing restaurants, specialty cafes, and brasseries. Zero apps to download. Seated guests order smoothly, eliminating rush-hour stress even when short-staffed.",
         heroPilot: "🚀 Request 30-Day Risk-Free Pilot (WhatsApp)",
         heroDemo: "📱 Experience Guest Spin Wheel",
-        metricReviews: "5★ Review Velocity",
-        metricCRM: "Owned Guest CRM",
-        metricSpeed: "Service Speed & Turns",
-        metricAI: "AI Vision & Fitness",
+        metricsDisclaimer: "🎯 Target Benchmarks & Performance Objectives for Pilot Establishments",
+        metricValReviews: "Up to +450%",
+        metricLabelReviews: "5★ Review Target",
+        metricValCRM: "100% Owned",
+        metricLabelCRM: "Direct Guest Data",
+        metricValSpeed: "+20% to +30%",
+        metricLabelSpeed: "Projected Table Turn Gain",
+        metricValAI: "Guilt-Free AI",
+        metricLabelAI: "Viral Engagement Hook",
         infographicBadge: "The Market Reality",
         infographicTitle: "Why Traditional Restaurants Struggle vs. The Smart Review AI Advantage",
         infographicDesc: "High labor turnover, rising overhead, and bad online reviews hurt hospitality margins. Here is how our automated system solves each challenge directly at the table.",
@@ -1827,7 +1856,7 @@
             badge: "Local Dominance",
             title: "1. Frictionless 5★ Google Review Engine",
             desc: "Outrank competitors on Google Maps. The gamified Spin & Win wheel engages diners at peak meal satisfaction, generating authentic 5★ reviews in under 30 seconds.",
-            kpi1: "Table Conversion: <strong>25% to 40%</strong>",
+            kpi1: "Target Interaction: <strong>25% to 40%</strong>",
             kpi2: "Completion Time: <strong>< 30 seconds</strong>"
           },
           {
@@ -1845,8 +1874,8 @@
             badge: "F&B World-First",
             title: "3. 'Eat & Fit' : AI Guilt-Free Dining",
             desc: "Guests snap a photo of their gourmet dish. Multimodal Vision AI computes calories and delivers a tailored, equipment-free 12-minute home workout directly on WhatsApp.",
-            kpi1: "Viral Shares: <strong>3x on Instagram</strong>",
-            kpi2: "Social Buzz: <strong>+82% engagement</strong>"
+            kpi1: "Social Hook: <strong>High viral share potential</strong>",
+            kpi2: "Guest Delight: <strong>Memorable dining touchpoint</strong>"
           },
           {
             key: "vip",
@@ -1854,8 +1883,8 @@
             badge: "Direct Retention",
             title: "4. WhatsApp VIP Pass & Automated Re-engagement",
             desc: "No plastic cards or app store downloads. Guests keep a live VIP pass inside WhatsApp. Automated campaigns re-activate guests during slow weekday shifts.",
-            kpi1: "Open Rate: <strong>98% on WhatsApp</strong>",
-            kpi2: "Repeat Visits: <strong>+22% within 60 days</strong>"
+            kpi1: "Open Rate: <strong>~98% on WhatsApp</strong>",
+            kpi2: "Target Repeat Uplift: <strong>+15% to +25% within 60 days</strong>"
           }
         ],
         simTitle: "Financial Impact Simulator",
@@ -1863,7 +1892,7 @@
         labelCovers: "Daily Seated Guests:",
         labelTicket: "Average Check per Guest:",
         labelConversion: "Table Interaction Rate:",
-        simNote: "💡 <strong>Forecast Model:</strong> Evaluates table turn acceleration (+18% seating capacity absorbed without extra labor) + average check increase (+15% upsell from visual food & drink recommendations).",
+        simNote: "💡 <strong>Indicative Forecast Model:</strong> Interactive projection based on conservative hospitality estimates (+18% seating capacity absorption +12% dessert/drink upselling). The 30-day free pilot lets you measure your actual venue metrics risk-free.",
         statReviews: "New 5★ Reviews / Month",
         statLeads: "WhatsApp CRM Contacts / Month",
         statRotation: "Table Turn Gain / Month",
@@ -1887,7 +1916,7 @@
         priceAnnual: "$119",
         periodAnnual: "/ month (billed $1,428/yr)",
         setupAnnual: "+ $190 discounted onboarding & setup",
-        trialHighlight: "<strong>30-Day Risk-Free Trial:</strong> Your 1st month subscription is 100% FREE. Experience real table turnover and 5★ review gains live before any recurring charge.",
+        trialHighlight: "<strong>30-Day Risk-Free Trial:</strong> Your 1st month subscription is 100% FREE. Track your actual review velocity and table turn gains live in your restaurant before any recurring charge.",
         featuresTitle: "Everything Included in Your Plan (Options Recap):",
         features: [
           "Unlimited Table QR Scans & Seated Digital Ordering (0% Commission)",
@@ -1917,7 +1946,7 @@
           },
           {
             q: "How does table ordering help during peak hours and staff shortages?",
-            a: "Instead of waitstaff running back and forth to take orders and process payments, seated guests order and pay directly from their table. Orders are instantly printed or displayed on the kitchen KDS, reducing table wait time by up to 25% and ensuring zero tables are neglected even with limited staff."
+            a: "Instead of waitstaff running back and forth to take orders and process payments, seated guests order and pay directly from their table. Orders are instantly printed or displayed on the kitchen KDS, targeting a reduction in table wait times by up to 25% and ensuring zero tables are neglected even with limited staff."
           },
           {
             q: "Can this integrate with our existing kitchen printers or POS?",
@@ -1925,7 +1954,7 @@
           },
           {
             q: "How does the 30-day pilot work?",
-            a: "We set up your custom branded digital menu, table QR cards, and WhatsApp workflow within 48 hours. You test it in one branch with real diners and measure review velocity and table turn gains before deciding on broader rollout."
+            a: "We set up your custom branded digital menu, table QR cards, and WhatsApp workflow within 48 hours. You test it in one branch with real diners and observe actual review velocity and table turn gains before deciding on broader rollout."
           }
         ],
         drawerDetails: {
@@ -1936,7 +1965,7 @@
             features: [
               "One-tap redirection to verified Google Business Profile.",
               "Smart mediation: dissatisfaction is handled privately before going online.",
-              "Demonstrated +0.6★ score increase within 45 days.",
+              "Target trajectory: +0.4★ to +0.7★ score increase within 45-60 days.",
               "Automated instant reward to encourage off-peak weekday visits."
             ]
           },
@@ -1947,8 +1976,8 @@
             features: [
               "Seated convenience: diners order comfortably from their smartphones.",
               "Staff shortage resilience: orders route directly to kitchen even when short-staffed.",
-              "Faster table turns (+20% to +30% acceleration during peak services).",
-              "Visual upselling: mouth-watering photos drive +15% higher drink & dessert spend.",
+              "Target table turn acceleration (+20% to +30% during peak services).",
+              "Visual upselling potential: mouth-watering photos drive +10% to +15% higher drink & dessert spend.",
               "Direct kitchen KDS chime: eliminates handwritten notes and order errors."
             ]
           },
@@ -1960,7 +1989,7 @@
               "Cutting-edge Multimodal AI (Gemini 3.1) with rapid food recognition.",
               "Custom 12-minute bodyweight routine tailored to restaurant portion sizes.",
               "Zero app download: 100% native WhatsApp delivery.",
-              "Massive viral word-of-mouth on Instagram Stories and TikTok."
+              "Strong viral word-of-mouth potential on Instagram Stories and TikTok."
             ]
           },
           vip: {
@@ -1971,7 +2000,7 @@
               "Zero plastic cards, zero clunky mobile apps to install.",
               "Automated smart campaigns targeting slow weekday lunch or afternoon hours.",
               "Precise guest segmentation by visit frequency and spend.",
-              "Proven +22% repeat visit frequency within 60 days."
+              "Targeted repeat visit uplift: +15% to +25% frequency within 60 days."
             ]
           }
         },
@@ -1999,10 +2028,15 @@
         heroSubtitle: "Le moteur tout-en-un de commande à table et d'hospitalité conçu pour les restaurants, brasseries et cafés exigeants. Zéro application à télécharger. Les convives commandent assis à leur rythme, éliminant le stress des coups de feu même en sous-effectif.",
         heroPilot: "🚀 Demander un Pilote 30 Jours sans Engagement (WhatsApp)",
         heroDemo: "📱 Découvrir la Roue de la Fortune Client",
-        metricReviews: "Volume d'Avis 5★",
-        metricCRM: "Fichier Client 100% Propriétaire",
-        metricSpeed: "Vitesse de Service & Rotation",
-        metricAI: "IA Vision & Fitness Guilt-Free",
+        metricsDisclaimer: "🎯 Projections & Objectifs de Performance Ciblés en Phase Pilote (30 Jours)",
+        metricValReviews: "Jusqu'à +450%",
+        metricLabelReviews: "Objectif Volume d'Avis 5★",
+        metricValCRM: "100% Propriétaire",
+        metricLabelCRM: "Données Clients Directes (Sans Intermédiaire)",
+        metricValSpeed: "+20% à +30%",
+        metricLabelSpeed: "Gain de Rotation & Fluidité Estimé",
+        metricValAI: "Expérience IA",
+        metricLabelAI: "Engagement & Partage Viral",
         infographicBadge: "La Réalité du Marché",
         infographicTitle: "Pourquoi les Méthodes Traditionnelles Échouent vs. L'Avantage Smart Review AI",
         infographicDesc: "Pénurie de personnel en salle, coûts de fonctionnement et avis injustes pénalisent la rentabilité. Voici comment notre système automatisé résout chaque friction directement à table.",
@@ -2029,7 +2063,7 @@
             badge: "Domination Locale",
             title: "1. Récolte Massive d'Avis Google 5★ Sans Friction",
             desc: "Surclassez vos concurrents sur Google Maps. La Roue de la Fortune engage les convives au moment du dessert pour récolter des avis 5★ vérifiés en moins de 30 secondes.",
-            kpi1: "Taux d'Engagement : <strong>25% à 40%</strong>",
+            kpi1: "Taux d'Engagement Visé : <strong>25% à 40%</strong>",
             kpi2: "Temps de Dépôt : <strong>< 30 secondes</strong>"
           },
           {
@@ -2047,8 +2081,8 @@
             badge: "Exclusivité F&B",
             title: "3. 'Eat & Fit' : Savourer Sans Culpabilité grâce à l'IA",
             desc: "Le convive photographie son plat. Notre IA Vision calcule les calories et lui génère instantanément sur WhatsApp une séance fitness sur-mesure de 12 min sans matériel.",
-            kpi1: "Partage Viral : <strong>x3 sur Instagram</strong>",
-            kpi2: "Bouche-à-Oreille : <strong>+82% d'interaction</strong>"
+            kpi1: "Levier Réseaux : <strong>Fort potentiel viral</strong>",
+            kpi2: "Facteur Wow : <strong>Expérience convive mémorable</strong>"
           },
           {
             key: "vip",
@@ -2056,8 +2090,8 @@
             badge: "Fidélisation Directe",
             title: "4. Pass VIP WhatsApp & Réactivation Automatique",
             desc: "Zéro carte plastique, zéro application lourde. Vos clients gardent leur pass digital sur WhatsApp. Notre IA relance automatiquement les convives lors des services creux.",
-            kpi1: "Taux d'Ouverture : <strong>98% sur WhatsApp</strong>",
-            kpi2: "Revisites : <strong>+18% à +25% sous 60 jours</strong>"
+            kpi1: "Taux d'Ouverture : <strong>~98% sur WhatsApp</strong>",
+            kpi2: "Objectif Revisites : <strong>+15% à +25% sous 60 jours</strong>"
           }
         ],
         simTitle: "Simulateur d'Impact Financier",
@@ -2065,7 +2099,7 @@
         labelCovers: "Couverts / Clients par Jour :",
         labelTicket: "Ticket Moyen Convive :",
         labelConversion: "Taux d'Adhésion / Spin :",
-        simNote: "💡 <strong>Base de calcul :</strong> Modèle estimant une accélération de la rotation des tables (+18% de capacité absorbée sans surcharge d'équipe) + augmentation du panier moyen (+12% d'upsell boissons/desserts).",
+        simNote: "💡 <strong>Modélisation prévisionnelle indicative :</strong> Estimations calculées sur des hypothèses prudentes d'optimisation (fluidité accrue du service et suggestions visuelles). Le pilote de 30 jours gratuit vous permet de mesurer vos gains réels sans engagement.",
         statReviews: "Nouveaux Avis 5★ / Mois",
         statLeads: "Contacts WhatsApp CRM / Mois",
         statRotation: "Gain Rotation & Productivité / Mois",
@@ -2089,7 +2123,7 @@
         priceAnnual: "99 €",
         periodAnnual: "/ mois (facturé 1 188 €/an)",
         setupAnnual: "+ 150 € forfait de set-up réduit",
-        trialHighlight: "<strong>Garantie 30 Jours Sans Risque :</strong> Votre 1er mois d'abonnement est 100% OFFERT. Constatez l'afflux d'avis 5★ et la rotation accélérée en direct avant tout prélèvement.",
+        trialHighlight: "<strong>Garantie 30 Jours Sans Risque :</strong> Votre 1er mois d'abonnement est 100% OFFERT. Mesurez l'accélération de vos avis 5★ et la fluidité de rotation en conditions réelles avant tout prélèvement.",
         featuresTitle: "Tout ce qui est Inclus dans Votre Forfait (Rappel des Options) :",
         features: [
           "Scans QR illimités & Commande à table fluide (0% de commission)",
@@ -2119,7 +2153,7 @@
           },
           {
             q: "Comment la commande à table aide-t-elle en cas de sous-effectif ou en plein été ?",
-            a: "Au lieu que les serveurs courent pour prendre les commandes et apporter les additions, les clients installés commandent et règlent directement depuis leur smartphone. Les bons s'impriment ou s'affichent instantanément en cuisine/bar, accélérant le service de 25% sans délaisser aucune table."
+            a: "Au lieu que les serveurs courent pour prendre les commandes et apporter les additions, les clients installés commandent et règlent directement depuis leur smartphone. Les bons s'impriment ou s'affichent instantanément en cuisine/bar, visant une réduction des temps d'attente jusqu'à 25% sans délaisser aucune table."
           },
           {
             q: "Est-ce compatible avec nos imprimantes ou logiciels de caisse actuels ?",
@@ -2127,7 +2161,7 @@
           },
           {
             q: "Comment se déroule la période pilote de 30 jours ?",
-            a: "Nous configurons votre carte illustrée, vos QR codes de table personnalisés et votre canal WhatsApp sous 48h. Vous testez en conditions réelles avec vos clients et mesurez la hausse d'avis 5★ et de rotation avant d'étendre la solution."
+            a: "Nous configurons votre carte illustrée, vos QR codes de table personnalisés et votre canal WhatsApp sous 48h. Vous testez en conditions réelles avec vos clients et mesurez vos chiffres concrets d'avis 5★ et de rotation avant d'étendre la solution."
           }
         ],
         drawerDetails: {
@@ -2138,7 +2172,7 @@
             features: [
               "Redirection en 1 clic vers votre fiche Google vérifiée.",
               "Médiation privée intelligente : les critiques constructives restent confidentielles.",
-              "Progression moyenne de +0.6★ sous 45 jours constatée.",
+              "Objectif de progression visé : +0.4★ à +0.7★ sous 45 à 60 jours de pilote.",
               "Récompense instantanée pour stimuler les visites aux heures creuses."
             ]
           },
@@ -2149,20 +2183,20 @@
             features: [
               "Confort premium : les clients commandent assis sans faire la queue debout.",
               "Bouclier anti-pénurie : les commandes partent en cuisine même avec des serveurs en moins.",
-              "Rotation des tables accélérée de +20% à +30% aux heures de pointe.",
-              "Suggestions visuelles : les photos augmentent le panier moyen de +15%.",
+              "Objectif de rotation des tables : +20% à +30% de fluidité lors des services de pointe.",
+              "Suggestions visuelles : les photos stimulent un panier moyen estimé à +10% à +15% sur les extras.",
               "Transmission KDS directe : zéro erreur de saisie ou oubli de commande."
             ]
           },
           eatfit: {
             tag: "Exclusivité F&B",
             title: "IA 'Eat & Fit' : Savourer Sans Culpabilité",
-            body: "Une exclusivité mondiale en restauration. Le convive prend en photo son plat, découvre son équilibre calorique et reçoit une routine fitness de 12 min sur WhatsApp pour compenser avec le sourire.",
+            body: "Une exclusivité en restauration. Le convive prend en photo son plat, découvre son équilibre calorique et reçoit une routine fitness de 12 min sur WhatsApp pour compenser avec le sourire.",
             features: [
               "IA Vision multimodale (Gemini 3.1) avec détection d'assiette instantanée.",
               "Routine de 12 min au poids du corps étalonnée sur les portions du restaurant.",
               "100% natif WhatsApp : zéro compte à créer, zéro friction.",
-              "Partage viral massif sur Instagram Stories et TikTok."
+              "Fort potentiel de partage spontané sur Instagram Stories et TikTok."
             ]
           },
           vip: {
@@ -2173,7 +2207,7 @@
               "Zéro carte plastique, zéro application lourde à télécharger.",
               "Campagnes automatisées ciblées pour remplir les services du mardi midi au jeudi soir.",
               "Segmentation fine selon les habitudes et paniers de consommation.",
-              "Augmentation mesurée de +18% à +25% de la fréquence de visite sous 60 jours."
+              "Objectif de revisite ciblé : +15% à +25% de fréquentation accrue sous 60 jours."
             ]
           }
         },
@@ -2214,10 +2248,25 @@
       document.getElementById('textHeroDemo').innerText = data.heroDemo;
 
       // Metrics
-      document.getElementById('metricLabelReviews').innerText = data.metricReviews;
-      document.getElementById('metricLabelCRM').innerText = data.metricCRM;
-      document.getElementById('metricLabelSpeed').innerText = data.metricSpeed;
-      document.getElementById('metricLabelAI').innerText = data.metricAI;
+      if (document.getElementById('metricsDisclaimer')) {
+        document.getElementById('metricsDisclaimer').innerText = data.metricsDisclaimer;
+      }
+      if (document.getElementById('metricValReviews')) {
+        document.getElementById('metricValReviews').innerText = data.metricValReviews;
+      }
+      if (document.getElementById('metricValCRM')) {
+        document.getElementById('metricValCRM').innerText = data.metricValCRM;
+      }
+      if (document.getElementById('metricValSpeed')) {
+        document.getElementById('metricValSpeed').innerText = data.metricValSpeed;
+      }
+      if (document.getElementById('metricValAI')) {
+        document.getElementById('metricValAI').innerText = data.metricValAI;
+      }
+      document.getElementById('metricLabelReviews').innerText = data.metricLabelReviews;
+      document.getElementById('metricLabelCRM').innerText = data.metricLabelCRM;
+      document.getElementById('metricLabelSpeed').innerText = data.metricLabelSpeed;
+      document.getElementById('metricLabelAI').innerText = data.metricLabelAI;
 
       // Infographic
       document.getElementById('infographicBadge').innerText = data.infographicBadge;

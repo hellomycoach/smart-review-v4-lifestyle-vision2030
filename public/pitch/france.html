@@ -198,6 +198,25 @@
       font-weight: 500;
     }
 
+    .metrics-disclaimer-wrapper {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .metrics-disclaimer {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 16px;
+      background: #f1f5f9;
+      color: #64748b;
+      font-size: 0.8rem;
+      font-weight: 700;
+      border-radius: 9999px;
+      border: 1px solid #e2e8f0;
+      letter-spacing: 0.02em;
+    }
+
     .hero-metrics-bar {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -885,22 +904,27 @@
     </p>
 
     <!-- Métriques Clés -->
+    <div class="metrics-disclaimer-wrapper">
+      <span class="metrics-disclaimer">
+        🎯 Projections &amp; Objectifs Cibles Visés en Phase Pilote (30 Jours)
+      </span>
+    </div>
     <div class="hero-metrics-bar">
       <div class="metric-card" onclick="openDrawer('reviews')">
-        <div class="metric-value">+450 %</div>
-        <div class="metric-label">Volume d'Avis Google 5★</div>
+        <div class="metric-value">Jusqu'à +450%</div>
+        <div class="metric-label">Objectif Volume d'Avis 5★</div>
       </div>
       <div class="metric-card" onclick="openDrawer('vip')">
-        <div class="metric-value">100 %</div>
-        <div class="metric-label">Clients Propriétaires (CRM)</div>
+        <div class="metric-value">100% Propriétaire</div>
+        <div class="metric-label">Données Clients Directes (Sans Intermédiaire)</div>
       </div>
       <div class="metric-card" onclick="openDrawer('tableordering')">
-        <div class="metric-value">+28 %</div>
-        <div class="metric-label">Vitesse de Service & Rotation</div>
+        <div class="metric-value">+20% à +30%</div>
+        <div class="metric-label">Gain de Rotation &amp; Fluidité Estimé</div>
       </div>
       <div class="metric-card" onclick="openDrawer('eatfit')">
-        <div class="metric-value">Exclusif</div>
-        <div class="metric-label">IA Food & Fitness Guilt-Free</div>
+        <div class="metric-value">Expérience IA</div>
+        <div class="metric-label">Engagement Différenciant &amp; Viralité</div>
       </div>
     </div>
   </section>
@@ -947,10 +971,8 @@
           </div>
           <div>
             <div class="pillar-kpi-row">
-              <div class="pillar-kpi">Conversion Moyenne : <strong>25% à 40% des tables</strong></div>
-              <div class="pillar-kpi">Temps de dépôt : <strong>
-                  < 30 secondes</strong>
-              </div>
+              <div class="pillar-kpi">Taux d'Engagement Visé : <strong>25% à 40% des tables</strong></div>
+              <div class="pillar-kpi">Temps de dépôt : <strong>&lt; 30 secondes</strong></div>
             </div>
             <div class="card-click-hint">Cliquez pour voir les détails stratégiques &rarr;</div>
           </div>
@@ -995,8 +1017,8 @@
           </div>
           <div>
             <div class="pillar-kpi-row">
-              <div class="pillar-kpi">Taux de Partage Viral : <strong>x3 sur Instagram</strong></div>
-              <div class="pillar-kpi">Engagement Client : <strong>+82% d'interaction</strong></div>
+              <div class="pillar-kpi">Levier Réseaux : <strong>Fort potentiel viral</strong></div>
+              <div class="pillar-kpi">Facteur Wow : <strong>Expérience convive mémorable</strong></div>
             </div>
             <div class="card-click-hint">Cliquez pour voir les détails stratégiques &rarr;</div>
           </div>
@@ -1017,8 +1039,8 @@
           </div>
           <div>
             <div class="pillar-kpi-row">
-              <div class="pillar-kpi">Taux d'Ouverture WhatsApp : <strong>98% en France</strong></div>
-              <div class="pillar-kpi">Revisites Générées : <strong>+18% en 60 jours</strong></div>
+              <div class="pillar-kpi">Taux d'Ouverture WhatsApp : <strong>~98% en France</strong></div>
+              <div class="pillar-kpi">Objectif Revisites : <strong>+15% à +20% en 60 jours</strong></div>
             </div>
             <div class="card-click-hint">Cliquez pour voir les détails stratégiques &rarr;</div>
           </div>
@@ -1066,8 +1088,7 @@
 
           <div
             style="background: var(--bg-main); padding: 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); font-size: 0.8rem; color: var(--text-muted);">
-            💡 <strong>Base de calcul :</strong> Modèle estimant une accélération de la rotation des tables (+18% de
-            capacité absorbée sans surcharge d'équipe) + augmentation du panier moyen (+12% d'upsell boissons/desserts).
+            💡 <strong>Modélisation prévisionnelle indicative :</strong> Estimations calculées sur des hypothèses prudentes d'optimisation (fluidité accrue du service et suggestions visuelles d'upsell). Le pilote de 30 jours gratuit vous permet d'observer et de mesurer vos gains réels sans engagement.
           </div>
         </div>
 
@@ -1278,7 +1299,7 @@
         features: [
           "Redirection instantanée vers votre fiche Google My Business vérifiée.",
           "Filtrage intelligent : les retours constructifs (< 4★) sont dirigés vers la direction en direct.",
-          "Progression moyenne de +0.6 étoile sur votre note globale sous 45 jours.",
+          "Objectif de progression visé : +0.4 à +0.7 étoile sur votre note globale sous 45 à 60 jours de pilote.",
           "Attribution automatique des récompenses pour stimuler les visites aux heures creuses."
         ]
       },
@@ -1289,8 +1310,8 @@
         features: [
           "Confort absolu : le convive commande assis sans faire la queue debout dans le passage.",
           "Bouclier anti-pénurie de personnel : zéro commande perdue ni table délaissée lors des services sous tension.",
-          "Rotation accélérée des tables : jusqu'à +25% de rapidité entre l'installation et l'envoi en cuisine.",
-          "Augmentation automatique du panier moyen (+12% à +18%) via suggestions visuelles d'entrées, boissons et desserts.",
+          "Objectif de rotation des tables : gain d'efficacité estimé jusqu'à +20% à +25% entre l'installation et l'envoi en cuisine.",
+          "Potentiel d'augmentation du panier moyen estimé à +10% à +15% via suggestions visuelles d'entrées, boissons et desserts.",
           "Transmission directe KDS / imprimante cuisine : zéro erreur de saisie ou oubli de serveur."
         ]
       },
@@ -1302,7 +1323,7 @@
           "Modèle IA Coach IA dernière génération rapide et précis.",
           "Protocole de 12 minutes sans matériel spécialement formulé pour chaque plat.",
           "Expérience 100% intégrée à WhatsApp, sans création de compte fastidieuse.",
-          "Effet viral : le convive partage fièrement son score et son badge 'Guilt-Free' sur Instagram et TikTok."
+          "Effet différenciant : le convive partage spontanément son score et son badge 'Guilt-Free' sur Instagram et TikTok."
         ]
       },
       vip: {
@@ -1313,7 +1334,7 @@
           "Zéro carte plastique, zéro application lourde à télécharger sur l'App Store.",
           "Campagnes de relance automatisées lors des services calmes (mardi midi, jeudis soirs).",
           "Segmentation fine selon le panier moyen et la fréquence des passages.",
-          "Taux de revisite accru de +18% mesuré dès les 60 premiers jours de mise en place."
+          "Objectif de revisite ciblé : potentiel de réactivation estimé à +15% à +20% dès les 60 premiers jours."
         ]
       },
       payments: {
