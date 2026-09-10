@@ -513,7 +513,7 @@ export default function SmartReviewDashboard() {
           email: data.user.email,
           instance_name: String(instanceName).trim(),
           restaurant_name: String(restaurantName).trim(),
-          role: data.user.role || (cleanEmail.includes('jdaproai.com') ? 'admin' : 'manager')
+          role: (data.user.role === 'admin' || cleanEmail.includes('jdaproai.com')) ? 'admin' : (data.user.role || 'manager')
         };
 
         setCurrentUser(sessionData);
