@@ -14,6 +14,9 @@ export default function RootLayout({
     <html lang="ar" translate="no" className="notranslate">
       <head>
         <meta name="google" content="notranslate" />
+        <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+        <meta httpEquiv="Pragma" content="no-cache" />
+        <meta httpEquiv="Expires" content="0" />
         {/* Feuille de style CSS blindée - Ne peut jamais être bloquée */}
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
