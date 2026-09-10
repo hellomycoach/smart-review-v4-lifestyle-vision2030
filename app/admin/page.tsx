@@ -36,7 +36,6 @@ const parseInstanceName = (raw: any): string => {
 };
 
 // Extraction de la clé de franchise pour isolation stricte
-// ex: "bos_cafe_moq" -> "bos_cafe", "bella_italia_riyadh" -> "bella_italia"
 const getFranchiseKey = (instance: string): string => {
   const clean = parseInstanceName(instance).toLowerCase().trim();
   if (!clean) return "";
@@ -49,7 +48,6 @@ const getFranchiseKey = (instance: string): string => {
   if (clean.startsWith('doha_pilot') || clean.includes('lusail')) return 'doha_pilot';
   if (clean.startsWith('smart_review') || clean.includes('elixir')) return 'smart_review_ksa';
   
-  // Repli : les 2 premiers segments
   const parts = clean.split('_');
   return parts.length > 1 ? `${parts[0]}_${parts[1]}` : parts[0];
 };
@@ -68,15 +66,6 @@ const isInstanceMatch = (itemInstance: string, targetInstance: string, targetFra
   return cleanItem.includes(cleanTarget) || cleanTarget.includes(cleanItem);
 };
 
-// Récupération sécurisée du texte de l'avis
-const getReviewText = (rev: any): string => {
-  const gText = rev.google_review_text?.trim();
-  const tText = rev.transcription?.trim();
-  if (gText && gText.length > 0) return gText;
-  if (tText && tText.length > 0) return tText;
-  return "Avis client enregistré / ملاحظة صوتية من العميل";
-};
-
 // Types de filtres temporels
 type DateFilterKey = 'today' | '7d' | '30d' | 'month' | 'all' | 'custom';
 
@@ -91,7 +80,7 @@ export default function SmartReviewDashboard() {
 
   // Thème, Langue & Onglets
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [lang, setLang] = useState<'fr' | 'ar' | 'en'>('fr');
+  const [lang, setLang] = useState<'fr' | 'ar' | 'en'>('en');
   const [activeTab, setActiveTab] = useState<'reviews' | 'loyalty' | 'leads'>('reviews');
   const [loading, setLoading] = useState(false);
 
@@ -111,17 +100,366 @@ export default function SmartReviewDashboard() {
   // Filtres spécifiques avis
   const [ratingFilter, setRatingFilter] = useState<'all' | 'positive' | 'negative' | '5' | '4' | '3' | '2' | '1'>('all');
 
-  // Gestion des avis négatifs résolus (sauvegardé en local)
+  // Gestion des avis négatifs résolus
   const [resolvedIssues, setResolvedIssues] = useState<number[]>([]);
 
   // Gestion de l'offre récompense
-  const [rewardOffer, setRewardOffer] = useState('1 Café ou Cookie offert ☕');
+  const [rewardOffer, setRewardOffer] = useState('');
   const [newReward, setNewReward] = useState('');
   const [isUpdatingReward, setIsUpdatingReward] = useState(false);
 
-  // 1. Restaurer la session locale au démarrage
+  // Dictionnaire Trilingue Complet
+  const t = useMemo(() => {
+    const dict = {
+      fr: {
+        brandSub: "Plateforme Managériale Vision 2030",
+        loginTitle: "Espace Gérant & Franchise",
+        loginDesc: "Connectez-vous pour piloter vos avis, fidélité et clients",
+        email: "Adresse Email",
+        password: "Mot de passe",
+        loginBtn: "Se connecter au Dashboard",
+        logout: "Déconnexion",
+        tabReviews: "Avis & E-Réputation",
+        tabLoyalty: "Cartes de Fidélité & VIP",
+        tabLeads: "Contacts & Leads Wi-Fi",
+        periodLabel: "Période :",
+        periodToday: "Aujourd'hui",
+        period7d: "7 derniers jours",
+        period30d: "30 jours",
+        periodMonth: "Ce mois-ci",
+        periodAll: "Tout l'historique",
+        periodCustom: "Personnalisé",
+        kpiReviews: "Avis Récoltés",
+        kpiRating: "Note Moyenne",
+        kpiSatisfaction: "Satisfaction Client",
+        kpiGoogleReviews: "Avis 4-5★ Google",
+        kpiNegativeAlerts: "Avis Négatifs Interceptés",
+        kpiCardsTotal: "Cartes Fidélité Actives",
+        kpiCardsCompleted: "Paliers 10/10 VIP",
+        kpiCardsProgress: "Cartes en Cours (1-9)",
+        kpiVisits: "Visites Cumulées",
+        kpiLeads: "Contacts Enregistrés",
+        negativeAlertTitle: "Centre d'Interception des Insatisfactions (Alerte Immédiate)",
+        callClient: "Appeler le client",
+        markResolved: "Marquer comme traité",
+        resolved: "Traité ✓",
+        feedTitle: "Flux des Avis Clients",
+        exportCSV: "Exporter CSV",
+        rewardTitle: "Offre Cadeau Active",
+        rewardDesc: "Récompense offerte aux clients satisfaits",
+        rewardBtn: "Mettre à jour",
+        noReviews: "Aucun avis enregistré sur la période sélectionnée.",
+        noLoyalty: "Aucune carte de fidélité active sur cette période.",
+        noLeads: "Aucun lead Wi-Fi capturé sur cette période.",
+        stampsProgress: "Progression des tampons",
+        visits: "visites",
+        allRatings: "Toutes les notes",
+        positiveOnly: "Avis Positifs (4-5★)",
+        negativeOnly: "Avis Négatifs (1-3★)",
+        allMyBranches: (c: number) => `Toutes mes branches (${c})`,
+        allBrandsAdmin: "Toutes les enseignes (Super Admin)",
+        myFranchise: "Ma Franchise",
+        allBranchesText: "Toutes les branches",
+        refreshTooltip: "Actualiser les données",
+        overPeriod: "Sur la période",
+        globalExcellence: "Excellence globale",
+        positiveReviewsText: "avis positifs",
+        publishedToGoogle: "Publiés vers Google Maps",
+        privatelyIntercepted: "Interceptés en privé",
+        negativeAlertDesc: (c: number) => `${c} client(s) insatisfait(s) intercepté(s) avant toute publication publique sur Google Maps.`,
+        actionRequired: "Action Requise",
+        interceptedAlert: "Alerte Interceptée",
+        recent: "Récemment",
+        clientLabel: "Client :",
+        notSpecified: "Non renseigné",
+        googleReviewBadge: "Google Review ✓",
+        privateInterceptBadge: "Interception Privée",
+        telLabel: "Tél :",
+        branchLabel: "Branche :",
+        currentRewardTitle: "CADEAU ACTUEL",
+        rewardPlaceholder: "Ex: 1 Cookie ou Boisson offerte 🍪",
+        impactRateTitle: "Taux d'impact Smart Review",
+        positiveValuedGoogle: "Avis positifs valorisés sur Google :",
+        negativeContained: "Avis négatifs étouffés en interne :",
+        cardHolders: "Clients porteurs d'une carte",
+        inProgressPts: "En cours de cumul (1-9 pts)",
+        rewardUnlocked: "Récompense VIP débloquée",
+        recordedVisits: "Passages enregistrés",
+        digitalCardsList: (c: number) => `Liste des Cartes Digitales (${c})`,
+        thClientPhone: "Client / Téléphone",
+        thBranch: "Branche",
+        thProgression: "Progression Tampons (10 pts)",
+        thVisits: "Visites",
+        thAiScans: "Scans IA",
+        thEmail: "Email",
+        thDateCreated: "Date Création",
+        optInPhoneNumbers: "Numéros opt-in conformes",
+        mainSource: "Source Principale",
+        captivePortal: "Portail Captif Wi-Fi & QR",
+        internetGiftWheel: "Accès Internet + Roue Cadeau",
+        crmMarketingExport: "Export CRM Marketing",
+        downloadCsv: "Télécharger la base CSV",
+        readyForBroadcast: "Prêt pour WhatsApp Broadcast & SMS",
+        capturedContactsBase: (c: number) => `Base Contacts Capturés (${c})`,
+        thPhoneNumber: "Numéro de Téléphone",
+        thBranchEstablishment: "Branche / Établissement",
+        thSource: "Source",
+        thCaptureDate: "Date de Capture",
+        franchiseLabel: "Franchise",
+        defaultRewardOffer: "1 Café ou Cookie offert ☕",
+        defaultReviewText: "Avis client enregistré",
+        loginErrorCreds: "Email ou mot de passe incorrect",
+        loginErrorServer: "Erreur de connexion au serveur"
+      },
+      en: {
+        brandSub: "Vision 2030 Management Suite",
+        loginTitle: "Manager & Franchise Portal",
+        loginDesc: "Sign in to monitor customer reviews, loyalty cards, and leads",
+        email: "Email Address",
+        password: "Password",
+        loginBtn: "Sign In to Dashboard",
+        logout: "Log Out",
+        tabReviews: "Reviews & Reputation",
+        tabLoyalty: "Digital Loyalty Cards",
+        tabLeads: "Wi-Fi Leads & CRM",
+        periodLabel: "Period:",
+        periodToday: "Today",
+        period7d: "Last 7 days",
+        period30d: "Last 30 days",
+        periodMonth: "This Month",
+        periodAll: "All Time",
+        periodCustom: "Custom Range",
+        kpiReviews: "Total Reviews",
+        kpiRating: "Average Rating",
+        kpiSatisfaction: "Customer Satisfaction",
+        kpiGoogleReviews: "4-5★ Google Reviews",
+        kpiNegativeAlerts: "Intercepted Negative Reviews",
+        kpiCardsTotal: "Active Loyalty Cards",
+        kpiCardsCompleted: "Completed 10/10 VIPs",
+        kpiCardsProgress: "In-Progress Cards (1-9)",
+        kpiVisits: "Total Visits",
+        kpiLeads: "Captured Leads",
+        negativeAlertTitle: "Negative Feedback Interception Hub (Action Required)",
+        callClient: "Call Customer",
+        markResolved: "Mark as Resolved",
+        resolved: "Resolved ✓",
+        feedTitle: "Customer Reviews Stream",
+        exportCSV: "Export CSV",
+        rewardTitle: "Active Reward Offer",
+        rewardDesc: "Gift offered to satisfied customers",
+        rewardBtn: "Update Offer",
+        noReviews: "No reviews found for this selected timeframe.",
+        noLoyalty: "No active loyalty cards in this period.",
+        noLeads: "No Wi-Fi leads captured in this period.",
+        stampsProgress: "Stamps Progress",
+        visits: "visits",
+        allRatings: "All Ratings",
+        positiveOnly: "Positive Reviews (4-5★)",
+        negativeOnly: "Negative Reviews (1-3★)",
+        allMyBranches: (c: number) => `All my branches (${c})`,
+        allBrandsAdmin: "All brands (Super Admin)",
+        myFranchise: "My Franchise",
+        allBranchesText: "All branches",
+        refreshTooltip: "Refresh data",
+        overPeriod: "Over selected period",
+        globalExcellence: "Global excellence",
+        positiveReviewsText: "positive reviews",
+        publishedToGoogle: "Published to Google Maps",
+        privatelyIntercepted: "Privately intercepted",
+        negativeAlertDesc: (c: number) => `${c} dissatisfied customer(s) intercepted before any public review on Google Maps.`,
+        actionRequired: "Action Required",
+        interceptedAlert: "Intercepted Alert",
+        recent: "Recent",
+        clientLabel: "Customer:",
+        notSpecified: "Not specified",
+        googleReviewBadge: "Google Review ✓",
+        privateInterceptBadge: "Private Intercept",
+        telLabel: "Tel:",
+        branchLabel: "Branch:",
+        currentRewardTitle: "CURRENT REWARD",
+        rewardPlaceholder: "Ex: 1 Free Cookie or Beverage 🍪",
+        impactRateTitle: "Smart Review Impact Rate",
+        positiveValuedGoogle: "Positive reviews boosted on Google:",
+        negativeContained: "Negative feedback resolved internally:",
+        cardHolders: "Active card holders",
+        inProgressPts: "Collecting points (1-9 pts)",
+        rewardUnlocked: "VIP Reward Unlocked",
+        recordedVisits: "Logged customer visits",
+        digitalCardsList: (c: number) => `Digital Loyalty Cards List (${c})`,
+        thClientPhone: "Customer / Phone",
+        thBranch: "Branch",
+        thProgression: "Stamps Progress (10 pts)",
+        thVisits: "Visits",
+        thAiScans: "AI Scans",
+        thEmail: "Email",
+        thDateCreated: "Date Created",
+        optInPhoneNumbers: "Compliant opt-in contacts",
+        mainSource: "Primary Source",
+        captivePortal: "Wi-Fi Portal & QR Code",
+        internetGiftWheel: "Internet Access + Reward Wheel",
+        crmMarketingExport: "Marketing CRM Export",
+        downloadCsv: "Download CSV Database",
+        readyForBroadcast: "Ready for WhatsApp Broadcast & SMS",
+        capturedContactsBase: (c: number) => `Captured Contacts Database (${c})`,
+        thPhoneNumber: "Phone Number",
+        thBranchEstablishment: "Branch / Venue",
+        thSource: "Source",
+        thCaptureDate: "Capture Date",
+        franchiseLabel: "Franchise",
+        defaultRewardOffer: "1 Free Coffee or Cookie ☕",
+        defaultReviewText: "Customer review recorded",
+        loginErrorCreds: "Incorrect email or password",
+        loginErrorServer: "Server connection error"
+      },
+      ar: {
+        brandSub: "منصة إدارة المطاعم والمقاهي • رؤية 2030",
+        loginTitle: "بوابة إدارة الفروع والامتيازات",
+        loginDesc: "تسجيل الدخول لمتابعة تقييمات العملاء وبطاقات الولاء والعملاء المحتملين",
+        email: "البريد الإلكتروني",
+        password: "كلمة المرور",
+        loginBtn: "تسجيل الدخول للوحة التحكم",
+        logout: "تسجيل الخروج",
+        tabReviews: "التقييمات والسمعة",
+        tabLoyalty: "بطاقات الولاء والجوائز",
+        tabLeads: "أرقام الواي فاي والتواصل",
+        periodLabel: "الفترة:",
+        periodToday: "اليوم",
+        period7d: "آخر 7 أيام",
+        period30d: "آخر 30 يوم",
+        periodMonth: "هذا الشهر",
+        periodAll: "كامل السجل",
+        periodCustom: "فترة مخصصة",
+        kpiReviews: "إجمالي التقييمات",
+        kpiRating: "متوسط التقييم",
+        kpiSatisfaction: "نسبة الرضا",
+        kpiGoogleReviews: "تقييمات جوجل (4-5★)",
+        kpiNegativeAlerts: "الشكاوى المعترضة (1-3★)",
+        kpiCardsTotal: "بطاقات الولاء النشطة",
+        kpiCardsCompleted: "أكملوا 10 نقاط VIP",
+        kpiCardsProgress: "بطاقات جارية (1-9)",
+        kpiVisits: "إجمالي الزيارات",
+        kpiLeads: "الأرقام المسجلة",
+        negativeAlertTitle: "مركز اعتراض الشكاوى والتقييمات السلبية (متابعة فورية)",
+        callClient: "اتصال بالعميل",
+        markResolved: "تحديد كمحلول",
+        resolved: "تم الحل ✓",
+        feedTitle: "سجل تقييمات العملاء",
+        exportCSV: "تصدير CSV",
+        rewardTitle: "العرض التشجيعي الحالي",
+        rewardDesc: "الهدية المقدمة للعملاء الراضين",
+        rewardBtn: "تحديث العرض",
+        noReviews: "لا توجد تقييمات في الفترة المحددة.",
+        noLoyalty: "لا توجد بطاقات ولاء في هذه الفترة.",
+        noLeads: "لا توجد أرقام واي فاي مسجلة في هذه الفترة.",
+        stampsProgress: "تقدم النقاط",
+        visits: "زيارات",
+        allRatings: "جميع التقييمات",
+        positiveOnly: "التقييمات الإيجابية (4-5★)",
+        negativeOnly: "الشكاوى السلبية (1-3★)",
+        allMyBranches: (c: number) => `جميع فروعي (${c})`,
+        allBrandsAdmin: "جميع العلامات (المشرف العام)",
+        myFranchise: "امتيازي",
+        allBranchesText: "جميع الفروع",
+        refreshTooltip: "تحديث البيانات",
+        overPeriod: "خلال الفترة المحددة",
+        globalExcellence: "تميز إجمالي",
+        positiveReviewsText: "تقييمات إيجابية",
+        publishedToGoogle: "منشور على خرائط جوجل",
+        privatelyIntercepted: "معترض داخلياً",
+        negativeAlertDesc: (c: number) => `${c} عميل غير راضٍ تم اعتراضهم قبل نشر أي تقييم سلبي على جوجل.`,
+        actionRequired: "إجراء مطلوب",
+        interceptedAlert: "تنبيه معترض",
+        recent: "مؤخراً",
+        clientLabel: "العميل:",
+        notSpecified: "غير متوفر",
+        googleReviewBadge: "تقييم جوجل ✓",
+        privateInterceptBadge: "اعتراض داخلي",
+        telLabel: "الهاتف:",
+        branchLabel: "الفرع:",
+        currentRewardTitle: "الهدية الحالية",
+        rewardPlaceholder: "مثال: قهوة أو كوكيز مجاني 🍪",
+        impactRateTitle: "معدل تأثير سمارت ريفيو",
+        positiveValuedGoogle: "تقييمات إيجابية معززة على جوجل:",
+        negativeContained: "شكاوى سلبية تمت معالجتها داخلياً:",
+        cardHolders: "حاملو بطاقات الولاء",
+        inProgressPts: "جارٍ جمع النقاط (1-9 نقاط)",
+        rewardUnlocked: "مكافأة VIP مفتوحة",
+        recordedVisits: "زيارات مسجلة",
+        digitalCardsList: (c: number) => `قائمة بطاقات الولاء الرقمية (${c})`,
+        thClientPhone: "العميل / الهاتف",
+        thBranch: "الفرع",
+        thProgression: "تقدم النقاط (10 نقاط)",
+        thVisits: "الزيارات",
+        thAiScans: "مسحات الذكاء الاصطناعي",
+        thEmail: "البريد الإلكتروني",
+        thDateCreated: "تاريخ الإنشاء",
+        optInPhoneNumbers: "أرقام مؤكدة الموافقة",
+        mainSource: "المصدر الرئيسي",
+        captivePortal: "بوابة الواي فاي ورمز QR",
+        internetGiftWheel: "اتصال إنترنت + عجلة الجوائز",
+        crmMarketingExport: "تصدير إدارة علاقات العملاء",
+        downloadCsv: "تحميل قاعدة بيانات CSV",
+        readyForBroadcast: "جاهز لحملات الواتساب والرسائل",
+        capturedContactsBase: (c: number) => `قاعدة بيانات جهات الاتصال (${c})`,
+        thPhoneNumber: "رقم الهاتف",
+        thBranchEstablishment: "الفرع / المنشأة",
+        thSource: "المصدر",
+        thCaptureDate: "تاريخ التسجيل",
+        franchiseLabel: "الامتياز",
+        defaultRewardOffer: "قهوة أو كوكيز مجاني ☕",
+        defaultReviewText: "تم تسجيل تقييم العميل",
+        loginErrorCreds: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+        loginErrorServer: "خطأ في الاتصال بالخادم"
+      }
+    };
+    return dict[lang] || dict.en;
+  }, [lang]);
+
+  // Langue persistée
+  const handleSetLang = (l: 'fr' | 'ar' | 'en') => {
+    setLang(l);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('smart_review_lang', l);
+    }
+  };
+
+  // Récupération sécurisée du texte de l'avis
+  const getReviewText = (rev: any): string => {
+    const gText = rev.google_review_text?.trim();
+    const tText = rev.transcription?.trim();
+    if (gText && gText.length > 0) return gText;
+    if (tText && tText.length > 0) return tText;
+    return t.defaultReviewText;
+  };
+
+  // Récompense affichée (traduite si par défaut)
+  const displayRewardOffer = useMemo(() => {
+    if (
+      !rewardOffer ||
+      rewardOffer === '1 Café ou Cookie offert ☕' ||
+      rewardOffer === '1 Free Coffee or Cookie ☕' ||
+      rewardOffer === 'قهوة أو كوكيز مجاني ☕'
+    ) {
+      return t.defaultRewardOffer;
+    }
+    return rewardOffer;
+  }, [rewardOffer, t.defaultRewardOffer]);
+
+  // 1. Restaurer la session locale et la langue au démarrage
   useEffect(() => {
-    const savedUser = localStorage.getItem('smart_review_session_v4');
+    const savedLang = localStorage.getItem('smart_review_lang') as 'fr' | 'ar' | 'en';
+    if (savedLang && ['fr', 'en', 'ar'].includes(savedLang)) {
+      setLang(savedLang);
+    }
+
+    let savedUser = localStorage.getItem('smart_review_session_v4');
+    if (!savedUser) {
+      const oldSession = localStorage.getItem('smart_review_session_v2');
+      if (oldSession) {
+        savedUser = oldSession;
+        localStorage.setItem('smart_review_session_v4', oldSession);
+      }
+    }
     if (savedUser) {
       try {
         const user = JSON.parse(savedUser);
@@ -183,10 +521,10 @@ export default function SmartReviewDashboard() {
         localStorage.setItem('smart_review_session_v4', JSON.stringify(sessionData));
         await fetchAllData(sessionData);
       } else {
-        setLoginError(data?.error || (lang === 'fr' ? 'Email ou mot de passe incorrect' : 'Email or password incorrect'));
+        setLoginError(data?.error || t.loginErrorCreds);
       }
     } catch (err) {
-      setLoginError(lang === 'fr' ? 'Erreur de connexion au serveur' : 'Connection error / خطأ في الاتصال');
+      setLoginError(t.loginErrorServer);
     } finally {
       setIsLoggingIn(false);
     }
@@ -194,6 +532,7 @@ export default function SmartReviewDashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem('smart_review_session_v4');
+    localStorage.removeItem('smart_review_session_v2');
     setCurrentUser(null);
     setEmailInput('');
     setPasswordInput('');
@@ -209,7 +548,7 @@ export default function SmartReviewDashboard() {
     setLoading(true);
 
     try {
-      // 1. Tenter la route interne Next.js directe vers NocoDB (Pas de limite 50 items, temps réel)
+      // 1. Tenter la route interne Next.js directe vers NocoDB
       const directRes = await fetch('/api/dashboard/data', { cache: 'no-store' }).catch(() => null);
       if (directRes && directRes.ok) {
         const directData = await directRes.json();
@@ -268,7 +607,6 @@ export default function SmartReviewDashboard() {
         setRawCoupons(list);
       }
 
-      // E. Leads Wi-Fi
       const resLeads = await fetch(N8N_LEADS_API).catch(() => null);
       if (resLeads && resLeads.ok) {
         const leadsJson = await resLeads.json();
@@ -277,7 +615,7 @@ export default function SmartReviewDashboard() {
       }
 
     } catch (e) {
-      console.error("Erreur lors de la synchronisation NocoDB:", e);
+      console.error("Erreur lors de la synchronisation:", e);
     } finally {
       setLoading(false);
     }
@@ -292,7 +630,6 @@ export default function SmartReviewDashboard() {
     if (!currentUser) return [];
     if (currentUser.role === 'admin') return allRestaurants;
 
-    // Strictement filtré sur la franchise du gérant
     return allRestaurants.filter((r: any) => {
       const restFranchise = getFranchiseKey(r.instance_name);
       return restFranchise === userFranchiseKey;
@@ -302,18 +639,17 @@ export default function SmartReviewDashboard() {
   // Nom d'affichage de l'établissement sélectionné
   const currentBranchLabel = useMemo(() => {
     if (selectedInstance === 'all_franchise') {
-      if (currentUser?.role === 'admin') return "Toutes les enseignes (Super Admin)";
-      const brandName = allowedRestaurants[0]?.restaurant_name?.split('-')[0]?.trim() || "Ma Franchise";
-      return `${brandName} (Toutes les branches)`;
+      if (currentUser?.role === 'admin') return t.allBrandsAdmin;
+      const brandName = allowedRestaurants[0]?.restaurant_name?.split('-')[0]?.trim() || t.myFranchise;
+      return `${brandName} (${t.allBranchesText})`;
     }
     const found = allowedRestaurants.find((r: any) => parseInstanceName(r.instance_name) === selectedInstance);
     return found?.restaurant_name || selectedInstance;
-  }, [selectedInstance, allowedRestaurants, currentUser]);
+  }, [selectedInstance, allowedRestaurants, currentUser, t]);
 
   // 5. Filtrage des données par Date et par Instance
   const filterByDateAndInstance = (items: any[]) => {
     return items.filter((item: any) => {
-      // Filtre d'instance / franchise
       const itemInst = parseInstanceName(item.instance_name);
       if (currentUser?.role !== 'admin') {
         const itemFranchise = getFranchiseKey(itemInst);
@@ -323,10 +659,9 @@ export default function SmartReviewDashboard() {
         if (!isInstanceMatch(itemInst, selectedInstance)) return false;
       }
 
-      // Filtre de date
       if (dateFilter === 'all') return true;
       const rawDate = item.CreatedAt || item.created_at || item.email_captured_at;
-      if (!rawDate) return true; // Conserver les items sans date pour ne pas fausser
+      if (!rawDate) return true;
 
       const itemDate = new Date(rawDate).getTime();
       const now = Date.now();
@@ -391,7 +726,6 @@ export default function SmartReviewDashboard() {
     const avg = totalRev > 0 ? (ratings.reduce((a, b) => a + b, 0) / totalRev).toFixed(1) : "5.0";
     const satisfaction = totalRev > 0 ? Math.round((positiveRev / totalRev) * 100) : 100;
 
-    // Métriques fidélité
     const totalLoyal = filteredLoyalty.length;
     const completedCards = filteredLoyalty.filter((l: any) => Number(l.stamps_count) >= 10).length;
     const inProgressCards = totalLoyal - completedCards;
@@ -465,7 +799,7 @@ export default function SmartReviewDashboard() {
         `"${(getReviewText(r) || "").replace(/"/g, '""')}"`
       ]);
     } else if (type === 'loyalty') {
-      headers = ["ID", "Date Inscription", "Instance", "Telephone", "Email", "Tampons", "Visites Totales", "Scans IA"];
+      headers = ["ID", "Date", "Instance", "Phone", "Email", "Stamps", "Total Visits", "AI Scans"];
       rows = filteredLoyalty.map(l => [
         String(l.Id || ""),
         l.CreatedAt ? new Date(l.CreatedAt).toLocaleDateString() : "",
@@ -477,7 +811,7 @@ export default function SmartReviewDashboard() {
         String(l.ai_scans_count || 0)
       ]);
     } else if (type === 'leads') {
-      headers = ["ID", "Date", "Instance", "Telephone", "Source"];
+      headers = ["ID", "Date", "Instance", "Phone", "Source"];
       rows = filteredLeads.map(l => [
         String(l.Id || ""),
         l.CreatedAt ? new Date(l.CreatedAt).toLocaleDateString() : "",
@@ -498,145 +832,6 @@ export default function SmartReviewDashboard() {
     document.body.removeChild(link);
   };
 
-  // Textes & Dictionnaires Trilingues
-  const t = {
-    fr: {
-      brandSub: "Plateforme Managériale Vision 2030",
-      loginTitle: "Espace Gérant & Franchise",
-      loginDesc: "Connectez-vous pour piloter vos avis, fidélité et clients",
-      email: "Adresse Email",
-      password: "Mot de passe",
-      loginBtn: "Se connecter au Dashboard",
-      logout: "Déconnexion",
-      tabReviews: "Avis & E-Réputation",
-      tabLoyalty: "Cartes de Fidélité & VIP",
-      tabLeads: "Contacts & Leads Wi-Fi",
-      periodToday: "Aujourd'hui",
-      period7d: "7 derniers jours",
-      period30d: "30 jours",
-      periodMonth: "Ce mois-ci",
-      periodAll: "Tout l'historique",
-      periodCustom: "Personnalisé",
-      kpiReviews: "Avis Récoltés",
-      kpiRating: "Note Moyenne",
-      kpiSatisfaction: "Satisfaction Client",
-      kpiGoogleReviews: "Avis 4-5★ Google",
-      kpiNegativeAlerts: "Avis Négatifs Interceptés",
-      kpiCardsTotal: "Cartes Fidélité Actives",
-      kpiCardsCompleted: "Paliers 10/10 VIP",
-      kpiCardsProgress: "Cartes en Cours (1-9)",
-      kpiVisits: "Visites Cumulées",
-      kpiLeads: "Contacts Enregistrés",
-      negativeAlertTitle: "Centre d'Interception des Insatisfactions (Alerte Immédiate)",
-      callClient: "Appeler le client",
-      markResolved: "Marquer comme traité",
-      resolved: "Traité ✓",
-      feedTitle: "Flux des Avis Clients",
-      exportCSV: "Exporter CSV",
-      rewardTitle: "Offre Cadeau Active",
-      rewardDesc: "Récompense offerte aux clients satisfaits",
-      rewardBtn: "Mettre à jour",
-      noReviews: "Aucun avis enregistré sur la période sélectionnée.",
-      noLoyalty: "Aucune carte de fidélité active sur cette période.",
-      noLeads: "Aucun lead Wi-Fi capturé sur cette période.",
-      stampsProgress: "Progression des tampons",
-      visits: "visites",
-      allRatings: "Toutes les notes",
-      positiveOnly: "Avis Positifs (4-5★)",
-      negativeOnly: "Avis Négatifs (1-3★)"
-    },
-    en: {
-      brandSub: "Vision 2030 Management Suite",
-      loginTitle: "Manager & Franchise Portal",
-      loginDesc: "Sign in to monitor customer reviews, loyalty cards, and leads",
-      email: "Email Address",
-      password: "Password",
-      loginBtn: "Sign In to Dashboard",
-      logout: "Log Out",
-      tabReviews: "Reviews & Reputation",
-      tabLoyalty: "Digital Loyalty Cards",
-      tabLeads: "Wi-Fi Leads & CRM",
-      periodToday: "Today",
-      period7d: "Last 7 days",
-      period30d: "Last 30 days",
-      periodMonth: "This Month",
-      periodAll: "All Time",
-      periodCustom: "Custom Range",
-      kpiReviews: "Total Reviews",
-      kpiRating: "Average Rating",
-      kpiSatisfaction: "Customer Satisfaction",
-      kpiGoogleReviews: "4-5★ Google Reviews",
-      kpiNegativeAlerts: "Intercepted Negative Reviews",
-      kpiCardsTotal: "Active Loyalty Cards",
-      kpiCardsCompleted: "Completed 10/10 VIPs",
-      kpiCardsProgress: "In-Progress Cards (1-9)",
-      kpiVisits: "Total Visits",
-      kpiLeads: "Captured Leads",
-      negativeAlertTitle: "Negative Feedback Interception Hub (Action Required)",
-      callClient: "Call Customer",
-      markResolved: "Mark as Resolved",
-      resolved: "Resolved ✓",
-      feedTitle: "Customer Reviews Stream",
-      exportCSV: "Export CSV",
-      rewardTitle: "Active Reward Offer",
-      rewardDesc: "Gift offered to satisfied customers",
-      rewardBtn: "Update Offer",
-      noReviews: "No reviews found for this selected timeframe.",
-      noLoyalty: "No active loyalty cards in this period.",
-      noLeads: "No Wi-Fi leads captured in this period.",
-      stampsProgress: "Stamps Progress",
-      visits: "visits",
-      allRatings: "All Ratings",
-      positiveOnly: "Positive Reviews (4-5★)",
-      negativeOnly: "Negative Reviews (1-3★)"
-    },
-    ar: {
-      brandSub: "منصة إدارة المطاعم والمقاهي • رؤية 2030",
-      loginTitle: "بوابة إدارة الفروع والامتيازات",
-      loginDesc: "تسجيل الدخول لمتابعة تقييمات العملاء وبطاقات الولاء والعملاء المحتملين",
-      email: "البريد الإلكتروني",
-      password: "كلمة المرور",
-      loginBtn: "تسجيل الدخول للوحة التحكم",
-      logout: "تسجيل الخروج",
-      tabReviews: "التقييمات والسمعة",
-      tabLoyalty: "بطاقات الولاء والجوائز",
-      tabLeads: "أرقام الواي فاي والتواصل",
-      periodToday: "اليوم",
-      period7d: "آخر 7 أيام",
-      period30d: "آخر 30 يوم",
-      periodMonth: "هذا الشهر",
-      periodAll: "كامل السجل",
-      periodCustom: "فترة مخصصة",
-      kpiReviews: "إجمالي التقييمات",
-      kpiRating: "متوسط التقييم",
-      kpiSatisfaction: "نسبة الرضا",
-      kpiGoogleReviews: "تقييمات جوجل (4-5★)",
-      kpiNegativeAlerts: "الشكاوى المعترضة (1-3★)",
-      kpiCardsTotal: "بطاقات الولاء النشطة",
-      kpiCardsCompleted: "أكملوا 10 نقاط VIP",
-      kpiCardsProgress: "بطاقات جارية (1-9)",
-      kpiVisits: "إجمالي الزيارات",
-      kpiLeads: "الأرقام المسجلة",
-      negativeAlertTitle: "مركز اعتراض الشكاوى والتقييمات السلبية (متابعة فورية)",
-      callClient: "اتصال بالعميل",
-      markResolved: "تحديد كمحلول",
-      resolved: "تم الحل ✓",
-      feedTitle: "سجل تقييمات العملاء",
-      exportCSV: "تصدير CSV",
-      rewardTitle: "العرض التشجيعي الحالي",
-      rewardDesc: "الهدية المقدمة للعملاء الراضين",
-      rewardBtn: "تحديث العرض",
-      noReviews: "لا توجد تقييمات في الفترة المحددة.",
-      noLoyalty: "لا توجد بطاقات ولاء في هذه الفترة.",
-      noLeads: "لا توجد أرقام واي فاي مسجلة في هذه الفترة.",
-      stampsProgress: "تقدم النقاط",
-      visits: "زيارات",
-      allRatings: "جميع التقييمات",
-      positiveOnly: "التقييمات الإيجابية (4-5★)",
-      negativeOnly: "الشكاوى السلبية (1-3★)"
-    }
-  }[lang];
-
   // ================= FORMULAIRE DE CONNEXION =================
   if (!currentUser) {
     return (
@@ -644,13 +839,11 @@ export default function SmartReviewDashboard() {
         dir={lang === 'ar' ? 'rtl' : 'ltr'}
         className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center p-4 font-['Cairo',sans-serif] relative overflow-hidden"
       >
-        {/* Lueur d'ambiance */}
         <div className="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="w-full max-w-md bg-zinc-900/90 backdrop-blur-xl border border-zinc-800/80 rounded-3xl p-8 space-y-6 shadow-2xl relative z-10">
           
-          {/* Header & Langues */}
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
@@ -658,19 +851,19 @@ export default function SmartReviewDashboard() {
             </div>
             <div className="flex items-center gap-1 bg-zinc-950/60 p-1 rounded-xl border border-zinc-800 text-xs font-bold">
               <button 
-                onClick={() => setLang('fr')} 
+                onClick={() => handleSetLang('fr')} 
                 className={`px-2 py-1 rounded-lg transition ${lang === 'fr' ? 'bg-amber-500 text-zinc-950' : 'text-zinc-400 hover:text-zinc-200'}`}
               >
                 FR
               </button>
               <button 
-                onClick={() => setLang('en')} 
+                onClick={() => handleSetLang('en')} 
                 className={`px-2 py-1 rounded-lg transition ${lang === 'en' ? 'bg-amber-500 text-zinc-950' : 'text-zinc-400 hover:text-zinc-200'}`}
               >
                 EN
               </button>
               <button 
-                onClick={() => setLang('ar')} 
+                onClick={() => handleSetLang('ar')} 
                 className={`px-2 py-1 rounded-lg transition ${lang === 'ar' ? 'bg-amber-500 text-zinc-950' : 'text-zinc-400 hover:text-zinc-200'}`}
               >
                 عربي
@@ -785,13 +978,13 @@ export default function SmartReviewDashboard() {
                     </span>
                   </div>
                   <p className="text-xs text-zinc-400">
-                    {currentUser.email} • {currentUser.role === 'admin' ? 'Super Admin' : `Franchise : ${userFranchiseKey.toUpperCase()}`}
+                    {currentUser.email} • {currentUser.role === 'admin' ? 'Super Admin' : `${t.franchiseLabel} : ${userFranchiseKey.toUpperCase()}`}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Sélecteur de Branche (Strictement cloisonné à la Franchise) & Actions */}
+            {/* Sélecteur de Branche & Actions */}
             <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
               
               {/* Sélecteur de Branche */}
@@ -806,7 +999,7 @@ export default function SmartReviewDashboard() {
                         : 'bg-slate-100 border-slate-200 text-slate-800 focus:border-amber-500'
                     }`}
                   >
-                    <option value="all_franchise">Toutes mes branches ({allowedRestaurants.length})</option>
+                    <option value="all_franchise">{t.allMyBranches(allowedRestaurants.length)}</option>
                     {allowedRestaurants.map((r: any) => (
                       <option key={r.Id || r.instance_name} value={parseInstanceName(r.instance_name)}>
                         {r.restaurant_name || r.instance_name}
@@ -828,7 +1021,7 @@ export default function SmartReviewDashboard() {
                 className={`p-2.5 rounded-xl border transition ${
                   isDarkMode ? 'bg-zinc-950 border-zinc-800 hover:text-amber-400' : 'bg-slate-100 border-slate-200 hover:text-amber-600'
                 }`}
-                title="Actualiser les données"
+                title={t.refreshTooltip}
               >
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-amber-400' : ''}`} />
               </button>
@@ -850,7 +1043,7 @@ export default function SmartReviewDashboard() {
                 {(['fr', 'en', 'ar'] as const).map(l => (
                   <button
                     key={l}
-                    onClick={() => setLang(l)}
+                    onClick={() => handleSetLang(l)}
                     className={`px-2 py-1 rounded-lg uppercase transition ${
                       lang === l 
                         ? 'bg-amber-500 text-zinc-950 font-black' 
@@ -878,7 +1071,7 @@ export default function SmartReviewDashboard() {
           <div className="mt-5 pt-4 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
               <Calendar className="w-4 h-4 text-amber-500 flex-shrink-0" />
-              <span className="text-xs font-bold text-zinc-400 hidden sm:inline">Période :</span>
+              <span className="text-xs font-bold text-zinc-400 hidden sm:inline">{t.periodLabel}</span>
               
               <div className={`flex items-center p-1 rounded-xl border text-xs font-semibold ${
                 isDarkMode ? 'bg-zinc-950 border-zinc-800' : 'bg-slate-100 border-slate-200'
@@ -1005,7 +1198,7 @@ export default function SmartReviewDashboard() {
                   <MessageSquare className="w-4 h-4 text-amber-500" />
                 </div>
                 <p className="text-3xl font-black mt-3">{stats.totalRev}</p>
-                <span className="text-[11px] text-zinc-500 mt-1 block">Sur la période</span>
+                <span className="text-[11px] text-zinc-500 mt-1 block">{t.overPeriod}</span>
               </div>
 
               <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
@@ -1014,7 +1207,7 @@ export default function SmartReviewDashboard() {
                   <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
                 </div>
                 <p className="text-3xl font-black mt-3 text-amber-400">{stats.avgRating} <span className="text-sm text-zinc-500">/ 5</span></p>
-                <span className="text-[11px] text-emerald-400 font-bold mt-1 block">Excellence globale</span>
+                <span className="text-[11px] text-emerald-400 font-bold mt-1 block">{t.globalExcellence}</span>
               </div>
 
               <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
@@ -1023,7 +1216,7 @@ export default function SmartReviewDashboard() {
                   <ThumbsUp className="w-4 h-4 text-emerald-400" />
                 </div>
                 <p className="text-3xl font-black mt-3 text-emerald-400">{stats.satisfaction}</p>
-                <span className="text-[11px] text-zinc-500 mt-1 block">{stats.positiveRev} avis positifs</span>
+                <span className="text-[11px] text-zinc-500 mt-1 block">{stats.positiveRev} {t.positiveReviewsText}</span>
               </div>
 
               <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
@@ -1032,7 +1225,7 @@ export default function SmartReviewDashboard() {
                   <ArrowUpRight className="w-4 h-4 text-blue-400" />
                 </div>
                 <p className="text-3xl font-black mt-3 text-blue-400">{stats.positiveRev}</p>
-                <span className="text-[11px] text-blue-400/80 font-bold mt-1 block">Publiés vers Google Maps</span>
+                <span className="text-[11px] text-blue-400/80 font-bold mt-1 block">{t.publishedToGoogle}</span>
               </div>
 
               <div className={`p-5 rounded-3xl border transition shadow-sm ${
@@ -1045,7 +1238,7 @@ export default function SmartReviewDashboard() {
                   <AlertTriangle className="w-4 h-4 text-rose-500" />
                 </div>
                 <p className="text-3xl font-black mt-3 text-rose-500">{negativeReviews.length}</p>
-                <span className="text-[11px] text-rose-400 font-bold mt-1 block">Interceptés en privé</span>
+                <span className="text-[11px] text-rose-400 font-bold mt-1 block">{t.privatelyIntercepted}</span>
               </div>
             </div>
 
@@ -1062,12 +1255,12 @@ export default function SmartReviewDashboard() {
                     <div>
                       <h2 className="font-black text-base md:text-lg text-rose-500">{t.negativeAlertTitle}</h2>
                       <p className="text-xs text-rose-300/80">
-                        {negativeReviews.length} client(s) insatisfait(s) intercepté(s) avant toute publication publique sur Google Maps.
+                        {t.negativeAlertDesc(negativeReviews.length)}
                       </p>
                     </div>
                   </div>
                   <span className="text-xs font-black bg-rose-500 text-zinc-950 px-3 py-1 rounded-full uppercase tracking-wider">
-                    Action Requise
+                    {t.actionRequired}
                   </span>
                 </div>
 
@@ -1085,10 +1278,10 @@ export default function SmartReviewDashboard() {
                       >
                         <div className="flex justify-between items-start">
                           <span className="bg-rose-500/10 text-rose-400 font-extrabold text-xs px-3 py-1 rounded-lg border border-rose-500/20 flex items-center gap-1">
-                            ⭐️ {rev.rating || 2}/5 • Alerte Interceptée
+                            ⭐️ {rev.rating || 2}/5 • {t.interceptedAlert}
                           </span>
                           <span className="text-[11px] text-zinc-500">
-                            {rev.CreatedAt ? new Date(rev.CreatedAt).toLocaleDateString() : 'Récemment'}
+                            {rev.CreatedAt ? new Date(rev.CreatedAt).toLocaleDateString() : t.recent}
                           </span>
                         </div>
 
@@ -1098,8 +1291,8 @@ export default function SmartReviewDashboard() {
 
                         <div className="pt-2 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-3">
                           <div className="text-xs">
-                            <span className="text-zinc-500">Client : </span>
-                            <span className="font-mono font-bold text-zinc-300">+{rev.client_phone?.trim() || "Non renseigné"}</span>
+                            <span className="text-zinc-500">{t.clientLabel} </span>
+                            <span className="font-mono font-bold text-zinc-300">+{rev.client_phone?.trim() || t.notSpecified}</span>
                           </div>
 
                           <div className="flex items-center gap-2">
@@ -1197,12 +1390,12 @@ export default function SmartReviewDashboard() {
                                   ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
                                   : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
                               }`}>
-                                {isGood ? 'Google Review ✓' : 'Interception Privée'}
+                                {isGood ? t.googleReviewBadge : t.privateInterceptBadge}
                               </span>
                             </div>
 
                             <span className="text-[11px] text-zinc-500 font-mono">
-                              {rev.CreatedAt ? new Date(rev.CreatedAt).toLocaleDateString() : 'Recent'}
+                              {rev.CreatedAt ? new Date(rev.CreatedAt).toLocaleDateString() : t.recent}
                             </span>
                           </div>
 
@@ -1211,8 +1404,8 @@ export default function SmartReviewDashboard() {
                           </p>
 
                           <div className="flex justify-between items-center text-xs text-zinc-500 pt-1">
-                            <span>Tél: <span className="font-mono text-zinc-400">+{rev.client_phone || 'Non précisé'}</span></span>
-                            <span>Branche: <span className="font-bold text-amber-500/80">{parseInstanceName(rev.instance_name)}</span></span>
+                            <span>{t.telLabel} <span className="font-mono text-zinc-400">+{rev.client_phone || t.notSpecified}</span></span>
+                            <span>{t.branchLabel} <span className="font-bold text-amber-500/80">{parseInstanceName(rev.instance_name)}</span></span>
                           </div>
                         </div>
                       );
@@ -1237,8 +1430,8 @@ export default function SmartReviewDashboard() {
                   </div>
 
                   <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-center">
-                    <p className="text-xs text-amber-500 font-bold uppercase tracking-wider">Cadeau Actuel</p>
-                    <p className="text-base font-black text-amber-400 mt-1">{rewardOffer}</p>
+                    <p className="text-xs text-amber-500 font-bold uppercase tracking-wider">{t.currentRewardTitle}</p>
+                    <p className="text-base font-black text-amber-400 mt-1">{displayRewardOffer}</p>
                   </div>
 
                   <form onSubmit={handleUpdateReward} className="space-y-2">
@@ -1246,7 +1439,7 @@ export default function SmartReviewDashboard() {
                       type="text"
                       value={newReward}
                       onChange={(e) => setNewReward(e.target.value)}
-                      placeholder="Ex: 1 Cookie ou Boisson offerte 🍪"
+                      placeholder={t.rewardPlaceholder}
                       className={`w-full text-xs px-3.5 py-2.5 rounded-xl border focus:outline-none focus:border-amber-500 transition ${
                         isDarkMode ? 'bg-zinc-950 border-zinc-800 text-zinc-200' : 'bg-slate-100 border-slate-200 text-slate-800'
                       }`}
@@ -1265,10 +1458,10 @@ export default function SmartReviewDashboard() {
                 <div className={`p-6 rounded-3xl border space-y-3 ${
                   isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200 shadow-sm'
                 }`}>
-                  <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Taux d'impact Smart Review</h4>
+                  <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">{t.impactRateTitle}</h4>
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between text-zinc-300">
-                      <span>Avis positifs valorisés sur Google :</span>
+                      <span>{t.positiveValuedGoogle}</span>
                       <span className="font-bold text-emerald-400">{stats.positiveRev}</span>
                     </div>
                     <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
@@ -1279,7 +1472,7 @@ export default function SmartReviewDashboard() {
                     </div>
 
                     <div className="flex justify-between text-zinc-300 pt-2">
-                      <span>Avis négatifs étouffés en interne :</span>
+                      <span>{t.negativeContained}</span>
                       <span className="font-bold text-rose-400">{stats.negativeRev}</span>
                     </div>
                     <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
@@ -1310,7 +1503,7 @@ export default function SmartReviewDashboard() {
                   <CreditCard className="w-4 h-4 text-amber-500" />
                 </div>
                 <p className="text-3xl font-black mt-3">{stats.totalLoyal}</p>
-                <span className="text-[11px] text-zinc-500 mt-1 block">Clients porteurs d'une carte</span>
+                <span className="text-[11px] text-zinc-500 mt-1 block">{t.cardHolders}</span>
               </div>
 
               <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
@@ -1319,7 +1512,7 @@ export default function SmartReviewDashboard() {
                   <TrendingUp className="w-4 h-4 text-amber-400" />
                 </div>
                 <p className="text-3xl font-black mt-3 text-amber-400">{stats.inProgressCards}</p>
-                <span className="text-[11px] text-amber-500/80 font-bold mt-1 block">En cours de cumul (1-9 pts)</span>
+                <span className="text-[11px] text-amber-500/80 font-bold mt-1 block">{t.inProgressPts}</span>
               </div>
 
               <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
@@ -1328,7 +1521,7 @@ export default function SmartReviewDashboard() {
                   <Award className="w-4 h-4 text-emerald-400" />
                 </div>
                 <p className="text-3xl font-black mt-3 text-emerald-400">{stats.completedCards}</p>
-                <span className="text-[11px] text-emerald-400 font-bold mt-1 block">Récompense VIP débloquée</span>
+                <span className="text-[11px] text-emerald-400 font-bold mt-1 block">{t.rewardUnlocked}</span>
               </div>
 
               <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
@@ -1337,7 +1530,7 @@ export default function SmartReviewDashboard() {
                   <Sparkles className="w-4 h-4 text-purple-400" />
                 </div>
                 <p className="text-3xl font-black mt-3 text-purple-400">{stats.totalVisits}</p>
-                <span className="text-[11px] text-zinc-500 mt-1 block">Passages enregistrés</span>
+                <span className="text-[11px] text-zinc-500 mt-1 block">{t.recordedVisits}</span>
               </div>
             </div>
 
@@ -1348,14 +1541,14 @@ export default function SmartReviewDashboard() {
               <div className="p-5 border-b border-zinc-800/80 flex justify-between items-center">
                 <h3 className="font-bold text-sm flex items-center gap-2">
                   <CreditCard className="w-4 h-4 text-amber-500" />
-                  Liste des Cartes Digitales ({filteredLoyalty.length})
+                  {t.digitalCardsList(filteredLoyalty.length)}
                 </h3>
                 <button
                   onClick={() => exportCSV('loyalty')}
                   className="text-xs text-amber-500 font-bold hover:underline flex items-center gap-1 cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" />
-                  Exporter CSV
+                  {t.exportCSV}
                 </button>
               </div>
 
@@ -1368,13 +1561,13 @@ export default function SmartReviewDashboard() {
                   <table className="w-full text-left text-xs">
                     <thead className={`border-b ${isDarkMode ? 'bg-zinc-950/60 border-zinc-800 text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-600'}`}>
                       <tr>
-                        <th className="p-4 font-bold">Client / Téléphone</th>
-                        <th className="p-4 font-bold">Branche</th>
-                        <th className="p-4 font-bold">Progression Tampons (10 pts)</th>
-                        <th className="p-4 font-bold">Visites</th>
-                        <th className="p-4 font-bold">Scans IA</th>
-                        <th className="p-4 font-bold">Email</th>
-                        <th className="p-4 font-bold">Date Création</th>
+                        <th className="p-4 font-bold">{t.thClientPhone}</th>
+                        <th className="p-4 font-bold">{t.thBranch}</th>
+                        <th className="p-4 font-bold">{t.thProgression}</th>
+                        <th className="p-4 font-bold">{t.thVisits}</th>
+                        <th className="p-4 font-bold">{t.thAiScans}</th>
+                        <th className="p-4 font-bold">{t.thEmail}</th>
+                        <th className="p-4 font-bold">{t.thDateCreated}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-800/60">
@@ -1416,7 +1609,7 @@ export default function SmartReviewDashboard() {
                               {item.email || "—"}
                             </td>
                             <td className="p-4 text-zinc-500">
-                              {item.CreatedAt ? new Date(item.CreatedAt).toLocaleDateString() : 'Récemment'}
+                              {item.CreatedAt ? new Date(item.CreatedAt).toLocaleDateString() : t.recent}
                             </td>
                           </tr>
                         );
@@ -1438,25 +1631,25 @@ export default function SmartReviewDashboard() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
                 <div className="flex justify-between items-center text-xs text-zinc-400">
-                  <span>Total Leads Capturés</span>
+                  <span>{t.kpiLeads}</span>
                   <Users className="w-4 h-4 text-emerald-400" />
                 </div>
                 <p className="text-3xl font-black mt-3 text-emerald-400">{filteredLeads.length}</p>
-                <span className="text-[11px] text-zinc-500 mt-1 block">Numéros opt-in conformes</span>
+                <span className="text-[11px] text-zinc-500 mt-1 block">{t.optInPhoneNumbers}</span>
               </div>
 
               <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
                 <div className="flex justify-between items-center text-xs text-zinc-400">
-                  <span>Source Principale</span>
+                  <span>{t.mainSource}</span>
                   <Wifi className="w-4 h-4 text-amber-500" />
                 </div>
-                <p className="text-xl font-black mt-3 text-zinc-200">Portail Captif Wi-Fi & QR</p>
-                <span className="text-[11px] text-zinc-500 mt-1 block">Accès Internet + Roue Cadeau</span>
+                <p className="text-xl font-black mt-3 text-zinc-200">{t.captivePortal}</p>
+                <span className="text-[11px] text-zinc-500 mt-1 block">{t.internetGiftWheel}</span>
               </div>
 
               <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
                 <div className="flex justify-between items-center text-xs text-zinc-400">
-                  <span>Export CRM Marketing</span>
+                  <span>{t.crmMarketingExport}</span>
                   <Download className="w-4 h-4 text-blue-400" />
                 </div>
                 <button
@@ -1464,9 +1657,9 @@ export default function SmartReviewDashboard() {
                   className="mt-3 w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-xs py-2 rounded-xl transition shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Download className="w-3.5 h-3.5" />
-                  Télécharger la base CSV
+                  {t.downloadCsv}
                 </button>
-                <span className="text-[10px] text-zinc-500 mt-1 text-center block">Prêt pour WhatsApp Broadcast & SMS</span>
+                <span className="text-[10px] text-zinc-500 mt-1 text-center block">{t.readyForBroadcast}</span>
               </div>
             </div>
 
@@ -1477,7 +1670,7 @@ export default function SmartReviewDashboard() {
               <div className="p-5 border-b border-zinc-800/80 flex justify-between items-center">
                 <h3 className="font-bold text-sm flex items-center gap-2">
                   <Wifi className="w-4 h-4 text-emerald-400" />
-                  Base Contacts Capturés ({filteredLeads.length})
+                  {t.capturedContactsBase(filteredLeads.length)}
                 </h3>
               </div>
 
@@ -1490,10 +1683,10 @@ export default function SmartReviewDashboard() {
                   <table className="w-full text-left text-xs">
                     <thead className={`border-b ${isDarkMode ? 'bg-zinc-950/60 border-zinc-800 text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-600'}`}>
                       <tr>
-                        <th className="p-4 font-bold">Numéro de Téléphone</th>
-                        <th className="p-4 font-bold">Branche / Établissement</th>
-                        <th className="p-4 font-bold">Source</th>
-                        <th className="p-4 font-bold">Date de Capture</th>
+                        <th className="p-4 font-bold">{t.thPhoneNumber}</th>
+                        <th className="p-4 font-bold">{t.thBranchEstablishment}</th>
+                        <th className="p-4 font-bold">{t.thSource}</th>
+                        <th className="p-4 font-bold">{t.thCaptureDate}</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-800/60">
@@ -1511,7 +1704,7 @@ export default function SmartReviewDashboard() {
                             </span>
                           </td>
                           <td className="p-4 text-zinc-400">
-                            {lead.CreatedAt ? new Date(lead.CreatedAt).toLocaleString() : "Récemment"}
+                            {lead.CreatedAt ? new Date(lead.CreatedAt).toLocaleString() : t.recent}
                           </td>
                         </tr>
                       ))}
