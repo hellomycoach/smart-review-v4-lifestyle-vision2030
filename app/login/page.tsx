@@ -209,14 +209,36 @@ export default function SmartReviewDashboard() {
     setLoading(true);
 
     try {
-      // A. Restaurants
+      // 1. Tenter la route interne Next.js directe vers NocoDB (Pas de limite 50 items, temps réel)
+      const directRes = await fetch('/api/dashboard/data', { cache: 'no-store' }).catch(() => null);
+      if (directRes && directRes.ok) {
+        const directData = await directRes.json();
+        if (directData && directData.success) {
+          if (Array.isArray(directData.reviews)) setRawReviews(directData.reviews);
+          if (Array.isArray(directData.loyalty)) setRawLoyalty(directData.loyalty);
+          if (Array.isArray(directData.coupons)) setRawCoupons(directData.coupons);
+          if (Array.isArray(directData.leads)) setRawLeads(directData.leads);
+          if (Array.isArray(directData.restaurants)) {
+            setAllRestaurants(directData.restaurants);
+            const currentMatch = directData.restaurants.find((r: any) => 
+              parseInstanceName(r.instance_name).toLowerCase() === user.instance_name.toLowerCase()
+            );
+            if (currentMatch && currentMatch.reward_offer) {
+              setRewardOffer(currentMatch.reward_offer);
+            }
+          }
+          setLoading(false);
+          return;
+        }
+      }
+
+      // 2. Fallback vers les webhooks n8n si la route directe est indisponible
       const resRest = await fetch(N8N_RESTAURANTS_API).catch(() => null);
       if (resRest && resRest.ok) {
         const restJson = await resRest.json();
         const restList = Array.isArray(restJson) ? restJson : (restJson.list || []);
         setAllRestaurants(restList);
 
-        // Trouver le restaurant courant pour l'offre cadeau
         const currentMatch = restList.find((r: any) => 
           parseInstanceName(r.instance_name).toLowerCase() === user.instance_name.toLowerCase()
         );
@@ -225,7 +247,6 @@ export default function SmartReviewDashboard() {
         }
       }
 
-      // B. Avis Clients
       const resRev = await fetch(N8N_REVIEWS_API).catch(() => null);
       if (resRev && resRev.ok) {
         const revJson = await resRev.json();
@@ -233,7 +254,6 @@ export default function SmartReviewDashboard() {
         setRawReviews(list);
       }
 
-      // C. Cartes de Fidélité
       const resFid = await fetch(N8N_FIDELITE_API).catch(() => null);
       if (resFid && resFid.ok) {
         const fidJson = await resFid.json();
@@ -241,7 +261,6 @@ export default function SmartReviewDashboard() {
         setRawLoyalty(list);
       }
 
-      // D. Coupons Gagnés
       const resCoup = await fetch(N8N_COUPONS_API).catch(() => null);
       if (resCoup && resCoup.ok) {
         const coupJson = await resCoup.json();
