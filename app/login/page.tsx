@@ -1,19 +1,24 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Star, MessageSquare, AlertTriangle, Gift, Phone, CheckCircle, 
   Sun, Moon, Globe, RefreshCw, Check, LogOut, Lock, Mail, Eye, EyeOff,
-  Users, Download, Wifi
+  Users, Download, Wifi, Calendar, CreditCard, Award, ChevronDown, 
+  Filter, Building2, Sparkles, ThumbsUp, ExternalLink, ArrowUpRight,
+  TrendingUp, Clock
 } from 'lucide-react';
 
-const N8N_REVIEWS_API = "https://n8n.srv821341.hstgr.cloud/webhook/dashboard-data-v2";
+// ================= ENDPOINTS N8N =================
+const N8N_REVIEWS_API = "https://n8n.srv821341.hstgr.cloud/webhook/dashboard-data";
 const N8N_LOGIN_API = "https://n8n.srv821341.hstgr.cloud/webhook/login-manager";
-const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants-v2";
+const N8N_RESTAURANTS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-restaurants";
 const N8N_UPDATE_REWARD_API = "https://n8n.srv821341.hstgr.cloud/webhook/update-reward-v2";
 const N8N_LEADS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-leads-v2";
+const N8N_FIDELITE_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-fidelite-v3";
+const N8N_COUPONS_API = "https://n8n.srv821341.hstgr.cloud/webhook/get-coupons-v3";
 
-// Extraction propre des menus déroulants NocoDB
+// Extraction propre des noms d'instances
 const parseInstanceName = (raw: any): string => {
   if (!raw) return "";
   if (typeof raw === 'string') return raw.trim();
@@ -30,31 +35,50 @@ const parseInstanceName = (raw: any): string => {
   return "";
 };
 
-// Comparateur souple de marque (ex: "bella_italia_ryadh" correspond à "bella_italia_riyadh")
-const isInstanceMatch = (inst1: string, inst2: string): boolean => {
-  const clean1 = parseInstanceName(inst1).toLowerCase().trim();
-  const clean2 = parseInstanceName(inst2).toLowerCase().trim();
-  if (!clean1 || !clean2) return true;
-  if (clean1 === clean2) return true;
-
-  // Comparer le premier mot-clé de la marque (ex: "bella")
-  const key1 = clean1.split('_')[0];
-  const key2 = clean2.split('_')[0];
-  if (key1 && key2 && key1.length >= 3 && key1 === key2) return true;
-
-  return clean1.includes(clean2) || clean2.includes(clean1);
+// Extraction de la clé de franchise pour isolation stricte
+// ex: "bos_cafe_moq" -> "bos_cafe", "bella_italia_riyadh" -> "bella_italia"
+const getFranchiseKey = (instance: string): string => {
+  const clean = parseInstanceName(instance).toLowerCase().trim();
+  if (!clean) return "";
+  
+  if (clean.startsWith('bos_cafe') || clean.includes('bos')) return 'bos_cafe';
+  if (clean.startsWith('bella_italia') || clean.includes('bella')) return 'bella_italia';
+  if (clean.startsWith('barns')) return 'barns';
+  if (clean.startsWith('halim')) return 'halim_cafe';
+  if (clean.startsWith('riwaq') || clean.includes('qnl')) return 'riwaq';
+  if (clean.startsWith('doha_pilot') || clean.includes('lusail')) return 'doha_pilot';
+  if (clean.startsWith('smart_review') || clean.includes('elixir')) return 'smart_review_ksa';
+  
+  // Repli : les 2 premiers segments
+  const parts = clean.split('_');
+  return parts.length > 1 ? `${parts[0]}_${parts[1]}` : parts[0];
 };
 
-// Affiche google_review_text OU transcription
+// Vérifie si une instance correspond à un filtre (exact ou franchise)
+const isInstanceMatch = (itemInstance: string, targetInstance: string, targetFranchise?: string): boolean => {
+  const cleanItem = parseInstanceName(itemInstance).toLowerCase().trim();
+  const cleanTarget = parseInstanceName(targetInstance).toLowerCase().trim();
+  
+  if (!cleanItem) return false;
+  if (cleanTarget && cleanItem === cleanTarget) return true;
+  
+  if (targetFranchise) {
+    return getFranchiseKey(cleanItem) === targetFranchise;
+  }
+  return cleanItem.includes(cleanTarget) || cleanTarget.includes(cleanItem);
+};
+
+// Récupération sécurisée du texte de l'avis
 const getReviewText = (rev: any): string => {
   const gText = rev.google_review_text?.trim();
   const tText = rev.transcription?.trim();
-
   if (gText && gText.length > 0) return gText;
   if (tText && tText.length > 0) return tText;
-
-  return "شكوَى من العميل (ملاحظة صوتية) / Customer complaint";
+  return "Avis client enregistré / ملاحظة صوتية من العميل";
 };
+
+// Types de filtres temporels
+type DateFilterKey = 'today' | '7d' | '30d' | 'month' | 'all' | 'custom';
 
 export default function SmartReviewDashboard() {
   // Session Utilisateur
@@ -67,216 +91,336 @@ export default function SmartReviewDashboard() {
 
   // Thème, Langue & Onglets
   const [isDarkMode, setIsDarkMode] = useState(true);
-  const [lang, setLang] = useState<'ar' | 'en'>('ar');
-  const [activeTab, setActiveTab] = useState<'reviews' | 'leads'>('reviews');
+  const [lang, setLang] = useState<'fr' | 'ar' | 'en'>('fr');
+  const [activeTab, setActiveTab] = useState<'reviews' | 'loyalty' | 'leads'>('reviews');
   const [loading, setLoading] = useState(false);
-  
-  // Données Restaurant, Avis & Leads
-  const [restaurant, setRestaurant] = useState<any>(null);
-  const [reviews, setReviews] = useState<any[]>([]);
-  const [leads, setLeads] = useState<any[]>([]);
-  const [stats, setStats] = useState({
-    totalReviews: 0,
-    avgRating: "5.0",
-    satisfactionRate: "100%",
-    rewardsCount: 0,
-  });
 
-  const [rewardOffer, setRewardOffer] = useState('1 Café offert ☕');
-  const [newReward, setNewReward] = useState('');
-  const [isUpdatingReward, setIsUpdatingReward] = useState(false);
+  // Données Brutes
+  const [allRestaurants, setAllRestaurants] = useState<any[]>([]);
+  const [selectedInstance, setSelectedInstance] = useState<string>('all_franchise');
+  const [rawReviews, setRawReviews] = useState<any[]>([]);
+  const [rawLoyalty, setRawLoyalty] = useState<any[]>([]);
+  const [rawCoupons, setRawCoupons] = useState<any[]>([]);
+  const [rawLeads, setRawLeads] = useState<any[]>([]);
+
+  // Filtres Temporels
+  const [dateFilter, setDateFilter] = useState<DateFilterKey>('30d');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
+
+  // Filtres spécifiques avis
+  const [ratingFilter, setRatingFilter] = useState<'all' | 'positive' | 'negative' | '5' | '4' | '3' | '2' | '1'>('all');
+
+  // Gestion des avis négatifs résolus (sauvegardé en local)
   const [resolvedIssues, setResolvedIssues] = useState<number[]>([]);
 
-  // Restaurer la session locale au chargement
+  // Gestion de l'offre récompense
+  const [rewardOffer, setRewardOffer] = useState('1 Café ou Cookie offert ☕');
+  const [newReward, setNewReward] = useState('');
+  const [isUpdatingReward, setIsUpdatingReward] = useState(false);
+
+  // 1. Restaurer la session locale au démarrage
   useEffect(() => {
-    const savedUser = localStorage.getItem('smart_review_session_v2');
+    const savedUser = localStorage.getItem('smart_review_session_v4');
     if (savedUser) {
-      const user = JSON.parse(savedUser);
-      setCurrentUser(user);
-      fetchLiveNocoDB(user.instance_name);
+      try {
+        const user = JSON.parse(savedUser);
+        setCurrentUser(user);
+        setSelectedInstance(user.instance_name || 'all_franchise');
+        fetchAllData(user);
+      } catch (e) {
+        localStorage.removeItem('smart_review_session_v4');
+      }
+    }
+    const savedResolved = localStorage.getItem('smart_review_resolved_issues');
+    if (savedResolved) {
+      try {
+        setResolvedIssues(JSON.parse(savedResolved));
+      } catch (e) {}
     }
   }, []);
 
-  // Connexion Dynamique NocoDB
+  // 2. Connexion Managériale Dynamique
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
     setIsLoggingIn(true);
-  
+
     const cleanEmail = emailInput.trim().toLowerCase();
     const cleanPassword = passwordInput.trim();
-  
+
     try {
       const res = await fetch(N8N_LOGIN_API, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: cleanEmail,
           password: cleanPassword,
         }),
       });
-  
+
       const raw = await res.json();
       const data = Array.isArray(raw) ? raw[0] : raw;
-      
-      if (data.success && data.user) {
-        // NocoDB renvoie parfois des objets liés
-        const instanceName = typeof data.user.instance_name === 'object' 
+
+      if (data && data.success && data.user) {
+        const instanceName = typeof data.user.instance_name === 'object'
           ? (data.user.instance_name.instance_name || data.user.instance_name.Id || "")
           : data.user.instance_name;
-      
+
         const restaurantName = typeof data.user.restaurant_name === 'object'
           ? (data.user.restaurant_name.instance_name || data.user.restaurant_name.restaurant_name || instanceName)
           : (data.user.restaurant_name || instanceName);
-      
+
         const sessionData = {
           email: data.user.email,
-          instance_name: instanceName,
-          restaurant_name: restaurantName
+          instance_name: String(instanceName).trim(),
+          restaurant_name: String(restaurantName).trim(),
+          role: data.user.role || (cleanEmail.includes('jdaproai.com') ? 'admin' : 'manager')
         };
-  
+
         setCurrentUser(sessionData);
-        localStorage.setItem('smart_review_session_v2', JSON.stringify(sessionData));
-        fetchLiveNocoDB(sessionData.instance_name);
+        setSelectedInstance(sessionData.instance_name);
+        localStorage.setItem('smart_review_session_v4', JSON.stringify(sessionData));
+        await fetchAllData(sessionData);
       } else {
-        setLoginError(data.error || 'Email ou mot de passe incorrect');
+        setLoginError(data?.error || (lang === 'fr' ? 'Email ou mot de passe incorrect' : 'Email or password incorrect'));
       }
     } catch (err) {
-      setLoginError('Connection error / خطأ في الاتصال');
+      setLoginError(lang === 'fr' ? 'Erreur de connexion au serveur' : 'Connection error / خطأ في الاتصال');
     } finally {
       setIsLoggingIn(false);
     }
   };
 
-  // Déconnexion
   const handleLogout = () => {
-    localStorage.removeItem('smart_review_session_v2');
+    localStorage.removeItem('smart_review_session_v4');
     setCurrentUser(null);
     setEmailInput('');
     setPasswordInput('');
+    setAllRestaurants([]);
+    setRawReviews([]);
+    setRawLoyalty([]);
+    setRawLeads([]);
   };
 
-  // Chargement Dynamique des Avis & Leads Wi-Fi (Avec Filtrage Souple par Marque)
-  const fetchLiveNocoDB = async (instanceName?: string) => {
+  // 3. Récupération globale de toutes les données avec tolérance aux pannes
+  const fetchAllData = async (user = currentUser) => {
+    if (!user) return;
     setLoading(true);
-    const targetInstance = (instanceName || currentUser?.instance_name || "").trim().toLowerCase();
 
     try {
-      // 1. Fiche du Restaurant
-      const resRest = await fetch(N8N_RESTAURANTS_API);
-      if (resRest.ok) {
-        const restData = await resRest.json();
-        const restList = Array.isArray(restData) ? restData : (restData.list || []);
-        
-        const matchedRest = restList.find((r: any) => 
-          isInstanceMatch(r.instance_name, targetInstance)
-        );
+      // A. Restaurants
+      const resRest = await fetch(N8N_RESTAURANTS_API).catch(() => null);
+      if (resRest && resRest.ok) {
+        const restJson = await resRest.json();
+        const restList = Array.isArray(restJson) ? restJson : (restJson.list || []);
+        setAllRestaurants(restList);
 
-        if (matchedRest) {
-          setRestaurant({
-            Id: matchedRest.Id,
-            restaurant_name: matchedRest.restaurant_name || "Restaurant",
-            city: matchedRest.city || "الرياض",
-            status: matchedRest.status || "Active"
-          });
-          if (matchedRest.reward_offer) setRewardOffer(matchedRest.reward_offer);
+        // Trouver le restaurant courant pour l'offre cadeau
+        const currentMatch = restList.find((r: any) => 
+          parseInstanceName(r.instance_name).toLowerCase() === user.instance_name.toLowerCase()
+        );
+        if (currentMatch && currentMatch.reward_offer) {
+          setRewardOffer(currentMatch.reward_offer);
         }
       }
 
-      // 2. Avis Filtrés Souplement par Restaurant
-      const resRev = await fetch(`${N8N_REVIEWS_API}?instance=${targetInstance}`);
-      if (resRev.ok) {
-        const data = await resRev.json();
-        const rawList = data.list || (Array.isArray(data) ? data : []);
-        
-        const list = rawList.filter((r: any) => 
-          isInstanceMatch(r.instance_name, targetInstance)
-        );
-
-        setReviews(list);
-
-        const total = list.length;
-        const positive = list.filter((r: any) => r.sentiment?.trim() === 'positive' || Number(r.rating) >= 4).length;
-        const ratings = list.map((r: any) => Number(r.rating) || 5);
-        const avg = total > 0 ? (ratings.reduce((a: number, b: number) => a + b, 0) / total).toFixed(1) : "5.0";
-
-        setStats({
-          totalReviews: total,
-          avgRating: total > 0 ? avg : "5.0",
-          satisfactionRate: total > 0 ? Math.round((positive / total) * 100) + "%" : "100%",
-          rewardsCount: positive,
-        });
+      // B. Avis Clients
+      const resRev = await fetch(N8N_REVIEWS_API).catch(() => null);
+      if (resRev && resRev.ok) {
+        const revJson = await resRev.json();
+        const list = Array.isArray(revJson) ? revJson : (revJson.list || []);
+        setRawReviews(list);
       }
 
-      // 3. Leads Wi-Fi Capturés (Filtrage Souple par Marque)
-      const resLeads = await fetch(N8N_LEADS_API);
-      if (resLeads.ok) {
-        const dataLeads = await resLeads.json();
-        
-        let rawLeads: any[] = [];
-        if (Array.isArray(dataLeads)) {
-          rawLeads = dataLeads;
-        } else if (dataLeads.list && Array.isArray(dataLeads.list)) {
-          rawLeads = dataLeads.list;
-        } else if (typeof dataLeads === 'object' && dataLeads !== null) {
-          rawLeads = [dataLeads];
-        }
-        
-        const filteredLeads = rawLeads.filter((l: any) => 
-          isInstanceMatch(l.instance_name, targetInstance)
-        );
-
-        setLeads(filteredLeads);
+      // C. Cartes de Fidélité
+      const resFid = await fetch(N8N_FIDELITE_API).catch(() => null);
+      if (resFid && resFid.ok) {
+        const fidJson = await resFid.json();
+        const list = Array.isArray(fidJson) ? fidJson : (fidJson.list || []);
+        setRawLoyalty(list);
       }
 
-    } catch (error) {
-      console.error("Erreur de synchro NocoDB:", error);
+      // D. Coupons Gagnés
+      const resCoup = await fetch(N8N_COUPONS_API).catch(() => null);
+      if (resCoup && resCoup.ok) {
+        const coupJson = await resCoup.json();
+        const list = Array.isArray(coupJson) ? coupJson : (coupJson.list || []);
+        setRawCoupons(list);
+      }
+
+      // E. Leads Wi-Fi
+      const resLeads = await fetch(N8N_LEADS_API).catch(() => null);
+      if (resLeads && resLeads.ok) {
+        const leadsJson = await resLeads.json();
+        const list = Array.isArray(leadsJson) ? leadsJson : (leadsJson.list || []);
+        setRawLeads(list);
+      }
+
+    } catch (e) {
+      console.error("Erreur lors de la synchronisation NocoDB:", e);
     } finally {
       setLoading(false);
     }
   };
 
-  const exportLeadsCSV = () => {
-    if (leads.length === 0) return;
-    const headers = ["Phone Number", "Source", "Date"];
-    const rows = leads.map(l => [
-      `+${l.client_phone?.trim()}`,
-      l.source || "WiFi",
-      l.CreatedAt ? new Date(l.CreatedAt).toLocaleDateString() : "Recent"
-    ]);
-    
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
-    
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `contacts_${currentUser?.instance_name || 'leads'}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  // 4. Isolation stricte par Franchise (Multi-Store Cloisonné)
+  const userFranchiseKey = useMemo(() => {
+    return currentUser ? getFranchiseKey(currentUser.instance_name) : "";
+  }, [currentUser]);
+
+  const allowedRestaurants = useMemo(() => {
+    if (!currentUser) return [];
+    if (currentUser.role === 'admin') return allRestaurants;
+
+    // Strictement filtré sur la franchise du gérant
+    return allRestaurants.filter((r: any) => {
+      const restFranchise = getFranchiseKey(r.instance_name);
+      return restFranchise === userFranchiseKey;
+    });
+  }, [allRestaurants, currentUser, userFranchiseKey]);
+
+  // Nom d'affichage de l'établissement sélectionné
+  const currentBranchLabel = useMemo(() => {
+    if (selectedInstance === 'all_franchise') {
+      if (currentUser?.role === 'admin') return "Toutes les enseignes (Super Admin)";
+      const brandName = allowedRestaurants[0]?.restaurant_name?.split('-')[0]?.trim() || "Ma Franchise";
+      return `${brandName} (Toutes les branches)`;
+    }
+    const found = allowedRestaurants.find((r: any) => parseInstanceName(r.instance_name) === selectedInstance);
+    return found?.restaurant_name || selectedInstance;
+  }, [selectedInstance, allowedRestaurants, currentUser]);
+
+  // 5. Filtrage des données par Date et par Instance
+  const filterByDateAndInstance = (items: any[]) => {
+    return items.filter((item: any) => {
+      // Filtre d'instance / franchise
+      const itemInst = parseInstanceName(item.instance_name);
+      if (currentUser?.role !== 'admin') {
+        const itemFranchise = getFranchiseKey(itemInst);
+        if (itemFranchise !== userFranchiseKey) return false;
+      }
+      if (selectedInstance !== 'all_franchise') {
+        if (!isInstanceMatch(itemInst, selectedInstance)) return false;
+      }
+
+      // Filtre de date
+      if (dateFilter === 'all') return true;
+      const rawDate = item.CreatedAt || item.created_at || item.email_captured_at;
+      if (!rawDate) return true; // Conserver les items sans date pour ne pas fausser
+
+      const itemDate = new Date(rawDate).getTime();
+      const now = Date.now();
+
+      if (dateFilter === 'today') {
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        return itemDate >= startOfDay.getTime();
+      }
+      if (dateFilter === '7d') {
+        return itemDate >= now - 7 * 24 * 60 * 60 * 1000;
+      }
+      if (dateFilter === '30d') {
+        return itemDate >= now - 30 * 24 * 60 * 60 * 1000;
+      }
+      if (dateFilter === 'month') {
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+        return itemDate >= startOfMonth.getTime();
+      }
+      if (dateFilter === 'custom') {
+        const start = customStartDate ? new Date(customStartDate).getTime() : 0;
+        const end = customEndDate ? new Date(customEndDate).getTime() + 86400000 : Infinity;
+        return itemDate >= start && itemDate <= end;
+      }
+
+      return true;
+    });
+  };
+
+  const filteredReviews = useMemo(() => {
+    let list = filterByDateAndInstance(rawReviews);
+    if (ratingFilter === 'positive') {
+      list = list.filter((r: any) => Number(r.rating) >= 4 || r.sentiment?.trim() === 'positive');
+    } else if (ratingFilter === 'negative') {
+      list = list.filter((r: any) => Number(r.rating) <= 3 || r.sentiment?.trim() === 'negative');
+    } else if (['1', '2', '3', '4', '5'].includes(ratingFilter)) {
+      list = list.filter((r: any) => Math.round(Number(r.rating)) === Number(ratingFilter));
+    }
+    return list;
+  }, [rawReviews, selectedInstance, dateFilter, customStartDate, customEndDate, ratingFilter, currentUser, userFranchiseKey]);
+
+  const negativeReviews = useMemo(() => {
+    const list = filterByDateAndInstance(rawReviews);
+    return list.filter((r: any) => Number(r.rating) <= 3 || r.sentiment?.trim() === 'negative');
+  }, [rawReviews, selectedInstance, dateFilter, customStartDate, customEndDate, currentUser, userFranchiseKey]);
+
+  const filteredLoyalty = useMemo(() => {
+    return filterByDateAndInstance(rawLoyalty);
+  }, [rawLoyalty, selectedInstance, dateFilter, customStartDate, customEndDate, currentUser, userFranchiseKey]);
+
+  const filteredLeads = useMemo(() => {
+    return filterByDateAndInstance(rawLeads);
+  }, [rawLeads, selectedInstance, dateFilter, customStartDate, customEndDate, currentUser, userFranchiseKey]);
+
+  // Métriques calculées
+  const stats = useMemo(() => {
+    const totalRev = filteredReviews.length;
+    const positiveRev = filteredReviews.filter((r: any) => Number(r.rating) >= 4 || r.sentiment?.trim() === 'positive').length;
+    const ratings = filteredReviews.map((r: any) => Number(r.rating) || 5);
+    const avg = totalRev > 0 ? (ratings.reduce((a, b) => a + b, 0) / totalRev).toFixed(1) : "5.0";
+    const satisfaction = totalRev > 0 ? Math.round((positiveRev / totalRev) * 100) : 100;
+
+    // Métriques fidélité
+    const totalLoyal = filteredLoyalty.length;
+    const completedCards = filteredLoyalty.filter((l: any) => Number(l.stamps_count) >= 10).length;
+    const inProgressCards = totalLoyal - completedCards;
+    const totalVisits = filteredLoyalty.reduce((acc, curr) => acc + (Number(curr.total_visits) || Number(curr.stamps_count) || 1), 0);
+
+    return {
+      totalRev,
+      avgRating: avg,
+      satisfaction: `${satisfaction}%`,
+      positiveRev,
+      negativeRev: negativeReviews.length,
+      totalLoyal,
+      completedCards,
+      inProgressCards,
+      totalVisits,
+      totalLeads: filteredLeads.length
+    };
+  }, [filteredReviews, negativeReviews, filteredLoyalty, filteredLeads]);
+
+  // Actions
+  const toggleResolve = (id: number) => {
+    setResolvedIssues(prev => {
+      const updated = prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id];
+      localStorage.setItem('smart_review_resolved_issues', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   const handleUpdateReward = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newReward.trim() || !restaurant?.Id) return;
+    if (!newReward.trim()) return;
     setIsUpdatingReward(true);
 
     try {
-      await fetch(N8N_UPDATE_REWARD_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          restaurant_id: restaurant.Id,
-          reward_offer: newReward.trim(),
-        }),
-      });
-
+      const activeRest = allowedRestaurants.find((r: any) => parseInstanceName(r.instance_name) === selectedInstance) || allowedRestaurants[0];
+      if (activeRest?.Id) {
+        await fetch(N8N_UPDATE_REWARD_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            restaurant_id: activeRest.Id,
+            reward_offer: newReward.trim(),
+          }),
+        });
+      }
       setRewardOffer(newReward.trim());
       setNewReward('');
-    } catch (err) {
+    } catch (e) {
       setRewardOffer(newReward.trim());
       setNewReward('');
     } finally {
@@ -284,112 +428,268 @@ export default function SmartReviewDashboard() {
     }
   };
 
-  const toggleResolve = (id: number) => {
-    setResolvedIssues(prev => 
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
-    );
+  // Exports CSV
+  const exportCSV = (type: 'reviews' | 'loyalty' | 'leads') => {
+    let headers: string[] = [];
+    let rows: string[][] = [];
+    let filename = `export_${type}_${selectedInstance}_${dateFilter}.csv`;
+
+    if (type === 'reviews') {
+      headers = ["ID", "Date", "Instance", "Rating", "Sentiment", "Client Phone", "Review Text"];
+      rows = filteredReviews.map(r => [
+        String(r.Id || ""),
+        r.CreatedAt ? new Date(r.CreatedAt).toLocaleDateString() : "",
+        parseInstanceName(r.instance_name),
+        String(r.rating || 5),
+        r.sentiment || "",
+        `+${r.client_phone || ""}`,
+        `"${(getReviewText(r) || "").replace(/"/g, '""')}"`
+      ]);
+    } else if (type === 'loyalty') {
+      headers = ["ID", "Date Inscription", "Instance", "Telephone", "Email", "Tampons", "Visites Totales", "Scans IA"];
+      rows = filteredLoyalty.map(l => [
+        String(l.Id || ""),
+        l.CreatedAt ? new Date(l.CreatedAt).toLocaleDateString() : "",
+        parseInstanceName(l.instance_name),
+        `+${l.client_phone || ""}`,
+        l.email || "",
+        String(l.stamps_count || 0),
+        String(l.total_visits || l.stamps_count || 0),
+        String(l.ai_scans_count || 0)
+      ]);
+    } else if (type === 'leads') {
+      headers = ["ID", "Date", "Instance", "Telephone", "Source"];
+      rows = filteredLeads.map(l => [
+        String(l.Id || ""),
+        l.CreatedAt ? new Date(l.CreatedAt).toLocaleDateString() : "",
+        parseInstanceName(l.instance_name),
+        `+${l.client_phone || ""}`,
+        l.source || "WiFi"
+      ]);
+    }
+
+    const csvContent = "data:text/csv;charset=utf-8,\uFEFF" 
+      + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  const negativeReviews = reviews.filter(r => Number(r.rating) <= 3 || r.sentiment?.trim() === 'negative');
-
+  // Textes & Dictionnaires Trilingues
   const t = {
-    ar: {
-      title: restaurant?.restaurant_name || "لوحة التحكم الإدارية",
-      subtitle: `مدينة ${restaurant?.city || 'الرياض'} • Smart Review AI v2.0`,
-      whatsappConnected: "واتساب متصل",
-      totalReviews: "إجمالي التقييمات",
-      avgRating: "متوسط التقييم",
-      satisfactionRate: "نسبة الرضا",
-      rewardsGiven: "الهدايا الموزعة",
-      negativeAlertTitle: "مركز اعتراض الشكاوى (تتطلب إجراء سريع)",
-      callClient: "الاتصال بالعميل",
-      markResolved: "تحديد كتم الحل",
-      resolved: "تم المعالجة",
-      feedTitle: "سجل التقييمات والردود الآلية",
-      editRewardTitle: "تعديل عرض الهدية الحالية",
-      save: "حفظ العرض",
-      rewardPlaceholder: "مثال: 1 حلى مجاني 🍰",
-      allRatings: "جميع التقييمات",
-      positive: "إيجابي",
-      negative: "سلبي",
-      noReviews: "لا توجد تقييمات مسجلة حالياً لهذا المطعم",
-      refresh: "تحديث البيانات Live",
-      logout: "تسجيل الخروج",
-      tabReviews: "التقييمات والمؤشرات 📊",
-      tabLeads: "قائمة العملاء والواي فاي 👥",
-      exportBtn: "تصدير الملف إلى Excel 📥",
-      phoneCol: "رقم الهاتف",
-      sourceCol: "المصدر",
-      dateCol: "التاريخ",
-      noLeads: "لا توجد أرقام هواتف مسجلة حتى الآن"
+    fr: {
+      brandSub: "Plateforme Managériale Vision 2030",
+      loginTitle: "Espace Gérant & Franchise",
+      loginDesc: "Connectez-vous pour piloter vos avis, fidélité et clients",
+      email: "Adresse Email",
+      password: "Mot de passe",
+      loginBtn: "Se connecter au Dashboard",
+      logout: "Déconnexion",
+      tabReviews: "Avis & E-Réputation",
+      tabLoyalty: "Cartes de Fidélité & VIP",
+      tabLeads: "Contacts & Leads Wi-Fi",
+      periodToday: "Aujourd'hui",
+      period7d: "7 derniers jours",
+      period30d: "30 jours",
+      periodMonth: "Ce mois-ci",
+      periodAll: "Tout l'historique",
+      periodCustom: "Personnalisé",
+      kpiReviews: "Avis Récoltés",
+      kpiRating: "Note Moyenne",
+      kpiSatisfaction: "Satisfaction Client",
+      kpiGoogleReviews: "Avis 4-5★ Google",
+      kpiNegativeAlerts: "Avis Négatifs Interceptés",
+      kpiCardsTotal: "Cartes Fidélité Actives",
+      kpiCardsCompleted: "Paliers 10/10 VIP",
+      kpiCardsProgress: "Cartes en Cours (1-9)",
+      kpiVisits: "Visites Cumulées",
+      kpiLeads: "Contacts Enregistrés",
+      negativeAlertTitle: "Centre d'Interception des Insatisfactions (Alerte Immédiate)",
+      callClient: "Appeler le client",
+      markResolved: "Marquer comme traité",
+      resolved: "Traité ✓",
+      feedTitle: "Flux des Avis Clients",
+      exportCSV: "Exporter CSV",
+      rewardTitle: "Offre Cadeau Active",
+      rewardDesc: "Récompense offerte aux clients satisfaits",
+      rewardBtn: "Mettre à jour",
+      noReviews: "Aucun avis enregistré sur la période sélectionnée.",
+      noLoyalty: "Aucune carte de fidélité active sur cette période.",
+      noLeads: "Aucun lead Wi-Fi capturé sur cette période.",
+      stampsProgress: "Progression des tampons",
+      visits: "visites",
+      allRatings: "Toutes les notes",
+      positiveOnly: "Avis Positifs (4-5★)",
+      negativeOnly: "Avis Négatifs (1-3★)"
     },
     en: {
-      title: restaurant?.restaurant_name || "Manager Dashboard",
-      subtitle: `${restaurant?.city || 'Riyadh'} • Smart Review AI v2.0`,
-      whatsappConnected: "WhatsApp Connected",
-      totalReviews: "Total Reviews",
-      avgRating: "Average Rating",
-      satisfactionRate: "Satisfaction Rate",
-      rewardsGiven: "Rewards Distributed",
-      negativeAlertTitle: "Complaint Interception Center (Action Required)",
+      brandSub: "Vision 2030 Management Suite",
+      loginTitle: "Manager & Franchise Portal",
+      loginDesc: "Sign in to monitor customer reviews, loyalty cards, and leads",
+      email: "Email Address",
+      password: "Password",
+      loginBtn: "Sign In to Dashboard",
+      logout: "Log Out",
+      tabReviews: "Reviews & Reputation",
+      tabLoyalty: "Digital Loyalty Cards",
+      tabLeads: "Wi-Fi Leads & CRM",
+      periodToday: "Today",
+      period7d: "Last 7 days",
+      period30d: "Last 30 days",
+      periodMonth: "This Month",
+      periodAll: "All Time",
+      periodCustom: "Custom Range",
+      kpiReviews: "Total Reviews",
+      kpiRating: "Average Rating",
+      kpiSatisfaction: "Customer Satisfaction",
+      kpiGoogleReviews: "4-5★ Google Reviews",
+      kpiNegativeAlerts: "Intercepted Negative Reviews",
+      kpiCardsTotal: "Active Loyalty Cards",
+      kpiCardsCompleted: "Completed 10/10 VIPs",
+      kpiCardsProgress: "In-Progress Cards (1-9)",
+      kpiVisits: "Total Visits",
+      kpiLeads: "Captured Leads",
+      negativeAlertTitle: "Negative Feedback Interception Hub (Action Required)",
       callClient: "Call Customer",
       markResolved: "Mark as Resolved",
-      resolved: "Resolved",
-      feedTitle: "Review History & AI Responses",
-      editRewardTitle: "Update Current Reward Offer",
-      save: "Save Offer",
-      rewardPlaceholder: "e.g., 1 Free Dessert 🍰",
+      resolved: "Resolved ✓",
+      feedTitle: "Customer Reviews Stream",
+      exportCSV: "Export CSV",
+      rewardTitle: "Active Reward Offer",
+      rewardDesc: "Gift offered to satisfied customers",
+      rewardBtn: "Update Offer",
+      noReviews: "No reviews found for this selected timeframe.",
+      noLoyalty: "No active loyalty cards in this period.",
+      noLeads: "No Wi-Fi leads captured in this period.",
+      stampsProgress: "Stamps Progress",
+      visits: "visits",
       allRatings: "All Ratings",
-      positive: "Positive",
-      negative: "Negative",
-      noReviews: "No reviews currently recorded for this restaurant",
-      refresh: "Refresh Live Data",
-      logout: "Logout",
-      tabReviews: "Reviews & Metrics 📊",
-      tabLeads: "Customer Leads & Wi-Fi 👥",
-      exportBtn: "Export to Excel/CSV 📥",
-      phoneCol: "Phone Number",
-      sourceCol: "Source",
-      dateCol: "Date Captured",
-      noLeads: "No customer phone numbers captured yet"
+      positiveOnly: "Positive Reviews (4-5★)",
+      negativeOnly: "Negative Reviews (1-3★)"
+    },
+    ar: {
+      brandSub: "منصة إدارة المطاعم والمقاهي • رؤية 2030",
+      loginTitle: "بوابة إدارة الفروع والامتيازات",
+      loginDesc: "تسجيل الدخول لمتابعة تقييمات العملاء وبطاقات الولاء والعملاء المحتملين",
+      email: "البريد الإلكتروني",
+      password: "كلمة المرور",
+      loginBtn: "تسجيل الدخول للوحة التحكم",
+      logout: "تسجيل الخروج",
+      tabReviews: "التقييمات والسمعة",
+      tabLoyalty: "بطاقات الولاء والجوائز",
+      tabLeads: "أرقام الواي فاي والتواصل",
+      periodToday: "اليوم",
+      period7d: "آخر 7 أيام",
+      period30d: "آخر 30 يوم",
+      periodMonth: "هذا الشهر",
+      periodAll: "كامل السجل",
+      periodCustom: "فترة مخصصة",
+      kpiReviews: "إجمالي التقييمات",
+      kpiRating: "متوسط التقييم",
+      kpiSatisfaction: "نسبة الرضا",
+      kpiGoogleReviews: "تقييمات جوجل (4-5★)",
+      kpiNegativeAlerts: "الشكاوى المعترضة (1-3★)",
+      kpiCardsTotal: "بطاقات الولاء النشطة",
+      kpiCardsCompleted: "أكملوا 10 نقاط VIP",
+      kpiCardsProgress: "بطاقات جارية (1-9)",
+      kpiVisits: "إجمالي الزيارات",
+      kpiLeads: "الأرقام المسجلة",
+      negativeAlertTitle: "مركز اعتراض الشكاوى والتقييمات السلبية (متابعة فورية)",
+      callClient: "اتصال بالعميل",
+      markResolved: "تحديد كمحلول",
+      resolved: "تم الحل ✓",
+      feedTitle: "سجل تقييمات العملاء",
+      exportCSV: "تصدير CSV",
+      rewardTitle: "العرض التشجيعي الحالي",
+      rewardDesc: "الهدية المقدمة للعملاء الراضين",
+      rewardBtn: "تحديث العرض",
+      noReviews: "لا توجد تقييمات في الفترة المحددة.",
+      noLoyalty: "لا توجد بطاقات ولاء في هذه الفترة.",
+      noLeads: "لا توجد أرقام واي فاي مسجلة في هذه الفترة.",
+      stampsProgress: "تقدم النقاط",
+      visits: "زيارات",
+      allRatings: "جميع التقييمات",
+      positiveOnly: "التقييمات الإيجابية (4-5★)",
+      negativeOnly: "الشكاوى السلبية (1-3★)"
     }
   }[lang];
 
-  // ECRAN DE CONNEXION
+  // ================= FORMULAIRE DE CONNEXION =================
   if (!currentUser) {
     return (
-      <div dir="rtl" className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center p-4 font-['Cairo']">
-        <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-3xl p-8 space-y-6 shadow-2xl">
+      <div 
+        dir={lang === 'ar' ? 'rtl' : 'ltr'}
+        className="min-h-screen bg-zinc-950 text-zinc-100 flex items-center justify-center p-4 font-['Cairo',sans-serif] relative overflow-hidden"
+      >
+        {/* Lueur d'ambiance */}
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="w-full max-w-md bg-zinc-900/90 backdrop-blur-xl border border-zinc-800/80 rounded-3xl p-8 space-y-6 shadow-2xl relative z-10">
           
-          <div className="text-center space-y-2">
-            <div className="inline-flex p-3 bg-purple-500/10 rounded-2xl border border-purple-500/20 text-purple-400 mb-2">
-              <Star className="w-8 h-8 fill-purple-400" />
+          {/* Header & Langues */}
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+              <span className="text-[11px] font-bold text-zinc-400 tracking-wider uppercase">SaaS Hub v4.0</span>
             </div>
-            <h1 className="text-3xl font-black text-amber-500">Smart Review AI</h1>
-            <p className="text-xs text-zinc-400">بوابة إدارات المطاعم والمقاهي • Gamification v2.0</p>
+            <div className="flex items-center gap-1 bg-zinc-950/60 p-1 rounded-xl border border-zinc-800 text-xs font-bold">
+              <button 
+                onClick={() => setLang('fr')} 
+                className={`px-2 py-1 rounded-lg transition ${lang === 'fr' ? 'bg-amber-500 text-zinc-950' : 'text-zinc-400 hover:text-zinc-200'}`}
+              >
+                FR
+              </button>
+              <button 
+                onClick={() => setLang('en')} 
+                className={`px-2 py-1 rounded-lg transition ${lang === 'en' ? 'bg-amber-500 text-zinc-950' : 'text-zinc-400 hover:text-zinc-200'}`}
+              >
+                EN
+              </button>
+              <button 
+                onClick={() => setLang('ar')} 
+                className={`px-2 py-1 rounded-lg transition ${lang === 'ar' ? 'bg-amber-500 text-zinc-950' : 'text-zinc-400 hover:text-zinc-200'}`}
+              >
+                عربي
+              </button>
+            </div>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4 pt-2">
-            <div className="space-y-1">
-              <label className="text-xs text-zinc-400 font-bold">البريد الإلكتروني / Email</label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-zinc-500 absolute right-3 top-3.5 z-10" />
-                <input
-                  type="email"
-                  required
-                  dir="ltr"
-                  value={emailInput}
-                  onChange={(e) => setEmailInput(e.target.value)}
-                  placeholder="abdel@hellomycoach.com"
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pr-10 pl-4 py-2.5 text-sm text-left font-sans focus:outline-none focus:border-amber-500 transition text-zinc-100"
-                />
-              </div>
+          <div className="text-center space-y-2">
+            <div className="inline-flex p-3 bg-gradient-to-br from-amber-500/20 to-amber-600/10 rounded-2xl border border-amber-500/30 text-amber-400 mb-1">
+              <Building2 className="w-8 h-8" />
+            </div>
+            <h1 className="text-2xl font-black tracking-tight text-zinc-100">{t.loginTitle}</h1>
+            <p className="text-xs text-zinc-400">{t.loginDesc}</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
+                <Mail className="w-3.5 h-3.5 text-amber-500" />
+                {t.email}
+              </label>
+              <input
+                type="email"
+                required
+                dir="ltr"
+                value={emailInput}
+                onChange={(e) => setEmailInput(e.target.value)}
+                placeholder="manager@boscafe.qa"
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:outline-none focus:border-amber-500 transition"
+              />
             </div>
 
-            <div className="space-y-1">
-              <label className="text-xs text-zinc-400 font-bold">كلمة المرور / Password</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-zinc-300 flex items-center gap-1.5">
+                <Lock className="w-3.5 h-3.5 text-amber-500" />
+                {t.password}
+              </label>
               <div className="relative">
-                <Lock className="w-4 h-4 text-zinc-500 absolute right-3 top-3.5 z-10" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
@@ -397,12 +697,12 @@ export default function SmartReviewDashboard() {
                   value={passwordInput}
                   onChange={(e) => setPasswordInput(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl pr-10 pl-10 py-2.5 text-sm text-left font-mono focus:outline-none focus:border-amber-500 transition text-zinc-100"
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-sm text-zinc-100 font-mono placeholder:text-zinc-600 focus:outline-none focus:border-amber-500 transition pr-11"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute left-3 top-3 text-zinc-500 hover:text-amber-500 transition"
+                  className="absolute right-3 top-3.5 text-zinc-500 hover:text-amber-400 transition"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -410,20 +710,24 @@ export default function SmartReviewDashboard() {
             </div>
 
             {loginError && (
-              <p className="text-xs text-rose-500 font-bold text-center pt-1">{loginError}</p>
+              <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs text-rose-400 font-bold text-center flex items-center justify-center gap-2">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <span>{loginError}</span>
+              </div>
             )}
 
             <button
               type="submit"
               disabled={isLoggingIn}
-              className="w-full bg-amber-500 hover:bg-amber-600 text-zinc-950 font-black text-sm py-3 rounded-xl transition shadow-lg flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-zinc-950 font-black text-sm py-3.5 rounded-xl transition shadow-lg shadow-amber-500/10 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
-              {isLoggingIn ? <RefreshCw className="w-4 h-4 animate-spin" /> : "تسجيل الدخول / Login"}
+              {isLoggingIn ? <RefreshCw className="w-4 h-4 animate-spin" /> : t.loginBtn}
             </button>
           </form>
 
-          <div className="border-t border-zinc-800 pt-4 text-center">
-            <p className="text-[10px] text-zinc-500">Smart Review AI • Multi-Tenant SaaS Platform v2.0</p>
+          <div className="pt-4 border-t border-zinc-800/80 text-center space-y-1">
+            <p className="text-[11px] text-zinc-500 font-medium">Smart Review AI • {t.brandSub}</p>
+            <p className="text-[10px] text-zinc-600">Multi-Store & Franchise Isolation Engine</p>
           </div>
 
         </div>
@@ -431,7 +735,7 @@ export default function SmartReviewDashboard() {
     );
   }
 
-  // ================= DASHBOARD MANAGER =================
+  // ================= DASHBOARD PRINCIPAL =================
   return (
     <div 
       dir={lang === 'ar' ? 'rtl' : 'ltr'} 
@@ -439,317 +743,756 @@ export default function SmartReviewDashboard() {
         isDarkMode ? 'bg-zinc-950 text-zinc-100' : 'bg-slate-50 text-slate-900'
       }`}
     >
-      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-8">
+      <div className="max-w-7xl mx-auto p-4 md:p-8 space-y-6">
         
-        {/* HEADER */}
-        <header className={`flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b pb-6 ${
-          isDarkMode ? 'border-zinc-800' : 'border-slate-200'
+        {/* ================= BARRE DU HAUT / HEADER ================= */}
+        <header className={`p-5 rounded-3xl border transition backdrop-blur-xl ${
+          isDarkMode ? 'bg-zinc-900/70 border-zinc-800/80 shadow-2xl' : 'bg-white border-slate-200 shadow-md'
         }`}>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl md:text-3xl font-extrabold text-amber-500">{t.title}</h1>
-              <span className="text-xs px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-400 font-bold border border-purple-500/20">
-                PRO v2.0
-              </span>
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+            
+            {/* Logo & Info Établissement */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-gradient-to-br from-amber-500 to-amber-600 text-zinc-950 rounded-2xl shadow-lg shadow-amber-500/20">
+                  <Building2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-xl md:text-2xl font-black tracking-tight">{currentBranchLabel}</h1>
+                    <span className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-extrabold px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      Live
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-400">
+                    {currentUser.email} • {currentUser.role === 'admin' ? 'Super Admin' : `Franchise : ${userFranchiseKey.toUpperCase()}`}
+                  </p>
+                </div>
+              </div>
             </div>
-            <p className={`text-xs mt-1 ${isDarkMode ? 'text-zinc-400' : 'text-slate-500'}`}>{t.subtitle}</p>
+
+            {/* Sélecteur de Branche (Strictement cloisonné à la Franchise) & Actions */}
+            <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto justify-end">
+              
+              {/* Sélecteur de Branche */}
+              {allowedRestaurants.length > 1 ? (
+                <div className="relative">
+                  <select
+                    value={selectedInstance}
+                    onChange={(e) => setSelectedInstance(e.target.value)}
+                    className={`appearance-none text-xs font-bold px-4 py-2.5 pr-9 rounded-xl border focus:outline-none transition cursor-pointer ${
+                      isDarkMode 
+                        ? 'bg-zinc-950 border-zinc-800 text-zinc-200 focus:border-amber-500' 
+                        : 'bg-slate-100 border-slate-200 text-slate-800 focus:border-amber-500'
+                    }`}
+                  >
+                    <option value="all_franchise">Toutes mes branches ({allowedRestaurants.length})</option>
+                    {allowedRestaurants.map((r: any) => (
+                      <option key={r.Id || r.instance_name} value={parseInstanceName(r.instance_name)}>
+                        {r.restaurant_name || r.instance_name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-zinc-400 absolute right-3 top-3 pointer-events-none" />
+                </div>
+              ) : (
+                <div className={`px-3 py-2 rounded-xl text-xs font-bold border ${isDarkMode ? 'bg-zinc-950 border-zinc-800 text-amber-400' : 'bg-slate-100 border-slate-200 text-amber-700'}`}>
+                  {allowedRestaurants[0]?.restaurant_name || currentBranchLabel}
+                </div>
+              )}
+
+              {/* Bouton Rafraîchir */}
+              <button
+                onClick={() => fetchAllData()}
+                disabled={loading}
+                className={`p-2.5 rounded-xl border transition ${
+                  isDarkMode ? 'bg-zinc-950 border-zinc-800 hover:text-amber-400' : 'bg-slate-100 border-slate-200 hover:text-amber-600'
+                }`}
+                title="Actualiser les données"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-amber-400' : ''}`} />
+              </button>
+
+              {/* Thème Sombre / Clair */}
+              <button
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className={`p-2.5 rounded-xl border transition ${
+                  isDarkMode ? 'bg-zinc-950 border-zinc-800 text-amber-400' : 'bg-slate-100 border-slate-200 text-slate-600'
+                }`}
+              >
+                {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+
+              {/* Langues */}
+              <div className={`flex items-center p-1 rounded-xl border text-xs font-bold ${
+                isDarkMode ? 'bg-zinc-950 border-zinc-800' : 'bg-slate-100 border-slate-200'
+              }`}>
+                {(['fr', 'en', 'ar'] as const).map(l => (
+                  <button
+                    key={l}
+                    onClick={() => setLang(l)}
+                    className={`px-2 py-1 rounded-lg uppercase transition ${
+                      lang === l 
+                        ? 'bg-amber-500 text-zinc-950 font-black' 
+                        : isDarkMode ? 'text-zinc-400 hover:text-zinc-200' : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    {l}
+                  </button>
+                ))}
+              </div>
+
+              {/* Déconnexion */}
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1.5 px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 rounded-xl text-xs font-bold transition"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{t.logout}</span>
+              </button>
+
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          {/* ================= BARRE DE FILTRES TEMPORELS ================= */}
+          <div className="mt-5 pt-4 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+              <Calendar className="w-4 h-4 text-amber-500 flex-shrink-0" />
+              <span className="text-xs font-bold text-zinc-400 hidden sm:inline">Période :</span>
+              
+              <div className={`flex items-center p-1 rounded-xl border text-xs font-semibold ${
+                isDarkMode ? 'bg-zinc-950 border-zinc-800' : 'bg-slate-100 border-slate-200'
+              }`}>
+                <button
+                  onClick={() => setDateFilter('today')}
+                  className={`px-3 py-1.5 rounded-lg transition ${dateFilter === 'today' ? 'bg-amber-500 text-zinc-950 font-black' : 'text-zinc-400 hover:text-zinc-200'}`}
+                >
+                  {t.periodToday}
+                </button>
+                <button
+                  onClick={() => setDateFilter('7d')}
+                  className={`px-3 py-1.5 rounded-lg transition ${dateFilter === '7d' ? 'bg-amber-500 text-zinc-950 font-black' : 'text-zinc-400 hover:text-zinc-200'}`}
+                >
+                  {t.period7d}
+                </button>
+                <button
+                  onClick={() => setDateFilter('30d')}
+                  className={`px-3 py-1.5 rounded-lg transition ${dateFilter === '30d' ? 'bg-amber-500 text-zinc-950 font-black' : 'text-zinc-400 hover:text-zinc-200'}`}
+                >
+                  {t.period30d}
+                </button>
+                <button
+                  onClick={() => setDateFilter('month')}
+                  className={`px-3 py-1.5 rounded-lg transition ${dateFilter === 'month' ? 'bg-amber-500 text-zinc-950 font-black' : 'text-zinc-400 hover:text-zinc-200'}`}
+                >
+                  {t.periodMonth}
+                </button>
+                <button
+                  onClick={() => setDateFilter('all')}
+                  className={`px-3 py-1.5 rounded-lg transition ${dateFilter === 'all' ? 'bg-amber-500 text-zinc-950 font-black' : 'text-zinc-400 hover:text-zinc-200'}`}
+                >
+                  {t.periodAll}
+                </button>
+                <button
+                  onClick={() => setDateFilter('custom')}
+                  className={`px-3 py-1.5 rounded-lg transition ${dateFilter === 'custom' ? 'bg-amber-500 text-zinc-950 font-black' : 'text-zinc-400 hover:text-zinc-200'}`}
+                >
+                  {t.periodCustom}
+                </button>
+              </div>
+            </div>
+
+            {/* Dates personnalisées */}
+            {dateFilter === 'custom' && (
+              <div className="flex items-center gap-2 text-xs">
+                <input
+                  type="date"
+                  value={customStartDate}
+                  onChange={(e) => setCustomStartDate(e.target.value)}
+                  className={`px-3 py-1.5 rounded-xl border ${isDarkMode ? 'bg-zinc-950 border-zinc-800 text-zinc-200' : 'bg-white border-slate-300 text-slate-800'}`}
+                />
+                <span className="text-zinc-500">→</span>
+                <input
+                  type="date"
+                  value={customEndDate}
+                  onChange={(e) => setCustomEndDate(e.target.value)}
+                  className={`px-3 py-1.5 rounded-xl border ${isDarkMode ? 'bg-zinc-950 border-zinc-800 text-zinc-200' : 'bg-white border-slate-300 text-slate-800'}`}
+                />
+              </div>
+            )}
+
+            {/* Export Global de la vue active */}
             <button
-              onClick={() => fetchLiveNocoDB(currentUser.instance_name)}
-              className={`p-2 rounded-xl border transition flex items-center justify-center gap-1 text-xs font-bold ${
-                isDarkMode ? 'bg-zinc-900 border-zinc-800 text-zinc-300' : 'bg-white border-slate-200 text-slate-700 shadow-sm'
+              onClick={() => exportCSV(activeTab)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-bold transition ${
+                isDarkMode ? 'bg-zinc-950 border-zinc-800 hover:border-amber-500 text-zinc-300' : 'bg-white border-slate-200 hover:border-amber-500 text-slate-700 shadow-sm'
               }`}
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-amber-500' : ''}`} />
-              {t.refresh}
-            </button>
-
-            <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              {t.whatsappConnected}
-            </span>
-
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className={`p-2 rounded-xl border transition flex items-center justify-center ${
-                isDarkMode ? 'bg-zinc-900 border-zinc-800 text-amber-400' : 'bg-white border-slate-200 text-slate-700 shadow-sm'
-              }`}
-            >
-              {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </button>
-
-            <button
-              onClick={() => setLang(lang === 'ar' ? 'en' : 'ar')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-bold transition ${
-                isDarkMode ? 'bg-zinc-900 border-zinc-800 text-zinc-200' : 'bg-white border-slate-200 text-slate-800 shadow-sm'
-              }`}
-            >
-              <Globe className="w-3.5 h-3.5 text-amber-500" />
-              {lang === 'ar' ? 'English' : 'العربية'}
-            </button>
-
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-rose-900/40 bg-rose-500/10 text-rose-400 text-xs font-bold hover:bg-rose-500/20 transition"
-              title="Déconnexion"
-            >
-              <LogOut className="w-3.5 h-3.5" />
-              {t.logout}
+              <Download className="w-3.5 h-3.5 text-amber-500" />
+              {t.exportCSV}
             </button>
           </div>
         </header>
 
-        {/* BARRE DE NAVIGATION DES ONGLETS */}
-        <div className="flex border-b border-zinc-800 gap-4">
+        {/* ================= ONGLETS DE NAVIGATION ================= */}
+        <div className="flex border-b border-zinc-800 gap-4 md:gap-8 text-sm font-bold">
           <button
             onClick={() => setActiveTab('reviews')}
-            className={`pb-3 text-sm font-bold transition border-b-2 flex items-center gap-2 ${
+            className={`pb-3 flex items-center gap-2 border-b-2 transition ${
               activeTab === 'reviews' 
-                ? 'border-amber-500 text-amber-500' 
+                ? 'border-amber-500 text-amber-400' 
                 : 'border-transparent text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            <MessageSquare className="w-4 h-4" />
-            {t.tabReviews}
+            <Star className="w-4 h-4" />
+            {t.tabReviews} ({filteredReviews.length})
+          </button>
+
+          <button
+            onClick={() => setActiveTab('loyalty')}
+            className={`pb-3 flex items-center gap-2 border-b-2 transition ${
+              activeTab === 'loyalty' 
+                ? 'border-amber-500 text-amber-400' 
+                : 'border-transparent text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <CreditCard className="w-4 h-4" />
+            {t.tabLoyalty} ({filteredLoyalty.length})
           </button>
 
           <button
             onClick={() => setActiveTab('leads')}
-            className={`pb-3 text-sm font-bold transition border-b-2 flex items-center gap-2 ${
+            className={`pb-3 flex items-center gap-2 border-b-2 transition ${
               activeTab === 'leads' 
                 ? 'border-emerald-500 text-emerald-400' 
                 : 'border-transparent text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            <Users className="w-4 h-4" />
-            {t.tabLeads} ({leads.length})
+            <Wifi className="w-4 h-4" />
+            {t.tabLeads} ({filteredLeads.length})
           </button>
         </div>
 
-        {/* ONGLET 1 : AVIS & METRIQUES */}
+        {/* ================= ONGLET 1 : AVIS & E-REPUTATION ================= */}
         {activeTab === 'reviews' && (
-          <div className="space-y-8">
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className={`p-5 rounded-2xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800/80' : 'bg-white border-slate-200'}`}>
+          <div className="space-y-6">
+            
+            {/* KPIS REVIEWS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
                 <div className="flex justify-between items-center text-xs text-zinc-400">
-                  <span>{t.totalReviews}</span>
+                  <span>{t.kpiReviews}</span>
                   <MessageSquare className="w-4 h-4 text-amber-500" />
                 </div>
-                <p className="text-3xl font-black mt-3">{stats.totalReviews}</p>
+                <p className="text-3xl font-black mt-3">{stats.totalRev}</p>
+                <span className="text-[11px] text-zinc-500 mt-1 block">Sur la période</span>
               </div>
 
-              <div className={`p-5 rounded-2xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800/80' : 'bg-white border-slate-200'}`}>
+              <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
                 <div className="flex justify-between items-center text-xs text-zinc-400">
-                  <span>{t.avgRating}</span>
+                  <span>{t.kpiRating}</span>
                   <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
                 </div>
                 <p className="text-3xl font-black mt-3 text-amber-400">{stats.avgRating} <span className="text-sm text-zinc-500">/ 5</span></p>
+                <span className="text-[11px] text-emerald-400 font-bold mt-1 block">Excellence globale</span>
               </div>
 
-              <div className={`p-5 rounded-2xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800/80' : 'bg-white border-slate-200'}`}>
+              <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
                 <div className="flex justify-between items-center text-xs text-zinc-400">
-                  <span>{t.satisfactionRate}</span>
-                  <span className="text-emerald-500">👍</span>
+                  <span>{t.kpiSatisfaction}</span>
+                  <ThumbsUp className="w-4 h-4 text-emerald-400" />
                 </div>
-                <p className="text-3xl font-black mt-3 text-emerald-400">{stats.satisfactionRate}</p>
+                <p className="text-3xl font-black mt-3 text-emerald-400">{stats.satisfaction}</p>
+                <span className="text-[11px] text-zinc-500 mt-1 block">{stats.positiveRev} avis positifs</span>
               </div>
 
-              <div className={`p-5 rounded-2xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800/80' : 'bg-white border-slate-200'}`}>
+              <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
                 <div className="flex justify-between items-center text-xs text-zinc-400">
-                  <span>{t.rewardsGiven}</span>
-                  <Gift className="w-4 h-4 text-amber-500" />
+                  <span>{t.kpiGoogleReviews}</span>
+                  <ArrowUpRight className="w-4 h-4 text-blue-400" />
                 </div>
-                <p className="text-3xl font-black mt-3">{stats.rewardsCount}</p>
-                <span className="text-[10px] text-amber-500 font-bold mt-1 inline-block">{rewardOffer}</span>
+                <p className="text-3xl font-black mt-3 text-blue-400">{stats.positiveRev}</p>
+                <span className="text-[11px] text-blue-400/80 font-bold mt-1 block">Publiés vers Google Maps</span>
               </div>
-            </section>
 
+              <div className={`p-5 rounded-3xl border transition shadow-sm ${
+                negativeReviews.length > 0 
+                  ? 'bg-rose-950/20 border-rose-800/40 text-rose-200' 
+                  : isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'
+              }`}>
+                <div className="flex justify-between items-center text-xs text-rose-400 font-bold">
+                  <span>{t.kpiNegativeAlerts}</span>
+                  <AlertTriangle className="w-4 h-4 text-rose-500" />
+                </div>
+                <p className="text-3xl font-black mt-3 text-rose-500">{negativeReviews.length}</p>
+                <span className="text-[11px] text-rose-400 font-bold mt-1 block">Interceptés en privé</span>
+              </div>
+            </div>
+
+            {/* ================= ALERTE ROUGE : AVIS NEGATIFS INTERCEPTES ================= */}
             {negativeReviews.length > 0 && (
-              <section className={`rounded-2xl p-6 border transition ${isDarkMode ? 'bg-rose-950/20 border-rose-900/40' : 'bg-rose-50 border-rose-200'}`}>
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-rose-500/10 rounded-xl text-rose-500 border border-rose-500/20">
-                    <AlertTriangle className="w-5 h-5 animate-bounce" />
+              <section className={`rounded-3xl p-6 border-2 transition shadow-xl ${
+                isDarkMode ? 'bg-rose-950/25 border-rose-600/40 shadow-rose-950/30' : 'bg-rose-50 border-rose-300 shadow-rose-100'
+              }`}>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-5">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-rose-500/20 rounded-2xl text-rose-400 border border-rose-500/30 animate-pulse">
+                      <AlertTriangle className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h2 className="font-black text-base md:text-lg text-rose-500">{t.negativeAlertTitle}</h2>
+                      <p className="text-xs text-rose-300/80">
+                        {negativeReviews.length} client(s) insatisfait(s) intercepté(s) avant toute publication publique sur Google Maps.
+                      </p>
+                    </div>
                   </div>
-                  <h2 className={`font-bold text-base ${isDarkMode ? 'text-rose-200' : 'text-rose-900'}`}>{t.negativeAlertTitle}</h2>
+                  <span className="text-xs font-black bg-rose-500 text-zinc-950 px-3 py-1 rounded-full uppercase tracking-wider">
+                    Action Requise
+                  </span>
                 </div>
 
-                <div className="space-y-3">
-                  {negativeReviews.map((rev) => (
-                    <div key={rev.Id} className={`p-4 rounded-xl border transition ${
-                      resolvedIssues.includes(rev.Id) 
-                        ? (isDarkMode ? 'bg-zinc-900/40 border-zinc-800 opacity-60' : 'bg-slate-100 border-slate-200 opacity-60')
-                        : (isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-rose-100 shadow-sm')
-                    }`}>
-                      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-                        <div className="space-y-1">
-                          <span className="bg-rose-500/10 text-rose-500 font-bold text-xs px-2.5 py-0.5 rounded border border-rose-500/20">
-                            ⭐️ {rev.rating || 2}/5 - {t.negative}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {negativeReviews.map((rev) => {
+                    const isResolved = resolvedIssues.includes(rev.Id);
+                    return (
+                      <div 
+                        key={rev.Id} 
+                        className={`p-5 rounded-2xl border transition relative space-y-3 ${
+                          isResolved 
+                            ? isDarkMode ? 'bg-zinc-900/50 border-zinc-800 opacity-60' : 'bg-slate-100 border-slate-200 opacity-60'
+                            : isDarkMode ? 'bg-zinc-900 border-rose-900/50 shadow-lg' : 'bg-white border-rose-200 shadow-md'
+                        }`}
+                      >
+                        <div className="flex justify-between items-start">
+                          <span className="bg-rose-500/10 text-rose-400 font-extrabold text-xs px-3 py-1 rounded-lg border border-rose-500/20 flex items-center gap-1">
+                            ⭐️ {rev.rating || 2}/5 • Alerte Interceptée
                           </span>
-                          <p className={`text-sm font-semibold mt-1 ${isDarkMode ? 'text-zinc-200' : 'text-slate-800'}`}>
-                            "{getReviewText(rev)}"
-                          </p>
-                          <p className={`text-xs ${isDarkMode ? 'text-zinc-500' : 'text-slate-500'}`}>
-                            الهاتف: <span className="font-mono">+{rev.client_phone?.trim()}</span>
-                          </p>
+                          <span className="text-[11px] text-zinc-500">
+                            {rev.CreatedAt ? new Date(rev.CreatedAt).toLocaleDateString() : 'Récemment'}
+                          </span>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          <a 
-                            href={`tel:+${rev.client_phone?.trim()}`}
-                            className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-600 text-zinc-950 font-bold text-xs px-4 py-2.5 rounded-xl transition"
-                          >
-                            <Phone className="w-3.5 h-3.5" />
-                            {t.callClient}
-                          </a>
-                          <button
-                            onClick={() => toggleResolve(rev.Id)}
-                            className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 rounded-xl border transition ${
-                              resolvedIssues.includes(rev.Id)
-                                ? 'bg-emerald-500/20 text-emerald-500 border-emerald-500/30'
-                                : (isDarkMode ? 'bg-zinc-800 border-zinc-700' : 'bg-slate-100 border-slate-200')
-                            }`}
-                          >
-                            <CheckCircle className="w-3.5 h-3.5" />
-                            {resolvedIssues.includes(rev.Id) ? t.resolved : t.markResolved}
-                          </button>
+                        <p className={`text-sm font-semibold italic ${isDarkMode ? 'text-zinc-200' : 'text-slate-800'}`}>
+                          "{getReviewText(rev)}"
+                        </p>
+
+                        <div className="pt-2 border-t border-zinc-800/80 flex flex-wrap items-center justify-between gap-3">
+                          <div className="text-xs">
+                            <span className="text-zinc-500">Client : </span>
+                            <span className="font-mono font-bold text-zinc-300">+{rev.client_phone?.trim() || "Non renseigné"}</span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {rev.client_phone && (
+                              <a
+                                href={`tel:+${rev.client_phone.trim()}`}
+                                className="flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-xs px-3.5 py-2 rounded-xl transition shadow-md"
+                              >
+                                <Phone className="w-3.5 h-3.5" />
+                                {t.callClient}
+                              </a>
+                            )}
+                            <button
+                              onClick={() => toggleResolve(rev.Id)}
+                              className={`flex items-center gap-1.5 text-xs font-bold px-3.5 py-2 rounded-xl border transition ${
+                                isResolved
+                                  ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
+                                  : isDarkMode ? 'bg-zinc-800 border-zinc-700 text-zinc-300' : 'bg-slate-100 border-slate-300 text-slate-700'
+                              }`}
+                            >
+                              <CheckCircle className="w-3.5 h-3.5" />
+                              {isResolved ? t.resolved : t.markResolved}
+                            </button>
+                          </div>
                         </div>
+
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </section>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* ================= FLUX DE TOUS LES AVIS ================= */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              
+              {/* Liste filtrable des avis */}
               <div className="lg:col-span-2 space-y-4">
-                <div className="flex justify-between items-center">
-                  <h2 className="font-bold text-lg">{t.feedTitle}</h2>
-                  <span className={`text-xs px-3 py-1.5 rounded-xl border font-semibold ${isDarkMode ? 'bg-zinc-900 border-zinc-800 text-amber-500' : 'bg-white border-slate-200 text-amber-600 shadow-sm'}`}>
-                    {t.allRatings} ({reviews.length})
-                  </span>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                  <h2 className="text-lg font-extrabold flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5 text-amber-500" />
+                    {t.feedTitle}
+                  </h2>
+
+                  {/* Filtre par note */}
+                  <div className={`flex items-center p-1 rounded-xl border text-xs font-bold ${
+                    isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-slate-200'
+                  }`}>
+                    <button
+                      onClick={() => setRatingFilter('all')}
+                      className={`px-2.5 py-1 rounded-lg transition ${ratingFilter === 'all' ? 'bg-amber-500 text-zinc-950 font-black' : 'text-zinc-400'}`}
+                    >
+                      {t.allRatings}
+                    </button>
+                    <button
+                      onClick={() => setRatingFilter('positive')}
+                      className={`px-2.5 py-1 rounded-lg transition ${ratingFilter === 'positive' ? 'bg-emerald-500 text-zinc-950 font-black' : 'text-zinc-400'}`}
+                    >
+                      4-5★
+                    </button>
+                    <button
+                      onClick={() => setRatingFilter('negative')}
+                      className={`px-2.5 py-1 rounded-lg transition ${ratingFilter === 'negative' ? 'bg-rose-500 text-zinc-950 font-black' : 'text-zinc-400'}`}
+                    >
+                      1-3★
+                    </button>
+                  </div>
                 </div>
 
-                {reviews.length === 0 ? (
-                  <div className={`p-8 text-center rounded-2xl border ${isDarkMode ? 'bg-zinc-900/50 border-zinc-800 text-zinc-500' : 'bg-white border-slate-200 text-slate-400'}`}>
+                {filteredReviews.length === 0 ? (
+                  <div className={`p-12 text-center rounded-3xl border ${
+                    isDarkMode ? 'bg-zinc-900/50 border-zinc-800 text-zinc-500' : 'bg-white border-slate-200 text-slate-400'
+                  }`}>
                     {t.noReviews}
                   </div>
                 ) : (
-                  reviews.map((rev) => (
-                    <div key={rev.Id} className={`p-4 rounded-xl border transition space-y-2 ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200 shadow-sm'}`}>
-                      <div className="flex justify-between items-start">
-                        <div className="flex items-center gap-2">
-                          <div className="flex text-amber-400">
-                            {'★'.repeat(Number(rev.rating) || 5)}
+                  <div className="space-y-3">
+                    {filteredReviews.map((rev) => {
+                      const isGood = Number(rev.rating) >= 4;
+                      return (
+                        <div 
+                          key={rev.Id} 
+                          className={`p-4 rounded-2xl border transition space-y-2 ${
+                            isDarkMode ? 'bg-zinc-900/70 border-zinc-800/80 hover:border-zinc-700' : 'bg-white border-slate-200 hover:border-slate-300 shadow-sm'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start">
+                            <div className="flex items-center gap-2">
+                              <div className="flex text-amber-400 text-sm">
+                                {'★'.repeat(Math.min(5, Number(rev.rating) || 5))}
+                                {'☆'.repeat(Math.max(0, 5 - (Number(rev.rating) || 5)))}
+                              </div>
+                              <span className={`text-[11px] font-bold px-2 py-0.5 rounded-md border ${
+                                isGood 
+                                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
+                                  : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                              }`}>
+                                {isGood ? 'Google Review ✓' : 'Interception Privée'}
+                              </span>
+                            </div>
+
+                            <span className="text-[11px] text-zinc-500 font-mono">
+                              {rev.CreatedAt ? new Date(rev.CreatedAt).toLocaleDateString() : 'Recent'}
+                            </span>
                           </div>
-                          <span className={`text-xs font-bold px-2 py-0.5 rounded border ${
-                            Number(rev.rating) >= 4 
-                              ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' 
-                              : 'bg-rose-500/10 text-rose-500 border-rose-500/20'
-                          }`}>
-                            {Number(rev.rating) >= 4 ? t.positive : t.negative}
-                          </span>
+
+                          <p className={`text-sm ${isDarkMode ? 'text-zinc-200' : 'text-slate-700'}`}>
+                            "{getReviewText(rev)}"
+                          </p>
+
+                          <div className="flex justify-between items-center text-xs text-zinc-500 pt-1">
+                            <span>Tél: <span className="font-mono text-zinc-400">+{rev.client_phone || 'Non précisé'}</span></span>
+                            <span>Branche: <span className="font-bold text-amber-500/80">{parseInstanceName(rev.instance_name)}</span></span>
+                          </div>
                         </div>
-                        <span className="text-xs text-zinc-500">{rev.language?.trim().toUpperCase() || 'FR'}</span>
-                      </div>
-                      <p className={`text-sm ${isDarkMode ? 'text-zinc-300' : 'text-slate-700'}`}>
-                        "{getReviewText(rev)}"
-                      </p>
-                      <div className={`text-xs flex justify-between border-t pt-2 ${isDarkMode ? 'border-zinc-800/60 text-zinc-500' : 'border-slate-100 text-slate-400'}`}>
-                        <span>+{rev.client_phone?.trim()}</span>
-                        <span>Google Review ✅</span>
-                      </div>
-                    </div>
-                  ))
+                      );
+                    })}
+                  </div>
                 )}
               </div>
 
-              <div className="space-y-4">
-                <h2 className="font-bold text-lg">{t.editRewardTitle}</h2>
-                <div className={`p-5 rounded-2xl border transition space-y-4 ${isDarkMode ? 'bg-zinc-900/90 border-zinc-800' : 'bg-white border-slate-200 shadow-sm'}`}>
+              {/* Colonne latérale : Offre Récompense & Paramètres */}
+              <div className="space-y-6">
+                <div className={`p-6 rounded-3xl border space-y-4 ${
+                  isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200 shadow-sm'
+                }`}>
                   <div className="flex items-center gap-3">
-                    <div className="p-3 bg-amber-500/10 text-amber-500 rounded-xl border border-amber-500/20">
-                      <Gift className="w-6 h-6" />
+                    <div className="p-2.5 bg-amber-500/10 text-amber-500 rounded-2xl border border-amber-500/20">
+                      <Gift className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className={`text-xs ${isDarkMode ? 'text-zinc-400' : 'text-slate-500'}`}>العرض الحالي / Current Offer</p>
-                      <p className="font-extrabold text-amber-500 text-base">{rewardOffer}</p>
+                      <h3 className="font-bold text-sm">{t.rewardTitle}</h3>
+                      <p className="text-xs text-zinc-500">{t.rewardDesc}</p>
                     </div>
                   </div>
 
-                  <form onSubmit={handleUpdateReward} className="space-y-3 pt-2">
+                  <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-center">
+                    <p className="text-xs text-amber-500 font-bold uppercase tracking-wider">Cadeau Actuel</p>
+                    <p className="text-base font-black text-amber-400 mt-1">{rewardOffer}</p>
+                  </div>
+
+                  <form onSubmit={handleUpdateReward} className="space-y-2">
                     <input
                       type="text"
                       value={newReward}
                       onChange={(e) => setNewReward(e.target.value)}
-                      placeholder={t.rewardPlaceholder}
-                      className={`w-full px-4 py-2.5 rounded-xl text-sm border focus:outline-none focus:border-amber-500 transition ${
-                        isDarkMode ? 'bg-zinc-950 border-zinc-800 text-zinc-100 placeholder-zinc-600' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
+                      placeholder="Ex: 1 Cookie ou Boisson offerte 🍪"
+                      className={`w-full text-xs px-3.5 py-2.5 rounded-xl border focus:outline-none focus:border-amber-500 transition ${
+                        isDarkMode ? 'bg-zinc-950 border-zinc-800 text-zinc-200' : 'bg-slate-100 border-slate-200 text-slate-800'
                       }`}
                     />
                     <button
                       type="submit"
-                      disabled={isUpdatingReward}
-                      className="w-full flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-zinc-950 font-bold text-xs py-3 rounded-xl transition shadow-md"
+                      disabled={isUpdatingReward || !newReward.trim()}
+                      className="w-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black text-xs py-2.5 rounded-xl transition shadow-md disabled:opacity-50"
                     >
-                      {isUpdatingReward ? <RefreshCw className="w-4 h-4 animate-spin" /> : <><Check className="w-4 h-4" />{t.save}</>}
+                      {isUpdatingReward ? <RefreshCw className="w-3.5 h-3.5 animate-spin mx-auto" /> : t.rewardBtn}
                     </button>
                   </form>
                 </div>
+
+                {/* Synthèse de conversion */}
+                <div className={`p-6 rounded-3xl border space-y-3 ${
+                  isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200 shadow-sm'
+                }`}>
+                  <h4 className="text-xs font-bold text-zinc-400 uppercase tracking-wider">Taux d'impact Smart Review</h4>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between text-zinc-300">
+                      <span>Avis positifs valorisés sur Google :</span>
+                      <span className="font-bold text-emerald-400">{stats.positiveRev}</span>
+                    </div>
+                    <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
+                      <div 
+                        className="bg-emerald-400 h-full rounded-full transition-all duration-500" 
+                        style={{ width: `${stats.totalRev > 0 ? (stats.positiveRev / stats.totalRev) * 100 : 100}%` }}
+                      />
+                    </div>
+
+                    <div className="flex justify-between text-zinc-300 pt-2">
+                      <span>Avis négatifs étouffés en interne :</span>
+                      <span className="font-bold text-rose-400">{stats.negativeRev}</span>
+                    </div>
+                    <div className="w-full bg-zinc-800 h-2 rounded-full overflow-hidden">
+                      <div 
+                        className="bg-rose-500 h-full rounded-full transition-all duration-500" 
+                        style={{ width: `${stats.totalRev > 0 ? (stats.negativeRev / stats.totalRev) * 100 : 0}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
               </div>
+
             </div>
+
           </div>
         )}
 
-        {/* ONGLET 2 : FICHIER CLIENTS & LEADS WIFI */}
-        {activeTab === 'leads' && (
+        {/* ================= ONGLET 2 : CARTES DE FIDELITE & RECOMPENSES ================= */}
+        {activeTab === 'loyalty' && (
           <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <div>
-                <h2 className="text-xl font-bold text-emerald-400">{t.tabLeads}</h2>
-                <p className="text-xs text-zinc-400 mt-0.5">قائمة أرقام هواتف العملاء المجمعة عبر الواي فاي والمنيو الرقمي</p>
+            
+            {/* KPIS FIDELITE */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
+                <div className="flex justify-between items-center text-xs text-zinc-400">
+                  <span>{t.kpiCardsTotal}</span>
+                  <CreditCard className="w-4 h-4 text-amber-500" />
+                </div>
+                <p className="text-3xl font-black mt-3">{stats.totalLoyal}</p>
+                <span className="text-[11px] text-zinc-500 mt-1 block">Clients porteurs d'une carte</span>
               </div>
 
-              <button
-                onClick={exportLeadsCSV}
-                disabled={leads.length === 0}
-                className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-zinc-950 font-black text-xs px-4 py-2.5 rounded-xl transition shadow-lg disabled:opacity-50"
-              >
-                <Download className="w-4 h-4" />
-                {t.exportBtn}
-              </button>
+              <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
+                <div className="flex justify-between items-center text-xs text-zinc-400">
+                  <span>{t.kpiCardsProgress}</span>
+                  <TrendingUp className="w-4 h-4 text-amber-400" />
+                </div>
+                <p className="text-3xl font-black mt-3 text-amber-400">{stats.inProgressCards}</p>
+                <span className="text-[11px] text-amber-500/80 font-bold mt-1 block">En cours de cumul (1-9 pts)</span>
+              </div>
+
+              <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
+                <div className="flex justify-between items-center text-xs text-zinc-400">
+                  <span>{t.kpiCardsCompleted}</span>
+                  <Award className="w-4 h-4 text-emerald-400" />
+                </div>
+                <p className="text-3xl font-black mt-3 text-emerald-400">{stats.completedCards}</p>
+                <span className="text-[11px] text-emerald-400 font-bold mt-1 block">Récompense VIP débloquée</span>
+              </div>
+
+              <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
+                <div className="flex justify-between items-center text-xs text-zinc-400">
+                  <span>{t.kpiVisits}</span>
+                  <Sparkles className="w-4 h-4 text-purple-400" />
+                </div>
+                <p className="text-3xl font-black mt-3 text-purple-400">{stats.totalVisits}</p>
+                <span className="text-[11px] text-zinc-500 mt-1 block">Passages enregistrés</span>
+              </div>
             </div>
 
-            <div className={`border rounded-2xl overflow-hidden ${isDarkMode ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-slate-200 shadow-sm'}`}>
-              {leads.length === 0 ? (
-                <div className="p-8 text-center text-zinc-500 text-sm font-medium">
+            {/* TABLEAU DES MEMBRES DU PROGRAMME DE FIDELITE */}
+            <div className={`rounded-3xl border overflow-hidden shadow-sm ${
+              isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'
+            }`}>
+              <div className="p-5 border-b border-zinc-800/80 flex justify-between items-center">
+                <h3 className="font-bold text-sm flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-amber-500" />
+                  Liste des Cartes Digitales ({filteredLoyalty.length})
+                </h3>
+                <button
+                  onClick={() => exportCSV('loyalty')}
+                  className="text-xs text-amber-500 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Exporter CSV
+                </button>
+              </div>
+
+              {filteredLoyalty.length === 0 ? (
+                <div className="p-12 text-center text-zinc-500 text-sm">
+                  {t.noLoyalty}
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead className={`border-b ${isDarkMode ? 'bg-zinc-950/60 border-zinc-800 text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-600'}`}>
+                      <tr>
+                        <th className="p-4 font-bold">Client / Téléphone</th>
+                        <th className="p-4 font-bold">Branche</th>
+                        <th className="p-4 font-bold">Progression Tampons (10 pts)</th>
+                        <th className="p-4 font-bold">Visites</th>
+                        <th className="p-4 font-bold">Scans IA</th>
+                        <th className="p-4 font-bold">Email</th>
+                        <th className="p-4 font-bold">Date Création</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-800/60">
+                      {filteredLoyalty.map((item: any) => {
+                        const stamps = Math.min(10, Math.max(0, Number(item.stamps_count) || 0));
+                        const isCompleted = stamps >= 10;
+                        return (
+                          <tr key={item.Id} className={isDarkMode ? 'hover:bg-zinc-800/30' : 'hover:bg-slate-50'}>
+                            <td className="p-4 font-mono font-bold text-zinc-200">
+                              +{item.client_phone?.trim()}
+                            </td>
+                            <td className="p-4 font-bold text-amber-500/80">
+                              {parseInstanceName(item.instance_name)}
+                            </td>
+                            <td className="p-4">
+                              <div className="flex items-center gap-3">
+                                <span className={`font-black text-xs px-2 py-0.5 rounded-md border ${
+                                  isCompleted 
+                                    ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' 
+                                    : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                                }`}>
+                                  {stamps}/10
+                                </span>
+                                <div className="w-24 bg-zinc-800 h-2 rounded-full overflow-hidden flex">
+                                  <div 
+                                    className={`h-full rounded-full ${isCompleted ? 'bg-emerald-400' : 'bg-amber-400'}`}
+                                    style={{ width: `${(stamps / 10) * 100}%` }}
+                                  />
+                                </div>
+                              </div>
+                            </td>
+                            <td className="p-4 font-bold text-zinc-300">
+                              {item.total_visits || stamps} {t.visits}
+                            </td>
+                            <td className="p-4 font-mono text-zinc-400">
+                              {item.ai_scans_count || 0}
+                            </td>
+                            <td className="p-4 text-zinc-400">
+                              {item.email || "—"}
+                            </td>
+                            <td className="p-4 text-zinc-500">
+                              {item.CreatedAt ? new Date(item.CreatedAt).toLocaleDateString() : 'Récemment'}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+          </div>
+        )}
+
+        {/* ================= ONGLET 3 : LEADS WI-FI & CONTACTS ================= */}
+        {activeTab === 'leads' && (
+          <div className="space-y-6">
+            
+            {/* KPIS LEADS */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
+                <div className="flex justify-between items-center text-xs text-zinc-400">
+                  <span>Total Leads Capturés</span>
+                  <Users className="w-4 h-4 text-emerald-400" />
+                </div>
+                <p className="text-3xl font-black mt-3 text-emerald-400">{filteredLeads.length}</p>
+                <span className="text-[11px] text-zinc-500 mt-1 block">Numéros opt-in conformes</span>
+              </div>
+
+              <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
+                <div className="flex justify-between items-center text-xs text-zinc-400">
+                  <span>Source Principale</span>
+                  <Wifi className="w-4 h-4 text-amber-500" />
+                </div>
+                <p className="text-xl font-black mt-3 text-zinc-200">Portail Captif Wi-Fi & QR</p>
+                <span className="text-[11px] text-zinc-500 mt-1 block">Accès Internet + Roue Cadeau</span>
+              </div>
+
+              <div className={`p-5 rounded-3xl border transition shadow-sm ${isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'}`}>
+                <div className="flex justify-between items-center text-xs text-zinc-400">
+                  <span>Export CRM Marketing</span>
+                  <Download className="w-4 h-4 text-blue-400" />
+                </div>
+                <button
+                  onClick={() => exportCSV('leads')}
+                  className="mt-3 w-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-xs py-2 rounded-xl transition shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  Télécharger la base CSV
+                </button>
+                <span className="text-[10px] text-zinc-500 mt-1 text-center block">Prêt pour WhatsApp Broadcast & SMS</span>
+              </div>
+            </div>
+
+            {/* TABLEAU DES LEADS */}
+            <div className={`rounded-3xl border overflow-hidden shadow-sm ${
+              isDarkMode ? 'bg-zinc-900/80 border-zinc-800' : 'bg-white border-slate-200'
+            }`}>
+              <div className="p-5 border-b border-zinc-800/80 flex justify-between items-center">
+                <h3 className="font-bold text-sm flex items-center gap-2">
+                  <Wifi className="w-4 h-4 text-emerald-400" />
+                  Base Contacts Capturés ({filteredLeads.length})
+                </h3>
+              </div>
+
+              {filteredLeads.length === 0 ? (
+                <div className="p-12 text-center text-zinc-500 text-sm">
                   {t.noLeads}
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-start text-sm">
-                    <thead className={`text-xs border-b ${isDarkMode ? 'bg-zinc-950/60 border-zinc-800 text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-600'}`}>
+                  <table className="w-full text-left text-xs">
+                    <thead className={`border-b ${isDarkMode ? 'bg-zinc-950/60 border-zinc-800 text-zinc-400' : 'bg-slate-100 border-slate-200 text-slate-600'}`}>
                       <tr>
-                        <th className="p-4 text-start">{t.phoneCol}</th>
-                        <th className="p-4 text-start">{t.sourceCol}</th>
-                        <th className="p-4 text-start">{t.dateCol}</th>
+                        <th className="p-4 font-bold">Numéro de Téléphone</th>
+                        <th className="p-4 font-bold">Branche / Établissement</th>
+                        <th className="p-4 font-bold">Source</th>
+                        <th className="p-4 font-bold">Date de Capture</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-800/60">
-                      {leads.map((lead, idx) => (
-                        <tr key={lead.Id || idx} className="hover:bg-zinc-800/30 transition">
-                          <td className="p-4 font-mono font-bold text-amber-400">
+                      {filteredLeads.map((lead: any) => (
+                        <tr key={lead.Id} className={isDarkMode ? 'hover:bg-zinc-800/30' : 'hover:bg-slate-50'}>
+                          <td className="p-4 font-mono font-bold text-zinc-200">
                             +{lead.client_phone?.trim()}
                           </td>
+                          <td className="p-4 font-bold text-amber-500/80">
+                            {parseInstanceName(lead.instance_name)}
+                          </td>
                           <td className="p-4">
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                              <Wifi className="w-3 h-3" />
-                              {lead.source || 'WiFi'}
+                            <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded text-[11px] font-bold">
+                              {lead.source || "Wi-Fi Opt-in"}
                             </span>
                           </td>
-                          <td className="p-4 text-xs text-zinc-400">
-                            {lead.CreatedAt ? new Date(lead.CreatedAt).toLocaleDateString() : 'Recent'}
+                          <td className="p-4 text-zinc-400">
+                            {lead.CreatedAt ? new Date(lead.CreatedAt).toLocaleString() : "Récemment"}
                           </td>
                         </tr>
                       ))}
@@ -758,6 +1501,7 @@ export default function SmartReviewDashboard() {
                 </div>
               )}
             </div>
+
           </div>
         )}
 
