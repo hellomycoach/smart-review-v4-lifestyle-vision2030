@@ -327,16 +327,18 @@ export const DEFAULT_MENU_ITEMS: MenuItem[] = [
 
 // --- CATALOGUE SPÉCIFIQUE BO'S COFFEE ASPIRE PARK (bos_cafe_aspire) ---
 export const BOS_CAFE_ASPIRE_CATEGORIES: MenuCategory[] = [
-  { id: "all", name: { ar: "الكل (70)", fr: "Tout le menu (70)", en: "All Menu (70)" }, icon: "Coffee" },
+  { id: "all", name: { ar: "الكل (121)", fr: "Tout le menu (121)", en: "All Menu (121)" }, icon: "Coffee" },
   { id: "special_food", name: { ar: "أطباق خاصة وفطور", fr: "Plats Spéciaux & Petit-Déj", en: "Special Food & Breakfast" }, icon: "Sparkles" },
   { id: "sandwiches", name: { ar: "ساندوتشات وتوناكادو", fr: "Sandwiches & Toasts", en: "Sandwiches & Melts" }, icon: "Utensils" },
   { id: "pastas", name: { ar: "باستا إيطالية", fr: "Pâtes & Spécialités", en: "Pasta & Italian" }, icon: "Flame" },
-  { id: "combos", name: { ar: "وجبات كومبو اقتصادية", fr: "Formules & Combos", en: "Combos & Value Meals" }, icon: "UtensilsCrossed" },
-  { id: "cakes", name: { ar: "كيك وتشيز كيك", fr: "Gâteaux & Cheesecakes", en: "Cakes & Cheesecakes" }, icon: "Cake" },
-  { id: "bakery", name: { ar: "مخبوزات وكوكيز وموفن", fr: "Viennoiseries & Cookies", en: "Bakery & Muffins" }, icon: "Coffee" },
+  { id: "combos", name: { ar: "وجبات كومبو وريد بُل", fr: "Formules & Combos", en: "Combos & Value Meals" }, icon: "UtensilsCrossed" },
+  { id: "froccino", name: { ar: "فروتشينو فرابيه", fr: "Froccinos Frappés", en: "Froccinos" }, icon: "Cake" },
+  { id: "freeze", name: { ar: "فريز وميلك شيك", fr: "Freezes & Milk-shakes", en: "Freezes & Shakes" }, icon: "Sparkles" },
+  { id: "cakes", name: { ar: "كيك وتشيز كيك وشوكولاتة", fr: "Gâteaux, Cheesecakes & Chocolats", en: "Cakes & Chocolates" }, icon: "Cake" },
+  { id: "bakery", name: { ar: "مخبوزات، كوكيز وشيبس", fr: "Viennoiseries, Cookies & Chips", en: "Bakery & Snacks" }, icon: "Coffee" },
   { id: "salads", name: { ar: "سلطات طازجة", fr: "Salades Fraîches", en: "Fresh Salads" }, icon: "Utensils" },
   { id: "coffee", name: { ar: "قهوة ساخنة ومثلجة", fr: "Cafés Chauds & Glacés", en: "Hot & Iced Coffee" }, icon: "Coffee" },
-  { id: "tea", name: { ar: "شاي وقهوة بريس", fr: "Thés & Infusions", en: "Hot Tea & Brewed" }, icon: "Coffee" },
+  { id: "tea", name: { ar: "شاي، بوبا وماتشا", fr: "Thés, Boba & Matcha", en: "Tea, Boba & Matcha" }, icon: "Coffee" },
   { id: "mojitos", name: { ar: "موهيتو منعش", fr: "Mojitos Frais", en: "Mojitos & Drinks" }, icon: "Sparkles" }
 ];
 
