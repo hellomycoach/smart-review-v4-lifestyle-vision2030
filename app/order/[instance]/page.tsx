@@ -39,6 +39,75 @@ export interface CartItem {
   itemTotal: number;
 }
 
+// Normalisation de texte (minuscules, sans accents)
+function normalizeText(text: string): string {
+  if (!text) return '';
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+// Tolérance aux fautes de frappe (Levenshtein simple, distance <= 1 ou 2)
+function isFuzzyMatch(wordA: string, wordB: string): boolean {
+  if (!wordA || !wordB) return false;
+  if (wordA === wordB) return true;
+  if (wordA.length < 3 || wordB.length < 3) return false;
+  if (Math.abs(wordA.length - wordB.length) > 2) return false;
+
+  // Préfixe direct (ex: salad -> salads, dessert -> dessertr)
+  if (wordA.startsWith(wordB) || wordB.startsWith(wordA)) return true;
+
+  const m = wordA.length;
+  const n = wordB.length;
+  const d: number[][] = [];
+  for (let i = 0; i <= m; i++) d[i] = [i];
+  for (let j = 0; j <= n; j++) d[0][j] = j;
+
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = wordA[i - 1] === wordB[j - 1] ? 0 : 1;
+      d[i][j] = Math.min(
+        d[i - 1][j] + 1,
+        d[i][j - 1] + 1,
+        d[i - 1][j - 1] + cost
+      );
+    }
+  }
+  const maxDistance = Math.min(m, n) >= 7 ? 2 : 1;
+  return d[m][n] <= maxDistance;
+}
+
+// Dictionnaire des synonymes culinaires pour recherche universelle
+const SEARCH_SYNONYMS: Record<string, string[]> = {
+  dessert: ['cake', 'cheesecake', 'brownie', 'gateau', 'chocolat', 'sweet', 'croffle', 'tiramisu', 'halwa', 'حلويات', 'حلى', 'كيك', 'شوكولاتة', 'cakes'],
+  desserts: ['cake', 'cheesecake', 'brownie', 'gateau', 'chocolat', 'sweet', 'croffle', 'tiramisu', 'halwa', 'حلويات', 'حلى', 'كيك', 'شوكولاتة', 'cakes'],
+  dessertr: ['cake', 'cheesecake', 'brownie', 'gateau', 'chocolat', 'sweet', 'croffle', 'tiramisu', 'halwa', 'حلويات', 'حلى', 'كيك', 'شوكولاتة', 'cakes'],
+  gateau: ['cake', 'cheesecake', 'brownie', 'tiramisu', 'dessert', 'cakes'],
+  gateaux: ['cake', 'cheesecake', 'brownie', 'tiramisu', 'dessert', 'cakes'],
+  cake: ['cheesecake', 'brownie', 'dessert', 'tiramisu', 'gateau', 'cakes'],
+  cakes: ['cheesecake', 'brownie', 'dessert', 'tiramisu', 'gateau', 'cake'],
+  salad: ['salads', 'salade', 'salades', 'halloumi', 'fiesta', 'couscous', 'farfalle', 'سلطة', 'سلطات'],
+  salads: ['salad', 'salade', 'salades', 'halloumi', 'fiesta', 'couscous', 'farfalle', 'سلطة', 'سلطات'],
+  salade: ['salad', 'salads', 'salades', 'halloumi', 'fiesta', 'couscous', 'farfalle', 'سلطة', 'سلطات'],
+  salades: ['salad', 'salads', 'salade', 'halloumi', 'fiesta', 'couscous', 'farfalle', 'سلطة', 'سلطات'],
+  pasta: ['pastas', 'pomodoro', 'pesto', 'carbonara', 'spaghetti', 'pates', 'pâtes', 'باستا', 'مكرونة'],
+  pastas: ['pasta', 'pomodoro', 'pesto', 'carbonara', 'spaghetti', 'pates', 'pâtes', 'باستا', 'مكرونة'],
+  pates: ['pasta', 'pastas', 'pomodoro', 'pesto', 'carbonara', 'spaghetti', 'pâtes'],
+  sandwich: ['sandwiches', 'tunacado', 'toast', 'croissant', 'melt', 'ساندوتش', 'ساندوتشات'],
+  sandwiches: ['sandwich', 'tunacado', 'toast', 'croissant', 'melt', 'ساندوتش', 'ساندوتشات'],
+  breakfast: ['petit-dejeuner', 'croissant', 'toast', 'egg', 'avocado', 'pancake', 'omelette', 'فطور', 'صباح', 'special_food'],
+  coffee: ['espresso', 'latte', 'cappuccino', 'americano', 'cortado', 'mocha', 'cafe', 'café', 'قهوة', 'اسبريسو'],
+  cafe: ['coffee', 'espresso', 'latte', 'cappuccino', 'americano', 'cortado', 'mocha', 'café', 'قهوة', 'اسبريسو'],
+  drink: ['drinks', 'beverage', 'beverages', 'boisson', 'boissons', 'juice', 'water', 'mojito', 'redbull', 'مشروب', 'مشروبات', 'عصير'],
+  drinks: ['drink', 'beverage', 'beverages', 'boisson', 'boissons', 'juice', 'water', 'mojito', 'redbull', 'مشروب', 'مشروبات', 'عصير'],
+  boisson: ['drink', 'drinks', 'beverage', 'beverages', 'boissons', 'juice', 'water', 'mojito', 'redbull', 'مشروب', 'مشروبات'],
+  boissons: ['drink', 'drinks', 'beverage', 'beverages', 'boisson', 'juice', 'water', 'mojito', 'redbull', 'مشروب', 'مشروبات'],
+  snack: ['snacks', 'chips', 'patatina', 'chocolat', 'chocolate', 'biscuit', 'رقائق', 'شيبس'],
+  chips: ['snacks', 'patatina', 'رقائق', 'شيبس']
+};
+
 function TableOrderingContent() {
   const params = useParams();
   const searchParams = useSearchParams();
@@ -463,17 +532,63 @@ function TableOrderingContent() {
     return cartSubtotal + tipAmount;
   }, [cartSubtotal, tipAmount]);
 
-  // Filtrage des plats
+  // Filtrage intelligent des plats avec tolérance aux fautes et recherche universelle
   const filteredItems = useMemo(() => {
+    const rawQ = searchQuery.trim();
+    if (!rawQ) {
+      // Pas de recherche active : filtre classique par onglet de catégorie
+      return menuItems.filter(item => {
+        return selectedCategory === "all" || item.categoryId === selectedCategory;
+      });
+    }
+
+    // Recherche active : recherche sur TOUT le menu avec tolérance aux fautes et multilinguisme
+    const q = normalizeText(rawQ);
+    const qTokens = q.split(/\s+/).filter(Boolean);
+
+    // Expansion sémantique & synonymes (ex: dessert -> cakes, cheesecake, brownie, etc.)
+    const searchTerms = new Set<string>([q, ...qTokens]);
+    
+    // Vérification directe ou tolérante dans le dictionnaire des synonymes
+    for (const [key, synonyms] of Object.entries(SEARCH_SYNONYMS)) {
+      const normKey = normalizeText(key);
+      if (q === normKey || isFuzzyMatch(q, normKey) || qTokens.some(t => t === normKey || isFuzzyMatch(t, normKey))) {
+        synonyms.forEach(s => searchTerms.add(normalizeText(s)));
+      }
+    }
+
+    const searchTermsArr = Array.from(searchTerms);
+
     return menuItems.filter(item => {
-      const matchCat = selectedCategory === "all" || item.categoryId === selectedCategory;
-      const q = searchQuery.toLowerCase().trim();
-      const matchSearch = !q || 
-        item.name[lang].toLowerCase().includes(q) ||
-        item.description[lang].toLowerCase().includes(q);
-      return matchCat && matchSearch;
+      // 1. Textes de l'article dans toutes les langues (Arabe, Anglais, Français)
+      const searchableTexts = [
+        item.name.en, item.name.fr, item.name.ar,
+        item.description.en, item.description.fr, item.description.ar,
+        item.categoryId
+      ].map(normalizeText);
+
+      // Nom de la catégorie associée
+      const cat = categories.find(c => c.id === item.categoryId);
+      if (cat) {
+        searchableTexts.push(
+          normalizeText(cat.name.en),
+          normalizeText(cat.name.fr),
+          normalizeText(cat.name.ar)
+        );
+      }
+
+      // 2. Vérification correspondance exacte, sous-chaîne ou fuzzy
+      return searchTermsArr.some(term => {
+        return searchableTexts.some(text => {
+          if (!text) return false;
+          if (text.includes(term) || term.includes(text)) return true;
+          // Test fuzzy mot par mot
+          const words = text.split(/\s+/);
+          return words.some(w => isFuzzyMatch(w, term));
+        });
+      });
     });
-  }, [menuItems, selectedCategory, searchQuery, lang]);
+  }, [menuItems, selectedCategory, searchQuery, categories]);
 
   // Validation de la commande
   const handlePlaceOrder = async () => {
@@ -666,6 +781,10 @@ function TableOrderingContent() {
           <img 
             src={restaurant.coverImage} 
             alt={restaurant.name}
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=80';
+            }}
             className="w-full h-36 md:h-48 object-cover opacity-75 hover:scale-105 transition-transform duration-700"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#241E1A]/95 via-[#241E1A]/40 to-transparent flex flex-col justify-end p-5 text-white">
@@ -734,14 +853,32 @@ function TableOrderingContent() {
             )}
           </div>
 
+          {/* Indicateur de résultats de recherche */}
+          {searchQuery && (
+            <div className="flex items-center justify-between px-1 text-xs text-[#8C7A6B]">
+              <span className="font-semibold">
+                {filteredItems.length} {lang === 'ar' ? 'نتيجة مطابقة في كامل القائمة' : lang === 'fr' ? 'résultats trouvés sur toute la carte' : 'results found across all menu'}
+              </span>
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="text-[#8C6D48] hover:text-[#3D352E] font-bold underline"
+              >
+                {lang === 'ar' ? 'مسح البحث' : lang === 'fr' ? 'Effacer' : 'Clear'}
+              </button>
+            </div>
+          )}
+
           {/* Onglets des catégories (Scroll horizontal doux) */}
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none no-scrollbar">
             {categories.map((cat) => {
-              const isSelected = selectedCategory === cat.id;
+              const isSelected = selectedCategory === cat.id && !searchQuery;
               return (
                 <button
                   key={cat.id}
-                  onClick={() => setSelectedCategory(cat.id)}
+                  onClick={() => {
+                    setSelectedCategory(cat.id);
+                    if (searchQuery) setSearchQuery('');
+                  }}
                   className={`flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all duration-200 shrink-0 ${
                     isSelected
                       ? 'bg-[#3D352E] text-[#FAF8F5] shadow-md scale-[1.02]'
@@ -763,9 +900,25 @@ function TableOrderingContent() {
       <main className="max-w-4xl mx-auto px-4 py-6">
         {filteredItems.length === 0 ? (
           <div className="text-center py-16 bg-[#F3ECE2] rounded-3xl border border-[#E0D5C7] p-8">
-            <Utensils className="w-12 h-12 text-[#9E8C7D] mx-auto mb-3 opacity-60" />
-            <h3 className="text-lg font-bold text-[#3D352E] mb-1">{t.emptyCart}</h3>
-            <p className="text-sm text-[#7A695B]">{t.emptyCartSub}</p>
+            <Search className="w-12 h-12 text-[#9E8C7D] mx-auto mb-3 opacity-60" />
+            <h3 className="text-lg font-bold text-[#3D352E] mb-1">
+              {searchQuery 
+                ? (lang === 'ar' ? `لا توجد نتائج مطابقة لـ "${searchQuery}"` : lang === 'fr' ? `Aucun plat ne correspond à "${searchQuery}"` : `No dishes match "${searchQuery}"`)
+                : t.emptyCart}
+            </h3>
+            <p className="text-sm text-[#7A695B] max-w-sm mx-auto">
+              {searchQuery 
+                ? (lang === 'ar' ? 'جرب البحث بكلمات أخرى مثل سلطة، كيك، باستا، ساندوتش أو قهوة' : lang === 'fr' ? 'Essayez avec un autre mot comme salade, café, pâtes, gâteau ou burger' : 'Try searching for salad, coffee, pasta, cake, or sandwich')
+                : t.emptyCartSub}
+            </p>
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="mt-4 px-5 py-2 rounded-full bg-[#3D352E] text-white text-xs font-bold hover:bg-[#241E1A] transition-all shadow"
+              >
+                {lang === 'ar' ? 'عرض كل القائمة' : lang === 'fr' ? 'Afficher tout le menu' : 'View all menu'}
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -787,6 +940,10 @@ function TableOrderingContent() {
                       <img 
                         src={item.image} 
                         alt={item.name[lang]}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80';
+                        }}
                         className={`w-full h-full object-cover transition-transform duration-500 ${!isOutOfStock ? 'group-hover:scale-108' : 'grayscale-[50%]'}`}
                       />
                       {isOutOfStock ? (
@@ -919,6 +1076,10 @@ function TableOrderingContent() {
               <img 
                 src={activeItem.image} 
                 alt={activeItem.name[lang]} 
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80';
+                }}
                 className="w-full h-full object-cover"
               />
               <button 
