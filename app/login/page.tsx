@@ -447,34 +447,41 @@ export default function SmartReviewDashboard() {
 
   // 1. Restaurer la session locale et la langue au démarrage
   useEffect(() => {
-    const savedLang = localStorage.getItem('smart_review_lang') as 'fr' | 'ar' | 'en';
-    if (savedLang && ['fr', 'en', 'ar'].includes(savedLang)) {
-      setLang(savedLang);
-    }
+    try {
+      const savedLang = localStorage.getItem('smart_review_lang') as 'fr' | 'ar' | 'en';
+      if (savedLang && ['fr', 'en', 'ar'].includes(savedLang)) {
+        setLang(savedLang);
+      }
 
-    let savedUser = localStorage.getItem('smart_review_session_v4');
-    if (!savedUser) {
-      const oldSession = localStorage.getItem('smart_review_session_v2');
-      if (oldSession) {
-        savedUser = oldSession;
-        localStorage.setItem('smart_review_session_v4', oldSession);
+      let savedUser = localStorage.getItem('smart_review_session_v4');
+      if (!savedUser) {
+        const oldSession = localStorage.getItem('smart_review_session_v2');
+        if (oldSession) {
+          savedUser = oldSession;
+        }
       }
-    }
-    if (savedUser) {
-      try {
-        const user = JSON.parse(savedUser);
-        setCurrentUser(user);
-        setSelectedInstance(user.instance_name || 'all_franchise');
-        fetchAllData(user);
-      } catch (e) {
-        localStorage.removeItem('smart_review_session_v4');
+      if (savedUser) {
+        const rawUser = JSON.parse(savedUser);
+        if (rawUser && rawUser.email) {
+          const user = {
+            email: String(rawUser.email || "").trim(),
+            instance_name: parseInstanceName(rawUser.instance_name),
+            restaurant_name: parseInstanceName(rawUser.restaurant_name || rawUser.instance_name),
+            role: (rawUser.role === 'admin' || String(rawUser.email).toLowerCase().includes('jdaproai.com')) ? 'admin' : (rawUser.role || 'manager')
+          };
+          setCurrentUser(user);
+          setSelectedInstance(user.instance_name || 'all_franchise');
+          fetchAllData(user);
+        }
       }
-    }
-    const savedResolved = localStorage.getItem('smart_review_resolved_issues');
-    if (savedResolved) {
-      try {
+      const savedResolved = localStorage.getItem('smart_review_resolved_issues');
+      if (savedResolved) {
         setResolvedIssues(JSON.parse(savedResolved));
-      } catch (e) {}
+      }
+    } catch (e) {
+      console.warn("Session restore error reset:", e);
+      localStorage.removeItem('smart_review_session_v4');
+      localStorage.removeItem('smart_review_session_v2');
     }
   }, []);
 
@@ -559,8 +566,9 @@ export default function SmartReviewDashboard() {
           if (Array.isArray(directData.leads)) setRawLeads(directData.leads);
           if (Array.isArray(directData.restaurants)) {
             setAllRestaurants(directData.restaurants);
+            const cleanUserInst = parseInstanceName(user?.instance_name).toLowerCase();
             const currentMatch = directData.restaurants.find((r: any) => 
-              parseInstanceName(r.instance_name).toLowerCase() === user.instance_name.toLowerCase()
+              cleanUserInst && parseInstanceName(r.instance_name).toLowerCase() === cleanUserInst
             );
             if (currentMatch && currentMatch.reward_offer) {
               setRewardOffer(currentMatch.reward_offer);
@@ -578,8 +586,9 @@ export default function SmartReviewDashboard() {
         const restList = Array.isArray(restJson) ? restJson : (restJson.list || []);
         setAllRestaurants(restList);
 
+        const cleanUserInst = parseInstanceName(user?.instance_name).toLowerCase();
         const currentMatch = restList.find((r: any) => 
-          parseInstanceName(r.instance_name).toLowerCase() === user.instance_name.toLowerCase()
+          cleanUserInst && parseInstanceName(r.instance_name).toLowerCase() === cleanUserInst
         );
         if (currentMatch && currentMatch.reward_offer) {
           setRewardOffer(currentMatch.reward_offer);
@@ -640,7 +649,11 @@ export default function SmartReviewDashboard() {
   const currentBranchLabel = useMemo(() => {
     if (selectedInstance === 'all_franchise') {
       if (currentUser?.role === 'admin') return t.allBrandsAdmin;
-      const brandName = allowedRestaurants[0]?.restaurant_name?.split('-')[0]?.trim() || t.myFranchise;
+      const firstRest = allowedRestaurants[0];
+      const restName = typeof firstRest?.restaurant_name === 'string'
+        ? firstRest.restaurant_name
+        : parseInstanceName(firstRest?.instance_name);
+      const brandName = restName ? restName.split('-')[0]?.trim() : t.myFranchise;
       return `${brandName} (${t.allBranchesText})`;
     }
     const found = allowedRestaurants.find((r: any) => parseInstanceName(r.instance_name) === selectedInstance);
@@ -978,7 +991,7 @@ export default function SmartReviewDashboard() {
                     </span>
                   </div>
                   <p className="text-xs text-zinc-400">
-                    {currentUser.email} • {currentUser.role === 'admin' ? 'Super Admin' : `${t.franchiseLabel} : ${userFranchiseKey.toUpperCase()}`}
+                    {currentUser.email} • {currentUser.role === 'admin' ? 'Super Admin' : `${t.franchiseLabel} : ${(userFranchiseKey || '').toUpperCase()}`}
                   </p>
                 </div>
               </div>
