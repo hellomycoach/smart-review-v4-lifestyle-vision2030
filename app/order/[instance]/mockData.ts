@@ -325,6 +325,21 @@ export const DEFAULT_MENU_ITEMS: MenuItem[] = [
   }
 ];
 
+// --- CATALOGUE SPÉCIFIQUE BO'S COFFEE ASPIRE PARK (bos_cafe_aspire) ---
+export const BOS_CAFE_ASPIRE_CATEGORIES: MenuCategory[] = [
+  { id: "all", name: { ar: "الكل (70)", fr: "Tout le menu (70)", en: "All Menu (70)" }, icon: "Coffee" },
+  { id: "special_food", name: { ar: "أطباق خاصة وفطور", fr: "Plats Spéciaux & Petit-Déj", en: "Special Food & Breakfast" }, icon: "Sparkles" },
+  { id: "sandwiches", name: { ar: "ساندوتشات وتوناكادو", fr: "Sandwiches & Toasts", en: "Sandwiches & Melts" }, icon: "Utensils" },
+  { id: "pastas", name: { ar: "باستا إيطالية", fr: "Pâtes & Spécialités", en: "Pasta & Italian" }, icon: "Flame" },
+  { id: "combos", name: { ar: "وجبات كومبو اقتصادية", fr: "Formules & Combos", en: "Combos & Value Meals" }, icon: "UtensilsCrossed" },
+  { id: "cakes", name: { ar: "كيك وتشيز كيك", fr: "Gâteaux & Cheesecakes", en: "Cakes & Cheesecakes" }, icon: "Cake" },
+  { id: "bakery", name: { ar: "مخبوزات وكوكيز وموفن", fr: "Viennoiseries & Cookies", en: "Bakery & Muffins" }, icon: "Coffee" },
+  { id: "salads", name: { ar: "سلطات طازجة", fr: "Salades Fraîches", en: "Fresh Salads" }, icon: "Utensils" },
+  { id: "coffee", name: { ar: "قهوة ساخنة ومثلجة", fr: "Cafés Chauds & Glacés", en: "Hot & Iced Coffee" }, icon: "Coffee" },
+  { id: "tea", name: { ar: "شاي وقهوة بريس", fr: "Thés & Infusions", en: "Hot Tea & Brewed" }, icon: "Coffee" },
+  { id: "mojitos", name: { ar: "موهيتو منعش", fr: "Mojitos Frais", en: "Mojitos & Drinks" }, icon: "Sparkles" }
+];
+
 // --- CATALOGUE SPÉCIFIQUE BO'S COFFEE MALL OF QATAR (bos_cafe_moq) ---
 export const BOS_CAFE_CATEGORIES: MenuCategory[] = [
   { id: "all", name: { ar: "الكل (52)", fr: "Tout le menu (52)", en: "All Menu (52)" }, icon: "Coffee" },
@@ -367,6 +382,22 @@ export function getMenuForInstance(instanceName: string) {
         taxRate: 0.0,
         totalTables: 30,
         coverImage: "/images/restaurants/riwaq/beverages_assortment.jpg"
+      }
+    };
+  }
+
+  if (clean.includes('aspire')) {
+    return {
+      categories: BOS_CAFE_ASPIRE_CATEGORIES,
+      items: [],
+      restaurantInfo: {
+        name: "Bo's Coffee - Aspire Park",
+        city: "Doha",
+        country: "Qatar",
+        currency: "QAR",
+        taxRate: 0.0,
+        totalTables: 30,
+        coverImage: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1200&q=80"
       }
     };
   }
