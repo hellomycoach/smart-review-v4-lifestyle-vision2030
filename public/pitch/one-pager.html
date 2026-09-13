@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Smart Review AI - Investor & Incubator One-Pager | Autonomous Hospitality Revenue Engine">
+  <title>Smart Review AI • Executive One-Pager (Investor & Incubator Presentation)</title>
+  <style>
+    /* ==========================================================================
+       EXECUTIVE DESIGN SYSTEM (PREMIUM VENTURE GRADE)
+       ========================================================================== */
+    :root {
+      --primary: #0F172A;        /* Slate 900 */
+      --primary-dark: #020617;   /* Slate 950 */
+      --accent: #C59B27;         /* Gold / Warm Ochre */
+      --accent-light: #FEF9C3;   /* Soft Gold Foam */
+      --accent-border: #EAB308;
+      --emerald: #059669;       /* Positive ROI */
+      --emerald-light: #ECFDF5;
+      --bg-page: #F8FAFC;       /* Off-white canvas */
+      --surface: #FFFFFF;
+      --border: #E2E8F0;
+      --text-main: #0F172A;
+      --text-muted: #475569;
+      --text-light: #64748B;
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.4;
+      font-size: 13px;
+      -webkit-font-smoothing: antialiased;
+      padding: 24px 16px;
+    }
+
+    /* Print / Export Action Header */
+    .screen-header {
+      max-width: 1000px;
+      margin: 0 auto 16px auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--surface);
+      padding: 12px 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .btn-print {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--primary);
+      color: #FFFFFF;
+      padding: 8px 18px;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-print:hover {
+      background: #1E293B;
+      transform: translateY(-1px);
+    }
+
+    /* The One Pager Sheet (Standard A4 Proportions) */
+    .one-pager-sheet {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px 36px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    }
+
+    /* Header Block */
+    .sheet-header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--primary);
+      align-items: center;
+    }
+
+    .brand-title {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-pill {
+      font-size: 11px;
+      font-weight: 800;
+      background: var(--accent-light);
+      color: #854D0E;
+      border: 1px solid var(--accent-border);
+      padding: 3px 10px;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .brand-tagline {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+
+    .header-meta {
+      text-align: right;
+      font-size: 12px;
+      color: var(--text-light);
+    }
+
+    .header-meta strong {
+      color: var(--primary);
+    }
+
+    /* Core Layout: 3 Columns Grid */
+    .sheet-grid {
+      display: grid;
+      grid-template-columns: 1.15fr 1fr 1.05fr;
+      gap: 24px;
+      margin-top: 20px;
+    }
+
+    .col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    /* Section Cards */
+    .card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      position: relative;
+    }
+
+    .card.highlight-card {
+      background: #F8FAFC;
+      border-color: #CBD5E1;
+    }
+
+    .card-title {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--primary);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #F1F5F9;
+      padding-bottom: 6px;
+    }
+
+    .card-title .icon {
+      color: var(--accent);
+    }
+
+    /* Problem List */
+    .pain-point {
+      margin-bottom: 8px;
+      padding-left: 12px;
+      border-left: 3px solid #EF4444;
+    }
+
+    .pain-point:last-child {
+      margin-bottom: 0;
+    }
+
+    .pain-title {
+      font-weight: 700;
+      font-size: 12px;
+      color: #991B1B;
+    }
+
+    .pain-desc {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      line-height: 1.35;
+    }
+
+    /* Solution Flywheel */
+    .solution-item {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 9px;
+      align-items: flex-start;
+    }
+
+    .solution-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .sol-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--primary);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+      shrink: 0;
+      margin-top: 1px;
+    }
+
+    .sol-text strong {
+      display: block;
+      font-size: 12px;
+      color: var(--primary);
+    }
+
+    .sol-text span {
+      font-size: 11.5px;
+      color: var(--text-muted);
+    }
+
+    /* Market Opportunity Sizing (TAM / SAM / SOM) */
+    .market-box {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .market-tier {
+      background: #F1F5F9;
+      border-radius: 8px;
+      padding: 8px 10px;
+      text-align: center;
+      border: 1px solid #E2E8F0;
+    }
+
+    .market-tier.som {
+      background: var(--accent-light);
+      border-color: var(--accent-border);
+    }
+
+    .tier-lbl {
+      font-size: 9.5px;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--text-light);
+    }
+
+    .tier-val {
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--primary);
+      margin: 2px 0;
+    }
+
+    .tier-sub {
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 1.2;
+    }
+
+    .market-insight {
+      background: #F8FAFC;
+      border-left: 3px solid var(--accent);
+      padding: 8px 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      border-radius: 0 6px 6px 0;
+    }
+
+    /* Business Model & Unit Economics */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .metric-card {
+      background: #F8FAFC;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+    }
+
+    .metric-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-light);
+      text-transform: uppercase;
+    }
+
+    .metric-number {
+      font-size: 17px;
+      font-weight: 900;
+      color: var(--primary);
+      margin-top: 2px;
+    }
+
+    .metric-foot {
+      font-size: 9.5px;
+      color: var(--emerald);
+      font-weight: 700;
+    }
+
+    /* Traction & Validations */
+    .traction-badge {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 10px;
+      background: #F8FAFC;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font-size: 11.5px;
+      margin-bottom: 6px;
+    }
+
+    .traction-badge strong {
+      color: var(--primary);
+    }
+
+    .traction-badge .status {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--emerald);
+      background: var(--emerald-light);
+      padding: 2px 8px;
+      border-radius: 9999px;
+    }
+
+    /* Bottom Bar: The Ask & Milestones */
+    .sheet-bottom {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: grid;
+      grid-template-columns: 1.2fr 1.8fr;
+      gap: 20px;
+      align-items: center;
+      background: #F8FAFC;
+      padding: 16px 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .ask-box {
+      border-right: 1px solid #CBD5E1;
+      padding-right: 20px;
+    }
+
+    .ask-label {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #B45309;
+    }
+
+    .ask-amount {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--primary);
+    }
+
+    .ask-detail {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .milestone-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .step-item {
+      font-size: 11px;
+    }
+
+    .step-title {
+      font-weight: 800;
+      color: var(--primary);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .step-desc {
+      color: var(--text-light);
+      line-height: 1.3;
+    }
+
+    /* Footer */
+    .sheet-footer {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-light);
+      border-top: 1px solid #F1F5F9;
+      padding-top: 8px;
+    }
+
+    /* ==========================================================================
+       PRINT OPTIMIZATION (STRICT SINGLE A4 PAGE FORMAT)
+       ========================================================================== */
+    @media print {
+      body {
+        background: #FFFFFF;
+        padding: 0;
+        margin: 0;
+        font-size: 11.5px;
+      }
+
+      .screen-header {
+        display: none !important;
+      }
+
+      .one-pager-sheet {
+        box-shadow: none !important;
+        border: none !important;
+        padding: 12mm 14mm !important;
+        max-width: 100% !important;
+        page-break-inside: avoid;
+      }
+
+      .sheet-grid {
+        gap: 16px;
+        margin-top: 14px;
+      }
+
+      .card {
+        padding: 10px 12px;
+      }
+
+      .sheet-bottom {
+        margin-top: 14px;
+        padding: 12px 16px;
+      }
+
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .sheet-grid {
+        grid-template-columns: 1fr;
+      }
+      .sheet-bottom {
+        grid-template-columns: 1fr;
+      }
+      .ask-box {
+        border-right: none;
+        border-bottom: 1px solid #CBD5E1;
+        padding-bottom: 12px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Screen Top Bar with Print & Save as PDF -->
+  <div class="screen-header">
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span class="badge-pill">Investor & Incubator Ready</span>
+      <span style="font-size:12px; color:var(--text-muted); font-weight:600;">
+        Smart Review AI • Strategic Brief & Qatar Market Sizing
+      </span>
+    </div>
+    <button class="btn-print" onclick="window.print()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+      Print / Save as PDF (A4)
+    </button>
+  </div>
+
+  <!-- THE EXECUTIVE ONE-PAGER SHEET -->
+  <div class="one-pager-sheet">
+
+    <!-- HEADER BLOCK -->
+    <header class="sheet-header">
+      <div>
+        <div class="brand-title">
+          SMART REVIEW AI
+          <span class="badge-pill">B2B SaaS • F&B Hospitality</span>
+        </div>
+        <p class="brand-tagline">
+          The Autonomous Guest Revenue Engine: 0-App Table Ordering, Google Review Interception & Viral Loyalty.
+        </p>
+      </div>
+      <div class="header-meta">
+        <div><strong>Founders:</strong> Abdelwaheb & Team JDA Pro AI</div>
+        <div><strong>HQ & Launchpad:</strong> Doha, Qatar (Targeting GCC)</div>
+        <div><strong>Status:</strong> Live in Production • Real Franchise Clients</div>
+      </div>
+    </header>
+
+    <!-- MAIN 3-COLUMN BODY -->
+    <div class="sheet-grid">
+
+      <!-- COLUMN 1: THE PROBLEM & WHY NOW -->
+      <div class="col">
+        <div class="card">
+          <div class="card-title">
+            <span>1. The Acute Industry Pain</span>
+            <span class="icon">⚠️</span>
+          </div>
+          
+          <div class="pain-point">
+            <div class="pain-title">18%–28% Aggregator Commission Bleed</div>
+            <div class="pain-desc">
+              Platforms (Talabat, Snoonu, Deliveroo) capture customers, cannibalize dine-in margins, and withhold guest data.
+            </div>
+          </div>
+
+          <div class="pain-point" style="margin-top: 10px;">
+            <div class="pain-title">Silent Churn from Untreated Bad Reviews</div>
+            <div class="pain-desc">
+              A 0.5-star drop on Google Maps causes a 14% to 19% drop in footfall. Dissatisfied guests vent online instead of to management.
+            </div>
+          </div>
+
+          <div class="pain-point" style="margin-top: 10px;">
+            <div class="pain-title">Friction-Heavy Legacy Apps (Zero Retention)</div>
+            <div class="pain-desc">
+              87% of guests refuse to download mobile apps for a restaurant. Paper loyalty cards are lost, resulting in zero actionable CRM data.
+            </div>
+          </div>
+        </div>
+
+        <div class="card highlight-card">
+          <div class="card-title">
+            <span>2. Why Now in Qatar (Macro Tailwinds)</span>
+            <span class="icon">🇶🇦</span>
+          </div>
+          <div class="market-insight">
+            <strong>Qatar National Vision 2030 & Tourism Surge:</strong> Doha is transforming into a global gastronomic and lifestyle hub with major leisure expansions (Lusail, Msheireb, Aspire, The Pearl). High smartphone penetration (99%) and high disposable income demand contactless luxury hospitality.
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMN 2: THE 4-IN-1 INTEGRATED SOLUTION -->
+      <div class="col">
+        <div class="card">
+          <div class="card-title">
+            <span>3. The Integrated Solution Flywheel</span>
+            <span class="icon">⚡</span>
+          </div>
+
+          <div class="solution-item">
+            <div class="sol-icon">01</div>
+            <div class="sol-text">
+              <strong>0-App Instant Table Ordering</strong>
+              <span>Instant QR dine-in ordering in <3 sec. Trilingual (AR/EN/FR), smart fuzzy search, zero app download required.</span>
+            </div>
+          </div>
+
+          <div class="solution-item">
+            <div class="sol-icon">02</div>
+            <div class="sol-text">
+              <strong>Smart Review & Shield AI Intercept</strong>
+              <span>5-star reviews are routed instantly to Google Maps; 1–3 star complaints are intercepted in real-time before going public.</span>
+            </div>
+          </div>
+
+          <div class="solution-item">
+            <div class="sol-icon">03</div>
+            <div class="sol-text">
+              <strong>Gamified Loyalty & Stamp Card</strong>
+              <span>Gamified Spin-the-Wheel + 10-stamp digital loyalty card saving phone & WhatsApp for repeat visits (+27% frequency).</span>
+            </div>
+          </div>
+
+          <div class="solution-item">
+            <div class="sol-icon">04</div>
+            <div class="sol-text">
+              <strong>Live KDS & Enterprise Manager Hub</strong>
+              <span>Real-time kitchen order screen + multi-store dashboard with franchise isolation, review analytics, and exportable CRM.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>4. Proven Real-World Traction</span>
+            <span class="icon">🚀</span>
+          </div>
+
+          <div class="traction-badge">
+            <div>
+              <strong>Bo's Coffee Qatar</strong> (Qutoof Al Majed)
+              <div style="font-size:10px; color:var(--text-light);">Mall of Qatar & Aspire Park Branches</div>
+            </div>
+            <span class="status">LIVE & DIGITIZED</span>
+          </div>
+
+          <div class="traction-badge">
+            <div>
+              <strong>RIWAQ Restaurant</strong> (QNL)
+              <div style="font-size:10px; color:var(--text-light);">Qatar National Library Luxury Lounge</div>
+            </div>
+            <span class="status">VALIDATED</span>
+          </div>
+
+          <div style="display:flex; justify-content:space-between; font-size:11px; margin-top:8px; color:var(--text-muted);">
+            <span>• 121+ items digitized (QAR)</span>
+            <span>• Sub-second response time</span>
+            <span>• 0-app friction</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- COLUMN 3: MARKET SIZING & UNIT ECONOMICS -->
+      <div class="col">
+        <div class="card">
+          <div class="card-title">
+            <span>5. Qatar Market Opportunity</span>
+            <span class="icon">📊</span>
+          </div>
+
+          <div class="market-box">
+            <div class="market-tier">
+              <div class="tier-lbl">TAM (GCC)</div>
+              <div class="tier-val">$210M</div>
+              <div class="tier-sub">75,000+ F&B Outlets</div>
+            </div>
+            <div class="market-tier">
+              <div class="tier-lbl">SAM (Qatar)</div>
+              <div class="tier-val">46M QAR</div>
+              <div class="tier-sub">~3,500 Dine-In & Cafés</div>
+            </div>
+            <div class="market-tier som">
+              <div class="tier-lbl">SOM (24M)</div>
+              <div class="tier-val">2.4M QAR</div>
+              <div class="tier-sub">350 Target Outlets</div>
+            </div>
+          </div>
+
+          <div style="font-size:11px; color:var(--text-muted); line-height:1.35;">
+            <strong>Parc de restauration Qatar :</strong> ~4,500 établissements F&B enregistrés (PSA Qatar), dont plus de <strong>1,200 cafés de spécialité</strong> à fort pouvoir d'achat. Cibles prioritaires : Groupes de franchise (Al Majed, Aura, Al Mana, Apparel Group).
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">
+            <span>6. Business Model & Unit Economics</span>
+            <span class="icon">💰</span>
+          </div>
+
+          <div class="metrics-row">
+            <div class="metric-card">
+              <div class="metric-title">ARPU / Branch</div>
+              <div class="metric-number">499 QAR</div>
+              <div class="metric-foot">~$137 / Month SaaS</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-title">LTV / CAC Ratio</div>
+              <div class="metric-number">5.4x</div>
+              <div class="metric-foot">High Stickiness</div>
+            </div>
+          </div>
+
+          <div class="metrics-row">
+            <div class="metric-card">
+              <div class="metric-title">Customer ROI</div>
+              <div class="metric-number">8x–14x</div>
+              <div class="metric-foot">Paid back in 3 orders</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-title">Gross Margin</div>
+              <div class="metric-number">84%</div>
+              <div class="metric-foot">Cloud Serverless</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM SECTION: THE ASK & 18-MONTH MILESTONES -->
+    <div class="sheet-bottom">
+      <div class="ask-box">
+        <div class="ask-label">Incubator / Seed Round</div>
+        <div class="ask-amount">600,000 QAR</div>
+        <div class="ask-detail">
+          ~$165,000 USD for 18-month runway to reach <strong>300 active branches</strong> and achieve profitability.
+        </div>
+      </div>
+
+      <div class="milestone-steps">
+        <div class="step-item">
+          <span class="step-title">Phase 1: Qatar Core</span>
+          <span class="step-desc">Onboard 75 franchise outlets in Doha (Qutoof Al Majed, Aura, independent specialty cafés).</span>
+        </div>
+        <div class="step-item">
+          <span class="step-title">Phase 2: Scale & POS</span>
+          <span class="step-desc">Integration with regional POS systems (Foodics, Simphony) & launch in Lusail / The Pearl (180 outlets).</span>
+        </div>
+        <div class="step-item">
+          <span class="step-title">Phase 3: KSA Pilot</span>
+          <span class="step-desc">Expand to Riyadh & Eastern Province, Saudi Arabia (300+ outlets, $1.2M ARR run-rate).</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="sheet-footer">
+      <div>Smart Review AI • Proprietary & Confidential • Presented for Incubation & Investment Evaluation</div>
+      <div>Contact: <strong>contact@jdaproai.com</strong> • Live Platform: <strong>smart-review-v4-lifestyle-vision2030.jdaproai.com</strong></div>
+    </footer>
+
+  </div>
+
+</body>
+</html>
