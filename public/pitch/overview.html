@@ -1637,62 +1637,6 @@
     </section>
   </main>
 
-  <!-- SECTION 2: TRANSPARENT PRICING & 1ST MONTH TRIAL OFFER -->
-  <section class="pricing-section" id="pricingSection">
-    <div class="section-header">
-      <span class="section-badge" id="pricingBadge">Transparent & Predictable Pricing</span>
-      <h2 class="section-title" id="pricingTitle">One All-Inclusive Plan. Zero Hidden Fees.</h2>
-      <p class="section-desc" id="pricingDesc">Zero commission on your food orders. Complete turnkey setup included with your first 30 days 100% free.</p>
-    </div>
-
-    <!-- Billing Toggle (Monthly vs Annual) -->
-    <div class="billing-toggle-wrapper">
-      <button class="billing-toggle-btn active" id="btnBillingMonthly" onclick="setBillingCycle('monthly')">
-        <span id="textBillingMonthly">Monthly (No Commitment)</span>
-      </button>
-      <button class="billing-toggle-btn" id="btnBillingAnnual" onclick="setBillingCycle('annual')">
-        <span id="textBillingAnnual">Annual (Auto-Renewal)</span>
-        <span class="discount-pill" id="badgeAnnualDiscount">Save 20% • 2 Mos Free</span>
-      </button>
-    </div>
-
-    <div class="pricing-card-wrapper">
-      <div class="pricing-free-ribbon" id="pricingRibbon">
-        <span>🎁 SPECIAL LAUNCH OFFER: 1ST MONTH TRIAL 100% FREE (30 DAYS)</span>
-      </div>
-
-      <div class="pricing-header">
-        <div>
-          <div class="pricing-plan-name" id="planName">Smart Review Hospitality Pro</div>
-          <div class="pricing-plan-desc" id="planDesc">Complete Dine-In Table Ordering, 5★ Google Reviews & WhatsApp CRM Suite</div>
-        </div>
-        <div class="price-box">
-          <div class="price-amount" id="displayPrice">$149</div>
-          <div class="price-period" id="displayPeriod">/ month (cancel anytime)</div>
-          <div class="setup-fee-badge" id="displaySetupFee">+ $290 one-time onboarding & setup</div>
-        </div>
-      </div>
-
-      <div class="trial-highlight-box" id="trialHighlight">
-        <span>🛡️</span>
-        <span id="trialHighlightText"><strong>30-Day Risk-Free Trial:</strong> Your 1st month subscription is 100% FREE. Experience real table turnover and 5★ review gains live before any recurring charge.</span>
-      </div>
-
-      <div class="pricing-features-title" id="featuresTitle">Everything Included in Your Plan (Options Recap):</div>
-      <div class="pricing-features-grid" id="pricingFeaturesGrid">
-        <!-- Injected dynamically via JS -->
-      </div>
-
-      <a href="#" target="_blank" rel="noopener noreferrer" class="pricing-cta-btn" id="pricingCtaBtn">
-        <span id="pricingCtaText">🚀 Activate My 1st Month Free Trial (WhatsApp)</span>
-      </a>
-
-      <p class="pricing-guarantee-text" id="pricingGuarantee">
-        🔒 30-day risk-free trial • Cancel anytime in 1 click • 48-hour turnkey onboarding
-      </p>
-    </div>
-  </section>
-
   <!-- SECTION 3: INTERACTIVE FAQ -->
   <section class="faq-section">
     <div class="section-header">
@@ -1930,8 +1874,8 @@
         ],
         pricingCta: "🚀 Activate My 1st Month Free Trial (WhatsApp)",
         pricingGuarantee: "🔒 30-day risk-free trial • Cancel anytime in 1 click • 48-hour turnkey onboarding",
-        whatsappPricingMsgMonthly: "Hello Nelia, I would like to activate the 1st Month Free Trial for Smart Review AI (Monthly Plan, $149/mo with setup).",
-        whatsappPricingMsgAnnual: "Hello Nelia, I would like to activate the 1st Month Free Trial for Smart Review AI (Annual Plan, $119/mo with discounted setup).",
+        whatsappPricingMsgMonthly: "Bonjour Nelia, je souhaite activer le mois d'essai pilote pour Smart Review AI dans notre restaurant.",
+        whatsappPricingMsgAnnual: "Bonjour Nelia, je souhaite activer le mois d'essai pilote pour Smart Review AI dans notre restaurant.",
         faqBadge: "Got Questions?",
         faqTitle: "Frequently Asked Questions",
         faqDesc: "Everything you need to know before launching your 30-day single restaurant or multi-branch pilot.",
@@ -2014,7 +1958,7 @@
         waMsg2: "Pick a quick action below or type your question to chat directly with me on WhatsApp:",
         waChipTrial: "🚀 Activate 1st Month Free Trial",
         waChipDemo: "📱 Test Live Guest Spin Wheel",
-        waChipPricing: "📋 Pricing & 48h Setup Details",
+        waChipPricing: "📋 48h Setup & Pilot Details",
         waChipQuestion: "💬 Ask a Custom Question",
         waInputPlaceholder: "Type your message...",
         whatsappMsg: "Hello Nelia, I reviewed the Smart Review AI overview and would like to discuss launching a 30-day restaurant pilot."
@@ -2336,28 +2280,33 @@
       document.getElementById('statTitleUpsell').innerText = data.statUpsell;
       document.getElementById('chartHeading').innerText = data.chartHeading;
 
-      // Pricing Section Update
-      document.getElementById('pricingBadge').innerText = data.pricingBadge;
-      document.getElementById('pricingTitle').innerText = data.pricingTitle;
-      document.getElementById('pricingDesc').innerText = data.pricingDesc;
-      document.getElementById('textBillingMonthly').innerText = data.billingMonthly;
-      document.getElementById('textBillingAnnual').innerText = data.billingAnnual;
-      document.getElementById('badgeAnnualDiscount').innerText = data.annualDiscountBadge;
-      document.getElementById('pricingRibbon').innerText = data.pricingRibbon;
-      document.getElementById('planName').innerText = data.planName;
-      document.getElementById('planDesc').innerText = data.planDesc;
-      document.getElementById('trialHighlightText').innerHTML = data.trialHighlight;
-      document.getElementById('featuresTitle').innerText = data.featuresTitle;
-      document.getElementById('pricingCtaText').innerText = data.pricingCta;
-      document.getElementById('pricingGuarantee').innerText = data.pricingGuarantee;
+      // Pricing Section Update (Safeguarded if element exists)
+      const pBadge = document.getElementById('pricingBadge');
+      if (pBadge) {
+        pBadge.innerText = data.pricingBadge;
+        document.getElementById('pricingTitle').innerText = data.pricingTitle;
+        document.getElementById('pricingDesc').innerText = data.pricingDesc;
+        document.getElementById('textBillingMonthly').innerText = data.billingMonthly;
+        document.getElementById('textBillingAnnual').innerText = data.billingAnnual;
+        document.getElementById('badgeAnnualDiscount').innerText = data.annualDiscountBadge;
+        document.getElementById('pricingRibbon').innerText = data.pricingRibbon;
+        document.getElementById('planName').innerText = data.planName;
+        document.getElementById('planDesc').innerText = data.planDesc;
+        document.getElementById('trialHighlightText').innerHTML = data.trialHighlight;
+        document.getElementById('featuresTitle').innerText = data.featuresTitle;
+        document.getElementById('pricingCtaText').innerText = data.pricingCta;
+        document.getElementById('pricingGuarantee').innerText = data.pricingGuarantee;
 
-      const featuresGrid = document.getElementById('pricingFeaturesGrid');
-      featuresGrid.innerHTML = data.features.map(f => `
-        <div class="pricing-feature-item">
-          <span class="pricing-feature-icon">✔</span>
-          <span>${f}</span>
-        </div>
-      `).join('');
+        const featuresGrid = document.getElementById('pricingFeaturesGrid');
+        if (featuresGrid) {
+          featuresGrid.innerHTML = data.features.map(f => `
+            <div class="pricing-feature-item">
+              <span class="pricing-feature-icon">✔</span>
+              <span>${f}</span>
+            </div>
+          `).join('');
+        }
+      }
 
       // FAQ
       document.getElementById('faqBadge').innerText = data.faqBadge;
@@ -2405,24 +2354,32 @@
 
     function setBillingCycle(cycle) {
       currentBillingCycle = cycle;
+      const btnMonthly = document.getElementById('btnBillingMonthly');
+      if (!btnMonthly) return;
       const isAnnual = cycle === 'annual';
-      document.getElementById('btnBillingMonthly').classList.toggle('active', !isAnnual);
-      document.getElementById('btnBillingAnnual').classList.toggle('active', isAnnual);
+      btnMonthly.classList.toggle('active', !isAnnual);
+      const btnAnnual = document.getElementById('btnBillingAnnual');
+      if (btnAnnual) btnAnnual.classList.toggle('active', isAnnual);
 
       const langData = I18N[currentLang];
-      if (isAnnual) {
-        document.getElementById('displayPrice').innerText = langData.priceAnnual;
-        document.getElementById('displayPeriod').innerText = langData.periodAnnual;
-        document.getElementById('displaySetupFee').innerText = langData.setupAnnual;
-      } else {
-        document.getElementById('displayPrice').innerText = langData.priceMonthly;
-        document.getElementById('displayPeriod').innerText = langData.periodMonthly;
-        document.getElementById('displaySetupFee').innerText = langData.setupMonthly;
+      const dispPrice = document.getElementById('displayPrice');
+      if (dispPrice) {
+        if (isAnnual) {
+          dispPrice.innerText = langData.priceAnnual;
+          document.getElementById('displayPeriod').innerText = langData.periodAnnual;
+          document.getElementById('displaySetupFee').innerText = langData.setupAnnual;
+        } else {
+          dispPrice.innerText = langData.priceMonthly;
+          document.getElementById('displayPeriod').innerText = langData.periodMonthly;
+          document.getElementById('displaySetupFee').innerText = langData.setupMonthly;
+        }
       }
 
-      // Update WhatsApp link for pricing button
-      const msg = isAnnual ? langData.whatsappPricingMsgAnnual : langData.whatsappPricingMsgMonthly;
-      document.getElementById('pricingCtaBtn').href = `https://wa.me/33767803233?text=${encodeURIComponent(msg)}`;
+      const ctaBtn = document.getElementById('pricingCtaBtn');
+      if (ctaBtn) {
+        const msg = isAnnual ? langData.whatsappPricingMsgAnnual : langData.whatsappPricingMsgMonthly;
+        ctaBtn.href = `https://wa.me/33767803233?text=${encodeURIComponent(msg)}`;
+      }
     }
 
     function toggleFaq(elem) {
@@ -2648,11 +2605,13 @@
       const langData = I18N[currentLang];
       let msg = '';
       if (type === 'trial') {
-        msg = currentBillingCycle === 'annual' ? langData.whatsappPricingMsgAnnual : langData.whatsappPricingMsgMonthly;
+        msg = currentLang === 'fr'
+          ? "Bonjour Nelia, je souhaite activer le mois d'essai pilote pour Smart Review AI dans mon restaurant."
+          : "Hello Nelia, I would like to activate the 30-day pilot trial for Smart Review AI in my restaurant.";
       } else if (type === 'pricing') {
         msg = currentLang === 'fr'
-          ? "Bonjour Nelia, je souhaite recevoir les détails sur les forfaits et la mise en service en 48h pour mon restaurant."
-          : "Hello Nelia, I would like more details regarding pricing plans and the 48h setup for my restaurant.";
+          ? "Bonjour Nelia, je souhaite échanger sur la mise en service sous 48h et le lancement d'un pilote Smart Review AI pour mon établissement."
+          : "Hello Nelia, I would like to discuss the 48h onboarding and launching a Smart Review AI pilot for my restaurant/hospitality group.";
       } else if (type === 'question') {
         msg = currentLang === 'fr'
           ? "Bonjour Nelia, j'ai une question concernant Smart Review AI pour mon établissement :"
