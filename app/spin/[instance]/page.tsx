@@ -454,6 +454,30 @@ export default function LuxuryRestaurantPortalV4() {
 
   const botPhoneClean = String(restaurantData.linked_evolution || "").replace(/[^0-9]/g, '');
 
+  const openWhatsAppUniversal = (e: React.MouseEvent, phone: string, text?: string) => {
+    e.preventDefault();
+    const clean = String(phone || '').replace(/[^0-9]/g, '');
+    if (!clean) return;
+
+    const textParam = text ? `&text=${encodeURIComponent(text)}` : '';
+    const textQuery = text ? `?text=${encodeURIComponent(text)}` : '';
+
+    const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      // 1. Tenter le protocole natif direct (ouvre WhatsApp / WhatsApp Business sans intermédiaire)
+      window.location.href = `whatsapp://send?phone=${clean}${textParam}`;
+
+      // 2. Fallback automatique vers le lien web au cas où l'app n'est pas installée
+      setTimeout(() => {
+        window.location.href = `https://wa.me/${clean}${textQuery}`;
+      }, 1200);
+    } else {
+      // 3. Desktop : ouvrir wa.me dans un nouvel onglet pour WhatsApp Web
+      window.open(`https://wa.me/${clean}${textQuery}`, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   const directReviewWhatsappUrl = botPhoneClean ? `https://wa.me/${botPhoneClean}` : (restaurantData.google_review_url || '#');
 
   return (
@@ -617,6 +641,11 @@ export default function LuxuryRestaurantPortalV4() {
                 href={restaurantData.direct_review_mode === 'direct_google' ? (restaurantData.google_review_url || '#') : (botPhoneClean ? directReviewWhatsappUrl : (restaurantData.google_review_url || '#'))}
                 target={restaurantData.direct_review_mode === 'direct_google' ? '_blank' : '_self'}
                 rel="noopener noreferrer"
+                onClick={(e) => {
+                  if (restaurantData.direct_review_mode !== 'direct_google' && botPhoneClean) {
+                    openWhatsAppUniversal(e, botPhoneClean);
+                  }
+                }}
                 className="w-full bg-gradient-to-r from-[#C8102E] via-[#E63946] to-[#A31D24] text-white font-black text-base py-4 px-6 rounded-2xl transition shadow-[0_10px_25px_rgba(200,16,46,0.35)] hover:brightness-105 active:scale-95 flex items-center justify-center gap-2.5 border border-red-300/30"
               >
                 {restaurantData.direct_review_mode === 'direct_google' ? (
@@ -750,6 +779,11 @@ export default function LuxuryRestaurantPortalV4() {
                   href={restaurantData.linked_evolution ? `https://wa.me/${restaurantData.linked_evolution}` : "#"}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={(e) => {
+                    if (restaurantData.linked_evolution) {
+                      openWhatsAppUniversal(e, restaurantData.linked_evolution);
+                    }
+                  }}
                   className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-black text-base sm:text-lg py-4 px-6 rounded-2xl transition shadow-[0_8px_20px_rgba(16,185,129,0.35)] flex items-center justify-center gap-3 transform active:scale-95 border border-emerald-400/40"
                 >
                   <Mic className="w-6 h-6 text-white shrink-0" />

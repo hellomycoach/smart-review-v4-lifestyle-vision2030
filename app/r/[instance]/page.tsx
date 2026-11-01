@@ -130,6 +130,26 @@ export default function DynamicRestaurantPortal() {
   const cleanPhone = String(restaurantData?.manager_whatsapp || restaurantData?.linked_evolution || "").replace(/[^0-9]/g, '') || "97450000000";
   const whatsappUrl = `https://wa.me/${cleanPhone}`;
 
+  const openWhatsAppUniversal = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!cleanPhone) return;
+
+    const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      // 1. Tenter le protocole natif direct (ouvre WhatsApp / WhatsApp Business sans intermédiaire)
+      window.location.href = `whatsapp://send?phone=${cleanPhone}`;
+
+      // 2. Fallback automatique vers le lien web au cas où l'app n'est pas installée
+      setTimeout(() => {
+        window.location.href = `https://wa.me/${cleanPhone}`;
+      }, 1200);
+    } else {
+      // 3. Desktop : ouvrir wa.me dans un nouvel onglet pour WhatsApp Web
+      window.open(`https://wa.me/${cleanPhone}`, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   const isRTL = lang === 'ar';
 
   const t = {
@@ -329,6 +349,7 @@ export default function DynamicRestaurantPortal() {
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={openWhatsAppUniversal}
                 className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-[#25D366] via-emerald-500 to-[#128C7E] hover:scale-[1.02] text-white font-black text-base sm:text-lg py-4 px-6 rounded-2xl shadow-[0_10px_25px_rgba(37,211,102,0.4)] transition-all duration-300 transform active:scale-98 border border-emerald-400/40"
               >
                 <MessageCircle className="w-6 h-6 fill-white text-emerald-800" />
