@@ -478,7 +478,20 @@ export default function LuxuryRestaurantPortalV4() {
     }
   };
 
-  const directReviewWhatsappUrl = botPhoneClean ? `https://wa.me/${botPhoneClean}` : (restaurantData.google_review_url || '#');
+  const getPrefilledReviewText = () => {
+    if (lang === 'ar') {
+      return "المرحلة 1/2:\n- رأيي: \n- تقييمي من 5: 5/5\n\n(💡 يمكنك أيضاً مسح هذا النص وإرسال تسجيل صوتي 🎙️)";
+    }
+    if (lang === 'en') {
+      return "Step 1/2:\n- My review: \n- My rating /5: 5/5\n\n(💡 You can also delete this message and send a quick voice note 🎙️)";
+    }
+    return "Étape 1/2 :\n- Mon avis : \n- Ma note sur 5 : 5/5\n\n(💡 Vous pouvez aussi effacer ce texte et envoyer directement un message vocal 🎙️)";
+  };
+
+  const prefilledReviewText = getPrefilledReviewText();
+  const directReviewWhatsappUrl = botPhoneClean 
+    ? `https://wa.me/${botPhoneClean}?text=${encodeURIComponent(prefilledReviewText)}` 
+    : (restaurantData.google_review_url || '#');
 
   return (
     <div 
@@ -643,7 +656,7 @@ export default function LuxuryRestaurantPortalV4() {
                 rel="noopener noreferrer"
                 onClick={(e) => {
                   if (restaurantData.direct_review_mode !== 'direct_google' && botPhoneClean) {
-                    openWhatsAppUniversal(e, botPhoneClean);
+                    openWhatsAppUniversal(e, botPhoneClean, prefilledReviewText);
                   }
                 }}
                 className="w-full bg-gradient-to-r from-[#C8102E] via-[#E63946] to-[#A31D24] text-white font-black text-base py-4 px-6 rounded-2xl transition shadow-[0_10px_25px_rgba(200,16,46,0.35)] hover:brightness-105 active:scale-95 flex items-center justify-center gap-2.5 border border-red-300/30"
@@ -776,12 +789,12 @@ export default function LuxuryRestaurantPortalV4() {
                 </p>
 
                 <a 
-                  href={restaurantData.linked_evolution ? `https://wa.me/${restaurantData.linked_evolution}` : "#"}
+                  href={restaurantData.linked_evolution ? `https://wa.me/${restaurantData.linked_evolution}?text=${encodeURIComponent(prefilledReviewText)}` : "#"}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => {
                     if (restaurantData.linked_evolution) {
-                      openWhatsAppUniversal(e, restaurantData.linked_evolution);
+                      openWhatsAppUniversal(e, restaurantData.linked_evolution, prefilledReviewText);
                     }
                   }}
                   className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-black text-base sm:text-lg py-4 px-6 rounded-2xl transition shadow-[0_8px_20px_rgba(16,185,129,0.35)] flex items-center justify-center gap-3 transform active:scale-95 border border-emerald-400/40"
